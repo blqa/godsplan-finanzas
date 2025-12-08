@@ -160,9 +160,10 @@
             <!-- INGRESO -->
             <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl mb-6">
                 <label class="text-emerald-500 text-xs font-bold uppercase tracking-wider mb-2 block">Ingreso Neto (Quincenal)</label>
-                <div class="flex items-center gap-2">
-                    <span class="text-2xl text-zinc-500 font-light">$</span>
-                    <input type="number" id="inpIncome" inputmode="decimal" class="bg-transparent text-3xl font-bold text-white w-full focus:outline-none placeholder-zinc-700" placeholder="0.00" onblur="app.saveConfig()">
+                <!-- FIX: Estructura Relative para evitar overlapping -->
+                <div class="relative flex items-center">
+                    <span class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-zinc-500 font-light pointer-events-none">$</span>
+                    <input type="number" id="inpIncome" inputmode="decimal" class="bg-transparent text-3xl font-bold text-white w-full focus:outline-none placeholder-zinc-700 pl-8" placeholder="0.00" onblur="app.saveConfig()">
                 </div>
             </div>
 
@@ -204,7 +205,7 @@
     </main>
 
     <!-- FAB (NUEVO GASTO) -->
-    <div class="fixed bottom-[100px] left-1/2 -translate-x-1/2 z-40">
+    <div id="fabContainer" class="fixed bottom-[100px] left-1/2 -translate-x-1/2 z-40 transition-all duration-300">
         <button onclick="app.openModal('expense')" class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-white shadow-[0_8px_25px_rgba(220,38,38,0.5)] border-4 border-[#050505] active:scale-95 transition-transform group">
             <i class="ph-bold ph-minus text-2xl group-hover:rotate-180 transition-transform duration-300"></i>
         </button>
@@ -665,6 +666,14 @@
                 const activeBtn = document.querySelectorAll('.nav-btn')[btnIndex];
                 activeBtn.classList.add('active');
                 activeBtn.classList.replace('text-zinc-500', 'text-white');
+
+                // FIX: Toggle FAB
+                const fab = document.getElementById('fabContainer');
+                if(viewName === 'balance') {
+                    fab.classList.remove('opacity-0', 'pointer-events-none');
+                } else {
+                    fab.classList.add('opacity-0', 'pointer-events-none');
+                }
             },
 
             openModal(mode, id = null) {
