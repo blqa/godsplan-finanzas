@@ -65,9 +65,11 @@
             width: 44px; height: 44px; border-radius: 12px; background: #27272a;
             display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #a1a1aa; margin-right: 15px; flex-shrink: 0;
         }
+        /* Colores de Iconos */
         .tx-icon.variable { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
         .tx-icon.extra { color: #34d399; background: rgba(52, 211, 153, 0.1); }
-        .tx-icon.fixed { color: #f87171; background: rgba(248, 113, 113, 0.1); }
+        .tx-icon.fixed { color: #f87171; background: rgba(248, 113, 113, 0.1); } /* Activo */
+        .tx-icon.future { color: #6b7280; background: rgba(107, 114, 128, 0.1); } /* Inactivo */
         
         .tx-info { flex: 1; min-width: 0; }
         .tx-title { font-weight: 700; font-size: 0.95rem; color: #e4e4e7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -77,7 +79,7 @@
         /* BOTTOM NAV */
         .bottom-nav {
             height: 80px; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(20px);
-            border-top: 1px solid #262626; display: grid; grid-template-columns: 1fr 1fr 1fr;
+            border-top: 1px solid #262626; display: grid; grid-template-columns: repeat(4, 1fr);
             position: fixed; bottom: 0; left: 0; width: 100%; z-index: 50;
             padding-bottom: env(safe-area-inset-bottom);
         }
@@ -146,6 +148,15 @@
         .chip-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 20px; }
         .chip { background: #262626; padding: 8px 16px; border-radius: 50px; font-size: 0.85rem; color: #a3a3a3; white-space: nowrap; cursor: pointer; border: 1px solid transparent; font-weight: 600; }
         .chip.selected { background: #ef4444; color: white; border-color: #ef4444; }
+
+        /* PROYECCIONES Y HISTORIAL */
+        .projection-card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 10px; }
+        .proj-label { font-size: 0.65rem; font-weight: 800; color: #71717a; text-transform: uppercase; margin-bottom: 5px; display: flex; justify-content: space-between; }
+        .proj-val { font-size: 1.5rem; font-weight: 800; color: white; }
+        
+        .month-nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .month-label { font-size: 1rem; font-weight: 800; color: white; width: 100px; text-align: center; }
+        .nav-btn { background: #262626; border: none; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
         /* EXTRA CARD */
         .extra-card {
@@ -223,7 +234,19 @@
         <div id="view-plan" class="view">
             <h2 class="text-2xl font-black text-white mb-6 px-2">Planificación</h2>
             
-            <div class="clean-input-group">
+            <!-- PROYECCIONES -->
+            <div class="projection-card border-l-4 border-l-blue-500">
+                <div class="proj-label"><span>Proyección Q1 (Día 5-19)</span></div>
+                <div class="proj-val" id="projQ1">$0</div>
+                <div class="text-[10px] text-gray-500 mt-1">Ingreso - Fijos</div>
+            </div>
+            <div class="projection-card border-l-4 border-l-purple-500">
+                <div class="proj-label"><span>Proyección Q2 (Día 20-4)</span></div>
+                <div class="proj-val" id="projQ2">$0</div>
+                <div class="text-[10px] text-gray-500 mt-1">Ingreso - Fijos</div>
+            </div>
+
+            <div class="clean-input-group mt-6">
                 <label class="input-label text-green-500">Ingreso Neto (Quincenal)</label>
                 <div class="flex items-center">
                     <span class="text-2xl font-bold text-gray-600 mr-2">$</span>
@@ -237,10 +260,25 @@
             </div>
             
             <div class="text-[10px] text-gray-600 mb-4 px-2">
-                Gastos activos en este periodo (Día 5-19 o 20-4).
+                Candado Rojo = Activo este periodo. Gris = Futuro.
             </div>
 
             <div id="fixedList" class="space-y-3 mb-24"></div>
+        </div>
+
+        <!-- VISTA HISTORIAL -->
+        <div id="view-history" class="view">
+            <h2 class="text-2xl font-black text-white mb-6 px-2">Historial</h2>
+            <div class="month-nav">
+                <button class="nav-btn" onclick="app.changeMonth(-1)"><i class="ph-bold ph-caret-left"></i></button>
+                <span class="month-label" id="histMonthLabel">--</span>
+                <button class="nav-btn" onclick="app.changeMonth(1)"><i class="ph-bold ph-caret-right"></i></button>
+            </div>
+            <div class="onyx-card !p-5 !min-h-0 mb-6">
+                <div class="text-[10px] text-gray-500 uppercase font-bold mb-1">Total Gastado</div>
+                <div class="text-2xl font-black text-red-400" id="histTotal">$0</div>
+            </div>
+            <div id="historyList" class="pb-24 space-y-3"></div>
         </div>
 
         <!-- VISTA CUENTA -->
@@ -251,7 +289,6 @@
                 <div class="w-20 h-20 bg-gray-800 rounded-full mx-auto flex items-center justify-center mb-4 text-3xl shadow-xl border border-gray-700" id="userAvatar">👤</div>
                 <h3 class="font-bold text-xl text-white mb-1" id="userName">Invitado</h3>
                 <p class="text-xs text-gray-500 mb-6 font-mono uppercase tracking-widest" id="userEmail">MODO LOCAL</p>
-                
                 <button id="btnLogin" onclick="app.login()" class="btn-primary mb-3 bg-blue-600 hover:bg-blue-500">Conectar Google</button>
                 <button id="btnLogout" onclick="app.logout()" class="btn-primary bg-transparent border border-red-900 text-red-500 hover:bg-red-900/20 hidden">Cerrar Sesión</button>
             </div>
@@ -276,16 +313,16 @@
     <!-- BOTTOM NAV -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="app.switchTab('today', this)">
-            <i class="ph-fill ph-wallet"></i>
-            <span>HOY</span>
+            <i class="ph-fill ph-wallet"></i><span>HOY</span>
         </div>
         <div class="nav-item" onclick="app.switchTab('plan', this)">
-            <i class="ph-bold ph-strategy"></i>
-            <span>PLAN</span>
+            <i class="ph-bold ph-strategy"></i><span>PLAN</span>
+        </div>
+        <div class="nav-item" onclick="app.switchTab('history', this)">
+            <i class="ph-bold ph-clock-counter-clockwise"></i><span>HIST</span>
         </div>
         <div class="nav-item" onclick="app.switchTab('settings', this)">
-            <i class="ph-bold ph-user-circle"></i>
-            <span>CUENTA</span>
+            <i class="ph-bold ph-user-circle"></i><span>CUENTA</span>
         </div>
     </div>
 
@@ -327,11 +364,11 @@
         </div>
     </div>
 
-    <!-- SHEET: GASTO FIJO -->
+    <!-- SHEET: GASTO FIJO (EDITAR) -->
     <div id="sheet-fixed" class="modal-overlay sheet" onclick="if(event.target===this) app.closeSheet('fixed')">
         <div class="bottom-sheet">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-lock-key text-red-500"></i> Nuevo Gasto Fijo</h3>
+                <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-lock-key text-red-500"></i> Gasto Fijo</h3>
                 <button onclick="app.closeSheet('fixed')" class="text-gray-500"><i class="ph-bold ph-x text-xl"></i></button>
             </div>
             <label class="form-label">Nombre del Gasto</label>
@@ -340,7 +377,8 @@
                 <div><label class="form-label">Monto</label><input type="number" id="fixAmount" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none" placeholder="$0"></div>
                 <div><label class="form-label">Día de Pago</label><input type="number" id="fixDay" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none text-center" placeholder="1-31"></div>
             </div>
-            <button onclick="app.addFixed()" class="btn-primary">GUARDAR FIJO</button>
+            <button onclick="app.saveFixed()" class="btn-primary">GUARDAR</button>
+            <button id="btnDeleteFixed" onclick="app.deleteFixed()" class="w-full py-3 mt-3 text-red-500 font-bold border border-red-900/30 rounded-xl hidden">ELIMINAR</button>
         </div>
     </div>
     
@@ -356,7 +394,7 @@
     </div>
 
     <script>
-        const COLLECTION = "treasury_v6_stable";
+        const COLLECTION = "treasury_v7_final";
         const firebaseConfig = { apiKey: "AIzaSyCrHBz94UtgiaYntHCYhC5jNa6auUI63vQ", authDomain: "god-s-plan-d737b.firebaseapp.com", projectId: "god-s-plan-d737b", storageBucket: "god-s-plan-d737b.firebasestorage.app", messagingSenderId: "458198314028", appId: "1:458198314028:web:d62b24cee2d19ee5b47589" };
         try { firebase.initializeApp(firebaseConfig); var auth=firebase.auth(), db=firebase.firestore(); } catch(e){}
 
@@ -364,8 +402,9 @@
             user: null,
             data: { income: 0, items: [], payDay1: 5, payDay2: 20, avgExtra: 0 },
             period: { daysLeft: 15 },
-            todaySpent: 0,
-            todayExtras: 0, 
+            todaySpent: 0, todayExtras: 0,
+            editingItem: null, // Index of fixed item being edited
+            histDate: new Date(),
 
             init() {
                 document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric' }).toUpperCase();
@@ -377,6 +416,7 @@
                         this.updateAuthUI(u);
                         this.loadData();
                         this.loadLogs();
+                        this.renderHistory();
                     } else {
                         document.getElementById('authModal').classList.add('active');
                     }
@@ -426,7 +466,7 @@
             // --- DATA ---
             async loadData() {
                 if(!this.user) return;
-                const local = localStorage.getItem('gp_treasury_v6');
+                const local = localStorage.getItem('gp_treasury_v7');
                 if(local) { this.data = JSON.parse(local); this.render(); }
 
                 if(!this.user.isAnonymous) {
@@ -435,7 +475,7 @@
                         this.data = doc.data();
                         if(!this.data.items) this.data.items = [];
                         this.render();
-                        localStorage.setItem('gp_treasury_v6', JSON.stringify(this.data));
+                        localStorage.setItem('gp_treasury_v7', JSON.stringify(this.data));
                     }
                 }
                 
@@ -455,7 +495,7 @@
             },
 
             save() {
-                localStorage.setItem('gp_treasury_v6', JSON.stringify(this.data));
+                localStorage.setItem('gp_treasury_v7', JSON.stringify(this.data));
                 if(this.user && !this.user.isAnonymous) db.collection(COLLECTION).doc(this.user.uid).set(this.data);
             },
 
@@ -472,27 +512,31 @@
                 let targetDate = new Date();
                 if(d >= p2) targetDate.setMonth(targetDate.getMonth()+1);
                 targetDate.setDate(end);
-                
                 if(targetDate.getDay()===6) targetDate.setDate(targetDate.getDate()+2);
                 if(targetDate.getDay()===0) targetDate.setDate(targetDate.getDate()+1);
                 
                 const diffTime = targetDate - now;
                 this.daysLeft = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
                 
-                const isExpenseActive = (day) => {
-                    if (d >= p1 && d < p2) return day >= p1 && day < p2;
-                    else return day >= p2 || day < p1;
-                };
-
-                const totalFixed = this.data.items.reduce((s, i) => isExpenseActive(i.day||1) ? s+(i.amount||0) : s, 0);
+                // Calculo Proyecciones
                 const income = this.data.income || 0;
-                const free = Math.max(0, income - totalFixed);
+                // Q1 Expenses (5-19)
+                const fixedQ1 = this.data.items.reduce((s, i) => (i.day >= 5 && i.day <= 19) ? s + (i.amount||0) : s, 0);
+                const freeQ1 = income - fixedQ1;
+                // Q2 Expenses (20-4)
+                const fixedQ2 = this.data.items.reduce((s, i) => (i.day >= 20 || i.day <= 4) ? s + (i.amount||0) : s, 0);
+                const freeQ2 = income - fixedQ2;
+
+                document.getElementById('projQ1').textContent = this.fmt(freeQ1);
+                document.getElementById('projQ2').textContent = this.fmt(freeQ2);
+
+                // Calculo Hoy
+                const isQ1 = (d >= 5 && d < 20);
+                const currentPeriodFree = isQ1 ? freeQ1 : freeQ2;
                 
-                const dailyLimit = free / this.daysLeft;
-                
+                const dailyLimit = currentPeriodFree / this.daysLeft;
                 const availableToday = dailyLimit - this.todaySpent + this.todayExtras;
 
-                // UI UPDATE
                 const elAvail = document.getElementById('valDaily');
                 if (elAvail) {
                     elAvail.textContent = this.fmt(availableToday);
@@ -500,21 +544,69 @@
                 }
                 
                 if(document.getElementById('dailyLimit')) document.getElementById('dailyLimit').textContent = this.fmt(dailyLimit);
-                if(document.getElementById('valFree')) document.getElementById('valFree').textContent = this.fmt(free);
+                if(document.getElementById('valFree')) document.getElementById('valFree').textContent = this.fmt(currentPeriodFree);
                 if(document.getElementById('daysLeft')) document.getElementById('daysLeft').textContent = this.daysLeft;
             },
 
-            // --- GASTOS FIJOS (PLAN) ---
-            addFixed() {
+            // --- GASTOS FIJOS (CRUD) ---
+            openSheet(id, idx = null) {
+                const sheet = document.getElementById('sheet-'+id);
+                if (sheet) sheet.classList.add('active');
+                
+                if (id === 'fixed') {
+                    this.editingItem = idx;
+                    const btnDel = document.getElementById('btnDeleteFixed');
+                    
+                    if (idx !== null) {
+                        const item = this.data.items[idx];
+                        document.getElementById('fixName').value = item.name;
+                        document.getElementById('fixAmount').value = item.amount;
+                        document.getElementById('fixDay').value = item.day;
+                        btnDel.classList.remove('hidden');
+                    } else {
+                        document.getElementById('fixName').value = '';
+                        document.getElementById('fixAmount').value = '';
+                        document.getElementById('fixDay').value = '';
+                        btnDel.classList.add('hidden');
+                    }
+                    document.getElementById('fixName').focus();
+                } else if(id === 'log') {
+                     document.getElementById('logAmnt').focus();
+                } else if(id === 'extra') {
+                     document.getElementById('extraAmnt').focus();
+                }
+            },
+
+            closeSheet(id) { 
+                const sheet = document.getElementById('sheet-'+id);
+                if (sheet) sheet.classList.remove('active'); 
+            },
+
+            saveFixed() {
                 const name = document.getElementById('fixName').value;
                 const amt = parseFloat(document.getElementById('fixAmount').value);
                 const day = parseInt(document.getElementById('fixDay').value);
                 if(!name || !amt || !day) return;
-                this.data.items.push({name, amount:amt, day});
+                
+                const item = {name, amount:amt, day};
+                if (this.editingItem !== null) {
+                    this.data.items[this.editingItem] = item;
+                } else {
+                    this.data.items.push(item);
+                }
+                
                 this.renderFixedList(); this.save(); this.closeSheet('fixed');
-                document.getElementById('fixName').value=''; document.getElementById('fixAmount').value=''; document.getElementById('fixDay').value='';
             },
-            deleteFixed(idx) { if(confirm("¿Borrar?")) { this.data.items.splice(idx,1); this.renderFixedList(); this.save(); } },
+            
+            deleteFixed() { 
+                if(this.editingItem !== null && confirm("¿Borrar?")) { 
+                    this.data.items.splice(this.editingItem,1); 
+                    this.renderFixedList(); 
+                    this.save(); 
+                    this.closeSheet('fixed'); 
+                } 
+            },
+
             renderFixedList() {
                 const el = document.getElementById('fixedList');
                 if (!el) return;
@@ -522,33 +614,30 @@
                 const d = new Date().getDate();
                 const p1=5, p2=20;
                 const isActive = (day) => (d >= p1 && d < p2) ? (day >= p1 && day < p2) : (day >= p2 || day < p1);
+                
+                // Ordenar por día
+                this.data.items.sort((a,b) => a.day - b.day);
+
                 this.data.items.forEach((it, i) => {
                     const active = isActive(it.day);
+                    // Icon logic: Rojo Abierto (Activo) vs Gris Cerrado (Inactivo)
+                    let iconClass = active ? 'ph-lock-open text-red-400' : 'ph-lock text-gray-500';
+                    let bgClass = active ? 'fixed' : 'future'; // Use future style for inactive
+
                     el.innerHTML += `
-                    <div class="tx-item ${active ? '' : 'opacity-40 grayscale'}">
+                    <div class="tx-item ${active ? '' : 'opacity-50'}" onclick="app.openSheet('fixed', ${i})">
                         <div class="flex items-center">
-                            <div class="tx-icon fixed"><i class="ph-bold ${active ? 'ph-lock-open' : 'ph-lock'}"></i></div>
+                            <div class="tx-icon ${bgClass}"><i class="ph-bold ${iconClass}"></i></div>
                             <div><div class="tx-title">${it.name}</div><div class="tx-date">Día ${it.day}</div></div>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="tx-amount text-red-400">$${it.amount}</div>
-                            <button onclick="app.deleteFixed(${i})" class="text-gray-600 hover:text-white"><i class="ph-bold ph-trash"></i></button>
                         </div>
                     </div>`;
                 });
             },
 
             // --- LOGS Y EXTRAS ---
-            openSheet(id) { 
-                const sheet = document.getElementById('sheet-'+id);
-                if (sheet) sheet.classList.add('active');
-                if(id==='log') document.getElementById('logAmnt')?.focus();
-                if(id==='extra') document.getElementById('extraAmnt')?.focus();
-            },
-            closeSheet(id) { 
-                const sheet = document.getElementById('sheet-'+id);
-                if (sheet) sheet.classList.remove('active'); 
-            },
             setDesc(t, el) { 
                 const logDesc = document.getElementById('logDesc');
                 if (logDesc) logDesc.value = t; 
@@ -594,35 +683,95 @@
                     let spent = 0;
                     let extras = 0;
                     
-                    if(arr.length===0) list.innerHTML='<div class="text-center text-xs text-gray-600 py-10 italic">Sin movimientos hoy</div>';
-
-                    arr.forEach(l => {
+                    // Filter logs for today
+                    const dailyLogs = arr.filter(l => {
                         const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
-                        if(d.toDateString() === todayStr) {
-                            if (l.type === 'income') {
-                                extras += l.amnt;
-                                list.innerHTML += `<div class="tx-item"><div class="flex items-center"><div class="tx-icon extra"><i class="ph-bold ph-coin"></i></div><div class="tx-info"><div class="tx-title">Extra</div><div class="tx-date">${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div></div><div class="tx-amount text-green-500">+$${l.amnt}</div></div>`;
-                            } else {
-                                spent += l.amnt;
-                                list.innerHTML += `<div class="tx-item"><div class="flex items-center"><div class="tx-icon variable"><i class="ph-bold ph-shopping-bag"></i></div><div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div></div><div class="tx-amount text-red-500">-$${l.amnt}</div></div>`;
-                            }
+                        return d.toDateString() === todayStr;
+                    });
+
+                    if(dailyLogs.length===0) list.innerHTML='<div class="text-center text-xs text-gray-600 py-10 italic">Sin movimientos hoy</div>';
+
+                    dailyLogs.forEach(l => {
+                        const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
+                        if (l.type === 'income') {
+                            extras += l.amnt;
+                            list.innerHTML += `<div class="tx-item"><div class="flex items-center"><div class="tx-icon extra"><i class="ph-bold ph-coin"></i></div><div class="tx-info"><div class="tx-title">Extra</div><div class="tx-date">${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div></div><div class="tx-amount text-green-500">+$${l.amnt}</div></div>`;
+                        } else {
+                            spent += l.amnt;
+                            // Add ONCLICK for editing
+                            list.innerHTML += `<div class="tx-item" onclick="app.openSheet('log', '${l.id}')"><div class="flex items-center"><div class="tx-icon variable"><i class="ph-bold ph-shopping-bag"></i></div><div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div></div><div class="tx-amount text-red-500">-$${l.amnt}</div></div>`;
                         }
                     });
                     this.todaySpent = spent;
                     this.todayExtras = extras;
                     
                     const totalEl = document.getElementById('todaySpentTotal');
-                    if(totalEl) totalEl.textContent = `-${this.fmt(spent)}`; 
+                    if(totalEl) totalEl.textContent = `-$${this.fmt(spent)}`; 
                     
                     this.render(); 
                 };
 
                 if(this.user && !this.user.isAnonymous) {
                      db.collection(COLLECTION).doc(this.user.uid).collection('logs').orderBy('date','desc').limit(20)
-                       .onSnapshot(s => process(s.docs.map(d=>d.data())));
+                       .onSnapshot(s => process(s.docs.map(d=> ({ id: d.id, ...d.data() }))));
                 } else {
                     const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]');
                     process(logs.reverse());
+                }
+            },
+            
+            // --- HISTORY ---
+            changeMonth(d) {
+                this.histDate.setMonth(this.histDate.getMonth() + d);
+                this.renderHistory();
+            },
+            
+            renderHistory() {
+                const label = document.getElementById('histMonthLabel');
+                const list = document.getElementById('historyList');
+                const totalEl = document.getElementById('histTotal');
+                if(!label || !list) return;
+
+                const m = this.histDate.getMonth();
+                const y = this.histDate.getFullYear();
+                label.textContent = `${["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"][m]} ${y}`;
+
+                list.innerHTML = '<div class="text-center text-xs text-gray-600 py-4">Cargando...</div>';
+                
+                // Function to filter and render logs for selected month
+                const showHist = (allLogs) => {
+                    list.innerHTML = '';
+                    let monthSpent = 0;
+                    const filtered = allLogs.filter(l => {
+                        const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
+                        return d.getMonth() === m && d.getFullYear() === y && l.type === 'expense';
+                    });
+                    
+                    if(filtered.length === 0) list.innerHTML = '<div class="text-center text-xs text-gray-600 py-10">Sin gastos este mes</div>';
+
+                    filtered.forEach(l => {
+                         monthSpent += l.amnt;
+                         const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
+                         list.innerHTML += `
+                            <div class="tx-item">
+                                <div class="flex items-center">
+                                    <div class="tx-icon variable"><i class="ph-bold ph-calendar-blank"></i></div>
+                                    <div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleDateString()}</div></div>
+                                </div>
+                                <div class="tx-amount text-red-500">-$${l.amnt}</div>
+                            </div>`;
+                    });
+                    totalEl.textContent = this.fmt(monthSpent);
+                };
+
+                if(this.user && !this.user.isAnonymous) {
+                     // Query specific month range (Simplification: getting last 100 and filtering locally for now)
+                     db.collection(COLLECTION).doc(this.user.uid).collection('logs')
+                       .orderBy('date', 'desc').limit(100)
+                       .get().then(s => showHist(s.docs.map(d=>d.data())));
+                } else {
+                    const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]');
+                    showHist(logs);
                 }
             },
 
