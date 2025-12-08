@@ -32,7 +32,9 @@
         #main-content {
             flex-grow: 1; overflow-y: auto; padding: 20px; padding-bottom: 110px;
             background: linear-gradient(180deg, #0f0f11 0%, #050505 100%);
+            scrollbar-width: none; /* Firefox */
         }
+        #main-content::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 
         /* TARJETA ONYX */
         .onyx-card {
@@ -52,7 +54,8 @@
         }
 
         .card-label { font-size: 0.7rem; color: #71717a; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
-        .card-value { font-size: 3rem; font-weight: 800; color: white; line-height: 1; letter-spacing: -1px; }
+        /* Ajuste de tamaño de fuente responsivo para evitar roturas */
+        .card-value { font-size: clamp(2rem, 8vw, 3.5rem); font-weight: 800; color: white; line-height: 1.1; letter-spacing: -1px; }
 
         /* SECCIONES Y LISTAS */
         .section-title { font-size: 0.8rem; font-weight: 800; color: #52525b; margin: 25px 0 15px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
@@ -63,15 +66,16 @@
         }
         .tx-icon {
             width: 44px; height: 44px; border-radius: 12px; background: #27272a;
-            display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #a1a1aa; margin-right: 15px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #a1a1aa; margin-right: 15px; flex-shrink: 0;
         }
         .tx-icon.variable { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
         .tx-icon.extra { color: #34d399; background: rgba(52, 211, 153, 0.1); }
+        .tx-icon.fixed { color: #f87171; background: rgba(248, 113, 113, 0.1); }
         
-        .tx-info { flex: 1; }
-        .tx-title { font-weight: 700; font-size: 0.95rem; color: #e4e4e7; }
+        .tx-info { flex: 1; min-width: 0; /* Evita desbordamiento de texto */ }
+        .tx-title { font-weight: 700; font-size: 0.95rem; color: #e4e4e7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .tx-date { font-size: 0.75rem; color: #71717a; font-weight: 600; }
-        .tx-amount { font-weight: 800; font-size: 1rem; color: #e4e4e7; }
+        .tx-amount { font-weight: 800; font-size: 1rem; color: #e4e4e7; white-space: nowrap; }
         
         /* BOTTOM NAV */
         .bottom-nav {
@@ -103,7 +107,7 @@
         .input-label { font-size: 0.7rem; color: #71717a; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
         .clean-input {
             background: transparent; border: none; color: white; width: 100%; font-weight: 800; font-size: 1.5rem;
-            outline: none;
+            outline: none; placeholder-gray-600;
         }
         
         /* FAB */
@@ -116,7 +120,7 @@
         }
         .fab:active { transform: scale(0.9); }
 
-        /* MODAL */
+        /* MODALES Y SHEETS */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 100;
@@ -180,23 +184,23 @@
             <div class="onyx-card">
                 <div>
                     <div class="card-label">LIBRE PARA HOY</div>
-                    <div class="card-value mt-2" id="valDaily">$0</div>
-                    <div class="text-[10px] text-gray-500 mt-1 font-mono">Límite Diario Base: <span id="dailyLimit" class="text-gray-300">$0</span></div>
+                    <div class="card-value mt-2" id="valDaily">--</div>
+                    <div class="text-[10px] text-gray-500 mt-1 font-mono">Límite Diario Base: <span id="dailyLimit" class="text-gray-300">--</span></div>
                 </div>
                 
                 <div class="flex justify-between items-end mt-4">
                     <div>
                         <div class="text-[10px] text-gray-500 font-bold uppercase mb-1">Restante del Periodo</div>
-                        <div class="text-lg font-bold text-white" id="valFree">$0</div>
+                        <div class="text-lg font-bold text-white" id="valFree">--</div>
                     </div>
                     <div class="text-right">
                         <div class="text-[10px] text-gray-500 font-bold uppercase mb-1">Días Restantes</div>
-                        <div class="text-lg font-bold text-red-400" id="daysLeft">0</div>
+                        <div class="text-lg font-bold text-red-400" id="daysLeft">--</div>
                     </div>
                 </div>
             </div>
 
-            <!-- PRÓXIMO EXTRA (NUEVO) -->
+            <!-- PRÓXIMO EXTRA -->
             <div class="extra-card">
                 <div>
                     <div class="extra-title">Próximo Pago Extra</div>
@@ -207,10 +211,10 @@
                 </div>
             </div>
 
-            <!-- HISTORIAL VARIABLES -->
+            <!-- HISTORIAL VARIABLES (GASTOS DE HOY) -->
             <div class="section-title">
                 <span>Gastos del Día</span>
-                <span class="text-xs text-red-500" id="todaySpentTotal">-$0</span>
+                <span class="text-xs text-red-500" id="todaySpentTotal">$0</span>
             </div>
             
             <div id="logList" class="pb-20 space-y-3">
@@ -218,7 +222,7 @@
             </div>
         </div>
 
-        <!-- VISTA PLAN -->
+        <!-- VISTA PLAN: Configuración y Fijos -->
         <div id="view-plan" class="view">
             <h2 class="text-2xl font-black text-white mb-6 px-2">Planificación</h2>
             
@@ -255,19 +259,12 @@
                 <button id="btnLogout" onclick="app.logout()" class="btn-primary bg-transparent border border-red-900 text-red-500 hover:bg-red-900/20 hidden">Cerrar Sesión</button>
             </div>
 
-            <div class="bg-gray-900/50 p-6 rounded-3xl border border-gray-800 mb-6">
-                <h4 class="text-xs text-gray-500 font-bold uppercase mb-4">Configuración de Horas Extra</h4>
-                <label class="input-label">Pago Promedio de Horas</label>
-                <input type="number" id="inpAvgExtra" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none mb-2" placeholder="$0.00" onchange="app.saveConfig()">
-                <p class="text-[10px] text-gray-600">Este monto se sugerirá los martes.</p>
-            </div>
-
             <button onclick="app.resetData()" class="w-full py-4 text-xs font-bold text-gray-600 hover:text-red-500 transition border border-gray-800 rounded-xl">REINICIAR DATOS</button>
         </div>
 
     </div>
 
-    <!-- FAB -->
+    <!-- FAB: SOLO EN VISTA HOY -->
     <button class="fab" id="fabBtn" onclick="app.openSheet('log')">
         <i class="ph-bold ph-plus"></i>
     </button>
@@ -304,6 +301,7 @@
                 <div class="chip" onclick="app.setDesc('Transporte', this)">🚌 Transporte</div>
                 <div class="chip" onclick="app.setDesc('Antojo', this)">🍫 Antojo</div>
                 <div class="chip" onclick="app.setDesc('Servicios', this)">💡 Servicios</div>
+                <div class="chip" onclick="app.setDesc('Salida', this)">🍺 Salida</div>
             </div>
             <input type="text" id="logDesc" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 text-white mb-6 outline-none" placeholder="Descripción...">
             <button onclick="app.addLog()" class="btn-primary shadow-lg shadow-yellow-900/20 bg-yellow-600 text-white">REGISTRAR GASTO</button>
@@ -332,7 +330,7 @@
                 <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-lock-key text-red-500"></i> Nuevo Gasto Fijo</h3>
                 <button onclick="app.closeSheet('fixed')" class="text-gray-500"><i class="ph-bold ph-x text-xl"></i></button>
             </div>
-            <label class="form-label">Nombre</label>
+            <label class="form-label">Nombre del Gasto</label>
             <input type="text" id="fixName" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white mb-4 outline-none">
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <div><label class="form-label">Monto</label><input type="number" id="fixAmount" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none" placeholder="$0"></div>
@@ -360,13 +358,14 @@
 
         const app = {
             user: null,
-            data: { income: 0, items: [], payDay1: 5, payDay2: 20, avgExtra: 0 },
+            data: { income: 0, items: [], payDay1: 5, payDay2: 20 },
             period: { daysLeft: 15 },
             todaySpent: 0,
-            todayExtras: 0, // Nueva variable para ingresos extras del día
+            todayExtras: 0, 
 
             init() {
-                document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric' }).toUpperCase();
+                const dateEl = document.getElementById('dateDisplay');
+                if(dateEl) dateEl.textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric' }).toUpperCase();
                 
                 auth.onAuthStateChanged(u => {
                     if(u) {
@@ -380,7 +379,6 @@
                     }
                 });
                 
-                // Calcular fecha de proximo extra al inicio
                 this.calculateNextExtra();
             },
 
@@ -388,30 +386,26 @@
             calculateNextExtra() {
                 const today = new Date();
                 let nextPay = new Date();
-                // 1. Encontrar el siguiente Martes
                 nextPay.setDate(today.getDate() + (2 + 7 - today.getDay()) % 7);
-                // Si hoy es martes, mover al siguiente semana? No, si hoy es martes y no ha pasado, es hoy. 
-                // Pero asumamos proximo martes futuro.
                 if (nextPay <= today) nextPay.setDate(nextPay.getDate() + 7);
 
-                // 2. Verificar cruce con quincena (5 o 20)
                 let day = nextPay.getDate();
                 if (day === 5 || day === 20) {
-                    nextPay.setDate(nextPay.getDate() + 1); // Mover a Miércoles
+                    nextPay.setDate(nextPay.getDate() + 1);
                 }
 
-                // 3. Verificar Lunes Festivo (Simple: Lunes anterior a este martes)
                 const prevMonday = new Date(nextPay);
                 prevMonday.setDate(nextPay.getDate() - 1);
-                const holidays = ["1-1", "5-2", "21-3", "1-5", "16-9", "20-11", "25-12"]; // D-M
+                const holidays = ["1-1", "5-2", "21-3", "1-5", "16-9", "20-11", "25-12"];
                 const monStr = `${prevMonday.getDate()}-${prevMonday.getMonth()+1}`;
                 
                 if (holidays.includes(monStr)) {
-                     nextPay.setDate(nextPay.getDate() + 1); // Mover a Miércoles
+                     nextPay.setDate(nextPay.getDate() + 1);
                 }
 
                 const opts = { weekday: 'short', day: 'numeric', month: 'short' };
-                document.getElementById('nextExtraDate').textContent = nextPay.toLocaleDateString('es-ES', opts);
+                const extraDateEl = document.getElementById('nextExtraDate');
+                if(extraDateEl) extraDateEl.textContent = nextPay.toLocaleDateString('es-ES', opts);
             },
 
             updateAuthUI(u) {
@@ -456,15 +450,14 @@
                 }
                 
                 if(!this.data.items) this.data.items = [];
-                document.getElementById('inpIncome').value = this.data.income || '';
-                document.getElementById('inpAvgExtra').value = this.data.avgExtra || '';
-                document.getElementById('extraAmnt').value = this.data.avgExtra || ''; // Prellenar con promedio
+                const inpIncome = document.getElementById('inpIncome');
+                if (inpIncome) inpIncome.value = this.data.income || '';
+                
                 this.renderFixedList();
             },
 
             saveConfig() {
                 this.data.income = parseFloat(document.getElementById('inpIncome').value) || 0;
-                this.data.avgExtra = parseFloat(document.getElementById('inpAvgExtra').value) || 0;
                 this.save();
                 this.render();
             },
@@ -478,17 +471,12 @@
             render() {
                 const now = new Date();
                 const d = now.getDate();
-                const p1 = 5, p2 = 20; // Fijos según requerimiento
+                const p1 = 5, p2 = 20; 
                 
-                // Rangos
-                let start, end;
-                if (d >= p1 && d < p2) { start=p1; end=p2; } 
-                else { start=p2; end=p1; }
-
                 // Dias Restantes
                 let targetDate = new Date();
                 if(d >= p2) targetDate.setMonth(targetDate.getMonth()+1);
-                targetDate.setDate(end);
+                targetDate.setDate(p2);
                 
                 if(targetDate.getDay()===6) targetDate.setDate(targetDate.getDate()+2);
                 if(targetDate.getDay()===0) targetDate.setDate(targetDate.getDate()+1);
@@ -496,7 +484,6 @@
                 const diffTime = targetDate - now;
                 this.daysLeft = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
                 
-                // Filtro
                 const isExpenseActive = (day) => {
                     if (d >= p1 && d < p2) return day >= p1 && day < p2;
                     else return day >= p2 || day < p1;
@@ -508,20 +495,21 @@
                 
                 const dailyLimit = free / this.daysLeft;
                 
-                // Lógica final: DailyLimit - GastadoHoy + ExtrasHoy
                 const availableToday = dailyLimit - this.todaySpent + this.todayExtras;
 
-                // UI
+                // UI UPDATE
                 const elAvail = document.getElementById('valDaily');
-                elAvail.textContent = this.fmt(availableToday);
-                elAvail.className = `card-value mt-2 ${availableToday < 0 ? 'text-red-500' : 'text-white'}`;
+                if (elAvail) {
+                    elAvail.textContent = this.fmt(availableToday);
+                    elAvail.className = `card-value mt-2 ${availableToday < 0 ? 'text-red-500' : 'text-white'}`;
+                }
                 
                 if(document.getElementById('dailyLimit')) document.getElementById('dailyLimit').textContent = this.fmt(dailyLimit);
-                document.getElementById('valFree').textContent = this.fmt(free);
-                document.getElementById('daysLeft').textContent = this.daysLeft;
+                if(document.getElementById('valFree')) document.getElementById('valFree').textContent = this.fmt(free);
+                if(document.getElementById('daysLeft')) document.getElementById('daysLeft').textContent = this.daysLeft;
             },
 
-            // --- FIJOS ---
+            // --- GASTOS FIJOS (PLAN) ---
             addFixed() {
                 const name = document.getElementById('fixName').value;
                 const amt = parseFloat(document.getElementById('fixAmount').value);
@@ -534,9 +522,10 @@
             deleteFixed(idx) { if(confirm("¿Borrar?")) { this.data.items.splice(idx,1); this.renderFixedList(); this.save(); } },
             renderFixedList() {
                 const el = document.getElementById('fixedList');
+                if (!el) return;
                 el.innerHTML = '';
                 const d = new Date().getDate();
-                const p1=5, p2=20;
+                const p1=this.data.payDay1 || 5, p2=this.data.payDay2 || 20;
                 const isActive = (day) => (d >= p1 && d < p2) ? (day >= p1 && day < p2) : (day >= p2 || day < p1);
                 this.data.items.forEach((it, i) => {
                     const active = isActive(it.day);
@@ -556,12 +545,21 @@
 
             // --- LOGS Y EXTRAS ---
             openSheet(id) { 
-                document.getElementById('sheet-'+id).classList.add('active'); 
-                if(id==='log') document.getElementById('quickAmnt').focus(); 
-                if(id==='extra') document.getElementById('extraAmnt').focus();
+                const sheet = document.getElementById('sheet-'+id);
+                if (sheet) sheet.classList.add('active');
+                if(id==='log') document.getElementById('logAmnt')?.focus();
+                if(id==='extra') document.getElementById('extraAmnt')?.focus();
             },
-            closeSheet(id) { document.getElementById('sheet-'+id).classList.remove('active'); },
-            setDesc(t, el) { document.getElementById('logDesc').value = t; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); },
+            closeSheet(id) { 
+                const sheet = document.getElementById('sheet-'+id);
+                if (sheet) sheet.classList.remove('active'); 
+            },
+            setDesc(t, el) { 
+                const logDesc = document.getElementById('logDesc');
+                if (logDesc) logDesc.value = t; 
+                document.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected')); 
+                if (el) el.classList.add('selected'); 
+            },
 
             async addLog() {
                 const desc = document.getElementById('logDesc').value || 'Gasto';
@@ -596,6 +594,7 @@
                 const todayStr = new Date().toDateString();
                 const process = (arr) => {
                     const list = document.getElementById('logList');
+                    if (!list) return; 
                     list.innerHTML = '';
                     let spent = 0;
                     let extras = 0;
