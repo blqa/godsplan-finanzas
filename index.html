@@ -60,16 +60,17 @@
         .tx-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 16px; background: #18181b; border: 1px solid #27272a; border-radius: 16px; margin-bottom: 10px;
+            transition: transform 0.1s; cursor: pointer;
         }
+        .tx-item:active { transform: scale(0.98); background: #27272a; }
+        
         .tx-icon {
             width: 44px; height: 44px; border-radius: 12px; background: #27272a;
             display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #a1a1aa; margin-right: 15px; flex-shrink: 0;
         }
-        /* Colores de Iconos */
         .tx-icon.variable { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
         .tx-icon.extra { color: #34d399; background: rgba(52, 211, 153, 0.1); }
-        .tx-icon.fixed { color: #f87171; background: rgba(248, 113, 113, 0.1); } /* Activo */
-        .tx-icon.future { color: #6b7280; background: rgba(107, 114, 128, 0.1); } /* Inactivo */
+        .tx-icon.fixed { color: #f87171; background: rgba(248, 113, 113, 0.1); }
         
         .tx-info { flex: 1; min-width: 0; }
         .tx-title { font-weight: 700; font-size: 0.95rem; color: #e4e4e7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -79,7 +80,7 @@
         /* BOTTOM NAV */
         .bottom-nav {
             height: 80px; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(20px);
-            border-top: 1px solid #262626; display: grid; grid-template-columns: repeat(4, 1fr);
+            border-top: 1px solid #262626; display: grid; grid-template-columns: 1fr 1fr 1fr;
             position: fixed; bottom: 0; left: 0; width: 100%; z-index: 50;
             padding-bottom: env(safe-area-inset-bottom);
         }
@@ -119,7 +120,7 @@
         }
         .fab:active { transform: scale(0.9); }
 
-        /* MODALES */
+        /* MODAL */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 100;
@@ -149,15 +150,6 @@
         .chip { background: #262626; padding: 8px 16px; border-radius: 50px; font-size: 0.85rem; color: #a3a3a3; white-space: nowrap; cursor: pointer; border: 1px solid transparent; font-weight: 600; }
         .chip.selected { background: #ef4444; color: white; border-color: #ef4444; }
 
-        /* PROYECCIONES Y HISTORIAL */
-        .projection-card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 10px; }
-        .proj-label { font-size: 0.65rem; font-weight: 800; color: #71717a; text-transform: uppercase; margin-bottom: 5px; display: flex; justify-content: space-between; }
-        .proj-val { font-size: 1.5rem; font-weight: 800; color: white; }
-        
-        .month-nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .month-label { font-size: 1rem; font-weight: 800; color: white; width: 100px; text-align: center; }
-        .nav-btn { background: #262626; border: none; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-
         /* EXTRA CARD */
         .extra-card {
             background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.1);
@@ -165,6 +157,8 @@
         }
         .extra-title { font-size: 0.7rem; color: #34d399; font-weight: 700; text-transform: uppercase; }
         .extra-date { font-size: 0.9rem; font-weight: 600; color: #d1fae5; }
+        
+        .btn-delete { width: 100%; padding: 12px; border-radius: 8px; font-weight: 800; cursor: pointer; margin-bottom: 10px; color: var(--alert); border: 1px solid var(--alert); background: transparent; }
     </style>
 </head>
 <body>
@@ -188,18 +182,17 @@
                 <div id="statusBadge" class="text-[10px] bg-gray-900 border border-gray-800 px-3 py-1 rounded-full text-gray-500">...</div>
             </div>
 
-            <!-- HERO CARD -->
+            <!-- HERO CARD (SALDO REAL) -->
             <div class="onyx-card">
                 <div>
-                    <div class="card-label">LIBRE PARA HOY</div>
-                    <div class="card-value mt-2" id="valDaily">--</div>
-                    <div class="text-[10px] text-gray-500 mt-1 font-mono">Límite Diario Base: <span id="dailyLimit" class="text-gray-300">--</span></div>
+                    <div class="card-label">RESTANTE DEL PERIODO</div>
+                    <div class="card-value mt-2" id="valFree">--</div>
                 </div>
                 
                 <div class="flex justify-between items-end mt-4">
                     <div>
-                        <div class="text-[10px] text-gray-500 font-bold uppercase mb-1">Restante del Periodo</div>
-                        <div class="text-lg font-bold text-white" id="valFree">--</div>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase mb-1">Disponible para Hoy</div>
+                        <div class="text-lg font-bold text-white" id="valDaily">--</div>
                     </div>
                     <div class="text-right">
                         <div class="text-[10px] text-gray-500 font-bold uppercase mb-1">Días Restantes</div>
@@ -221,8 +214,8 @@
 
             <!-- HISTORIAL VARIABLES (GASTOS DE HOY) -->
             <div class="section-title">
-                <span>Gastos del Día</span>
-                <span class="text-xs text-red-500" id="todaySpentTotal">$0</span>
+                <span>Movimientos del Periodo</span>
+                <span class="text-xs text-red-500" id="periodSpentTotal">$0</span>
             </div>
             
             <div id="logList" class="pb-20 space-y-3">
@@ -234,19 +227,7 @@
         <div id="view-plan" class="view">
             <h2 class="text-2xl font-black text-white mb-6 px-2">Planificación</h2>
             
-            <!-- PROYECCIONES -->
-            <div class="projection-card border-l-4 border-l-blue-500">
-                <div class="proj-label"><span>Proyección Q1 (Día 5-19)</span></div>
-                <div class="proj-val" id="projQ1">$0</div>
-                <div class="text-[10px] text-gray-500 mt-1">Ingreso - Fijos</div>
-            </div>
-            <div class="projection-card border-l-4 border-l-purple-500">
-                <div class="proj-label"><span>Proyección Q2 (Día 20-4)</span></div>
-                <div class="proj-val" id="projQ2">$0</div>
-                <div class="text-[10px] text-gray-500 mt-1">Ingreso - Fijos</div>
-            </div>
-
-            <div class="clean-input-group mt-6">
+            <div class="clean-input-group">
                 <label class="input-label text-green-500">Ingreso Neto (Quincenal)</label>
                 <div class="flex items-center">
                     <span class="text-2xl font-bold text-gray-600 mr-2">$</span>
@@ -260,25 +241,23 @@
             </div>
             
             <div class="text-[10px] text-gray-600 mb-4 px-2">
-                Candado Rojo = Activo este periodo. Gris = Futuro.
+                Gastos activos en este periodo (Día 5-19 o 20-4).
             </div>
 
             <div id="fixedList" class="space-y-3 mb-24"></div>
         </div>
 
-        <!-- VISTA HISTORIAL -->
+        <!-- VISTA HISTORIAL (NUEVA) -->
         <div id="view-history" class="view">
-            <h2 class="text-2xl font-black text-white mb-6 px-2">Historial</h2>
-            <div class="month-nav">
-                <button class="nav-btn" onclick="app.changeMonth(-1)"><i class="ph-bold ph-caret-left"></i></button>
-                <span class="month-label" id="histMonthLabel">--</span>
-                <button class="nav-btn" onclick="app.changeMonth(1)"><i class="ph-bold ph-caret-right"></i></button>
-            </div>
-            <div class="onyx-card !p-5 !min-h-0 mb-6">
-                <div class="text-[10px] text-gray-500 uppercase font-bold mb-1">Total Gastado</div>
-                <div class="text-2xl font-black text-red-400" id="histTotal">$0</div>
-            </div>
-            <div id="historyList" class="pb-24 space-y-3"></div>
+             <h2 class="text-2xl font-black text-white mb-6 px-2">Historial</h2>
+             <div class="flex justify-center items-center gap-4 mb-6">
+                 <button onclick="app.changeHistoryMonth(-1)" class="p-2 bg-gray-800 rounded-full text-gray-400"><i class="ph-bold ph-caret-left"></i></button>
+                 <span id="histDateDisplay" class="font-bold text-lg uppercase">...</span>
+                 <button onclick="app.changeHistoryMonth(1)" class="p-2 bg-gray-800 rounded-full text-gray-400"><i class="ph-bold ph-caret-right"></i></button>
+             </div>
+             <div id="historyList" class="pb-20 space-y-3">
+                 <!-- Injected -->
+             </div>
         </div>
 
         <!-- VISTA CUENTA -->
@@ -326,13 +305,18 @@
         </div>
     </div>
 
-    <!-- SHEET: GASTO VARIABLE -->
+    <!-- SHEET: GASTO VARIABLE (EDITAR/CREAR) -->
     <div id="sheet-log" class="modal-overlay sheet" onclick="if(event.target===this) app.closeSheet('log')">
         <div class="bottom-sheet">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-money text-yellow-500"></i> Gasto Variable</h3>
+                <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-money text-yellow-500"></i> <span id="logSheetTitle">Gasto Variable</span></h3>
                 <button onclick="app.closeSheet('log')" class="text-gray-500"><i class="ph-bold ph-x text-xl"></i></button>
             </div>
+            
+            <!-- Date Input Added -->
+            <label class="input-label">Fecha del Gasto</label>
+            <input type="date" id="logDate" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white mb-4 outline-none font-bold">
+
             <div class="relative mb-6">
                 <span class="absolute left-0 top-1/2 -translate-y-1/2 text-3xl font-black text-gray-600">$</span>
                 <input type="number" id="logAmnt" class="w-full bg-transparent text-center text-5xl font-black text-white border-b border-gray-700 pb-2 focus:outline-none focus:border-red-500" placeholder="0">
@@ -345,7 +329,9 @@
                 <div class="chip" onclick="app.setDesc('Salida', this)">🍺 Salida</div>
             </div>
             <input type="text" id="logDesc" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 text-white mb-6 outline-none" placeholder="Descripción...">
-            <button onclick="app.addLog()" class="btn-primary shadow-lg shadow-yellow-900/20 bg-yellow-600 text-white">REGISTRAR GASTO</button>
+            
+            <button onclick="app.saveLog()" class="btn-primary shadow-lg shadow-yellow-900/20 bg-yellow-600 text-white">GUARDAR</button>
+            <button id="btnDeleteLog" onclick="app.deleteLog()" class="btn-delete hidden">ELIMINAR</button>
         </div>
     </div>
 
@@ -364,7 +350,7 @@
         </div>
     </div>
 
-    <!-- SHEET: GASTO FIJO (EDITAR) -->
+    <!-- SHEET: GASTO FIJO -->
     <div id="sheet-fixed" class="modal-overlay sheet" onclick="if(event.target===this) app.closeSheet('fixed')">
         <div class="bottom-sheet">
             <div class="flex justify-between items-center mb-6">
@@ -378,7 +364,7 @@
                 <div><label class="form-label">Día de Pago</label><input type="number" id="fixDay" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none text-center" placeholder="1-31"></div>
             </div>
             <button onclick="app.saveFixed()" class="btn-primary">GUARDAR</button>
-            <button id="btnDeleteFixed" onclick="app.deleteFixed()" class="w-full py-3 mt-3 text-red-500 font-bold border border-red-900/30 rounded-xl hidden">ELIMINAR</button>
+            <button id="btnDeleteFixed" onclick="app.deleteFixed()" class="btn-delete hidden">ELIMINAR</button>
         </div>
     </div>
     
@@ -401,9 +387,11 @@
         const app = {
             user: null,
             data: { income: 0, items: [], payDay1: 5, payDay2: 20, avgExtra: 0 },
-            period: { daysLeft: 15 },
-            todaySpent: 0, todayExtras: 0,
-            editingItem: null, // Index of fixed item being edited
+            period: { start: null, end: null, daysLeft: 15 },
+            periodLogs: [], // Logs for the current period
+            spentInPeriod: 0, 
+            extrasInPeriod: 0,
+            editingItem: null, editingLogId: null,
             histDate: new Date(),
 
             init() {
@@ -415,8 +403,7 @@
                         document.getElementById('authModal').classList.remove('active');
                         this.updateAuthUI(u);
                         this.loadData();
-                        this.loadLogs();
-                        this.renderHistory();
+                        this.loadLogs(); // Will call render internally
                     } else {
                         document.getElementById('authModal').classList.add('active');
                     }
@@ -460,7 +447,8 @@
                 document.getElementById('view-'+viewId).classList.add('active');
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
                 btn.classList.add('active');
-                document.querySelector('.fab').style.display = viewId === 'today' ? 'flex' : 'none';
+                const fab = document.querySelector('.fab');
+                if(fab) fab.style.display = viewId === 'today' ? 'flex' : 'none';
             },
 
             // --- DATA ---
@@ -490,6 +478,8 @@
             saveConfig() {
                 this.data.income = parseFloat(document.getElementById('inpIncome').value) || 0;
                 this.data.avgExtra = parseFloat(document.getElementById('inpAvgExtra').value) || 0;
+                this.data.payDay1 = parseInt(document.getElementById('inpPay1').value) || 5;
+                this.data.payDay2 = parseInt(document.getElementById('inpPay2').value) || 20;
                 this.save();
                 this.render();
             },
@@ -500,56 +490,69 @@
             },
 
             // --- RENDER & CALC ---
-            render() {
+            calcPeriodDates() {
                 const now = new Date();
                 const d = now.getDate();
-                const p1 = 5, p2 = 20; 
-                
+                const p1 = 5, p2 = 20;
                 let start, end;
-                if (d >= p1 && d < p2) { start=p1; end=p2; } 
-                else { start=p2; end=p1; }
+                if (d >= p1 && d < p2) { start = new Date(now.getFullYear(), now.getMonth(), p1); end = new Date(now.getFullYear(), now.getMonth(), p2); } 
+                else if (d >= p2) { start = new Date(now.getFullYear(), now.getMonth(), p2); end = new Date(now.getFullYear(), now.getMonth() + 1, p1); }
+                else { start = new Date(now.getFullYear(), now.getMonth() - 1, p2); end = new Date(now.getFullYear(), now.getMonth(), p1); }
+                
+                // Adjustment logic (weekend) - Keep simple for now or use complex
+                this.period.start = start; 
+                this.period.end = end;
+                
+                const diffTime = end - now;
+                this.period.daysLeft = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+            },
 
-                let targetDate = new Date();
-                if(d >= p2) targetDate.setMonth(targetDate.getMonth()+1);
-                targetDate.setDate(end);
-                if(targetDate.getDay()===6) targetDate.setDate(targetDate.getDate()+2);
-                if(targetDate.getDay()===0) targetDate.setDate(targetDate.getDate()+1);
+            render() {
+                this.calcPeriodDates();
+                const d = new Date().getDate();
+                const p1 = 5, p2 = 20;
                 
-                const diffTime = targetDate - now;
-                this.daysLeft = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-                
-                // Calculo Proyecciones
+                // Logic for expense active
+                const isExpenseActive = (day) => {
+                    if (d >= p1 && d < p2) return day >= p1 && day < p2;
+                    else return day >= p2 || day < p1;
+                };
+
+                const totalFixed = this.data.items.reduce((s, i) => isExpenseActive(i.day||1) ? s+(i.amount||0) : s, 0);
                 const income = this.data.income || 0;
-                // Q1 Expenses (5-19)
-                const fixedQ1 = this.data.items.reduce((s, i) => (i.day >= 5 && i.day <= 19) ? s + (i.amount||0) : s, 0);
-                const freeQ1 = income - fixedQ1;
-                // Q2 Expenses (20-4)
-                const fixedQ2 = this.data.items.reduce((s, i) => (i.day >= 20 || i.day <= 4) ? s + (i.amount||0) : s, 0);
-                const freeQ2 = income - fixedQ2;
+                const baseFree = income - totalFixed; // Libre antes de gastos variables
 
-                document.getElementById('projQ1').textContent = this.fmt(freeQ1);
-                document.getElementById('projQ2').textContent = this.fmt(freeQ2);
-
-                // Calculo Hoy
-                const isQ1 = (d >= 5 && d < 20);
-                const currentPeriodFree = isQ1 ? freeQ1 : freeQ2;
+                // Calculo Real
+                // Restante Periodo = (Ingreso - FijosActivos - GastosVariablesPeriodo + ExtrasPeriodo)
+                const currentPeriodFree = baseFree - this.spentInPeriod + this.extrasInPeriod;
                 
-                const dailyLimit = currentPeriodFree / this.daysLeft;
-                const availableToday = dailyLimit - this.todaySpent + this.todayExtras;
+                const dailyLimit = currentPeriodFree / this.period.daysLeft;
 
-                const elAvail = document.getElementById('valDaily');
-                if (elAvail) {
-                    elAvail.textContent = this.fmt(availableToday);
-                    elAvail.className = `card-value mt-2 ${availableToday < 0 ? 'text-red-500' : 'text-white'}`;
+                // UI UPDATE
+                const elFree = document.getElementById('valFree');
+                if(elFree) elFree.textContent = this.fmt(currentPeriodFree);
+                
+                // Used in Hero "Libre para hoy" -> Daily Limit calculated from remaining period money
+                const elDaily = document.getElementById('valDaily');
+                if(elDaily) {
+                    elDaily.textContent = this.fmt(dailyLimit);
+                    elDaily.className = `card-value mt-2 ${dailyLimit < 0 ? 'text-red-500' : 'text-white'}`;
                 }
                 
-                if(document.getElementById('dailyLimit')) document.getElementById('dailyLimit').textContent = this.fmt(dailyLimit);
-                if(document.getElementById('valFree')) document.getElementById('valFree').textContent = this.fmt(currentPeriodFree);
-                if(document.getElementById('daysLeft')) document.getElementById('daysLeft').textContent = this.daysLeft;
+                if(document.getElementById('dailyLimit')) document.getElementById('dailyLimit').textContent = this.fmt(dailyLimit); // Redundant visually but keeps consistency
+                if(document.getElementById('daysLeft')) document.getElementById('daysLeft').textContent = this.period.daysLeft;
+                
+                // Update Period Spent Label
+                const elSpent = document.getElementById('todaySpentTotal'); // Actually Period Spent
+                if(elSpent) elSpent.textContent = `-${this.fmt(this.spentInPeriod)}`;
+                
+                // Update label to reflect Period
+                const secTitle = document.querySelector('.section-title span');
+                if(secTitle && secTitle.textContent === "Gastos del Día") secTitle.textContent = "Movimientos del Periodo";
             },
 
             // --- GASTOS FIJOS (CRUD) ---
-            openSheet(id, idx = null) {
+            openSheet(id, idx = null, logId = null) {
                 const sheet = document.getElementById('sheet-'+id);
                 if (sheet) sheet.classList.add('active');
                 
@@ -571,7 +574,32 @@
                     }
                     document.getElementById('fixName').focus();
                 } else if(id === 'log') {
-                     document.getElementById('logAmnt').focus();
+                     // Set date default to today
+                     const todayISO = new Date().toISOString().split('T')[0];
+                     document.getElementById('logDate').value = todayISO;
+                     
+                     if (logId) {
+                         this.editingLogId = logId;
+                         // Find log in periodLogs to edit
+                         const log = this.periodLogs.find(l => l.id === logId);
+                         if (log) {
+                             document.getElementById('logSheetTitle').textContent = "Editar Gasto";
+                             document.getElementById('logAmnt').value = log.amnt;
+                             document.getElementById('logDesc').value = log.desc;
+                             // Set correct date
+                             const d = log.date.toDate ? log.date.toDate() : new Date(log.date);
+                             document.getElementById('logDate').value = d.toISOString().split('T')[0];
+                             
+                             document.getElementById('btnDeleteLog').style.display = 'block';
+                         }
+                     } else {
+                         this.editingLogId = null;
+                         document.getElementById('logSheetTitle').textContent = "Gasto Variable";
+                         document.getElementById('logAmnt').value = '';
+                         document.getElementById('logDesc').value = '';
+                         document.getElementById('btnDeleteLog').style.display = 'none';
+                         document.getElementById('logAmnt').focus();
+                     }
                 } else if(id === 'extra') {
                      document.getElementById('extraAmnt').focus();
                 }
@@ -615,14 +643,12 @@
                 const p1=5, p2=20;
                 const isActive = (day) => (d >= p1 && d < p2) ? (day >= p1 && day < p2) : (day >= p2 || day < p1);
                 
-                // Ordenar por día
                 this.data.items.sort((a,b) => a.day - b.day);
 
                 this.data.items.forEach((it, i) => {
                     const active = isActive(it.day);
-                    // Icon logic: Rojo Abierto (Activo) vs Gris Cerrado (Inactivo)
                     let iconClass = active ? 'ph-lock-open text-red-400' : 'ph-lock text-gray-500';
-                    let bgClass = active ? 'fixed' : 'future'; // Use future style for inactive
+                    let bgClass = active ? 'fixed' : 'future'; 
 
                     el.innerHTML += `
                     <div class="tx-item ${active ? '' : 'opacity-50'}" onclick="app.openSheet('fixed', ${i})">
@@ -637,7 +663,7 @@
                 });
             },
 
-            // --- LOGS Y EXTRAS ---
+            // --- LOGS Y EXTRAS (CRUD) ---
             setDesc(t, el) { 
                 const logDesc = document.getElementById('logDesc');
                 if (logDesc) logDesc.value = t; 
@@ -645,14 +671,40 @@
                 if (el) el.classList.add('selected'); 
             },
 
-            async addLog() {
+            async saveLog() {
                 const desc = document.getElementById('logDesc').value || 'Gasto';
                 const amnt = parseFloat(document.getElementById('logAmnt').value);
-                if(!amnt) return;
-                const log = { desc, amnt, type: 'expense', date: new Date().toISOString() };
-                this.saveLogToDb(log);
+                const dateVal = document.getElementById('logDate').value;
+                if(!amnt || !dateVal) return;
+                
+                // Create date object from input (preserve local day)
+                const [y,m,d] = dateVal.split('-').map(Number);
+                const dateObj = new Date(y, m-1, d, 12, 0, 0); // Noon to avoid timezone shift
+
+                const logData = { desc, amnt, type: 'expense', date: dateObj.toISOString() };
+                
+                if (this.editingLogId) {
+                    await this.updateLogDb(this.editingLogId, logData);
+                } else {
+                    await this.saveLogToDb(logData);
+                }
+                
                 this.closeSheet('log');
-                document.getElementById('logDesc').value = ''; document.getElementById('logAmnt').value = '';
+            },
+            
+            async deleteLog() {
+                if(!this.editingLogId || !confirm("¿Eliminar gasto?")) return;
+                
+                if(this.user && !this.user.isAnonymous) {
+                     await db.collection(COLLECTION).doc(this.user.uid).collection('logs').doc(this.editingLogId).delete();
+                } else {
+                     // Local delete
+                     const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]');
+                     const filtered = logs.filter(l => l.id !== this.editingLogId);
+                     localStorage.setItem('gp_tr_logs', JSON.stringify(filtered));
+                     this.loadLogs();
+                }
+                this.closeSheet('log');
             },
 
             async addExtra() {
@@ -668,60 +720,84 @@
                      await db.collection(COLLECTION).doc(this.user.uid).collection('logs').add({ ...log, date: firebase.firestore.FieldValue.serverTimestamp() });
                 } else {
                     const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]');
-                    logs.push(log);
+                    logs.push({...log, id: Date.now().toString()});
                     localStorage.setItem('gp_tr_logs', JSON.stringify(logs));
                     this.loadLogs();
                 }
             },
+            
+            async updateLogDb(id, data) {
+                if(this.user && !this.user.isAnonymous) {
+                    // Update timestamp is tricky if we want to keep user date, so we use user date string mostly, 
+                    // but for ordering we rely on Firestore timestamp. If user changes date, we might need to update a sorting field.
+                    // For simplicity, we update 'date' to the new date chosen.
+                    await db.collection(COLLECTION).doc(this.user.uid).collection('logs').doc(id).update({
+                        ...data, date: firebase.firestore.Timestamp.fromDate(new Date(data.date))
+                    });
+                } else {
+                    const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]');
+                    const idx = logs.findIndex(l => l.id === id);
+                    if(idx !== -1) {
+                        logs[idx] = { ...logs[idx], ...data };
+                        localStorage.setItem('gp_tr_logs', JSON.stringify(logs));
+                        this.loadLogs();
+                    }
+                }
+            },
 
             loadLogs() {
-                const todayStr = new Date().toDateString();
+                this.calcPeriodDates(); // Ensure periods are fresh
                 const process = (arr) => {
                     const list = document.getElementById('logList');
                     if (!list) return; 
                     list.innerHTML = '';
-                    let spent = 0;
-                    let extras = 0;
                     
-                    // Filter logs for today
-                    const dailyLogs = arr.filter(l => {
+                    let spentPeriod = 0;
+                    let extrasPeriod = 0;
+                    
+                    // Filter logs for CURRENT PERIOD
+                    this.periodLogs = arr.filter(l => {
                         const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
-                        return d.toDateString() === todayStr;
+                        return d >= this.period.start && d < this.period.end; // Only logs within 5-19 or 20-4 range
                     });
 
-                    if(dailyLogs.length===0) list.innerHTML='<div class="text-center text-xs text-gray-600 py-10 italic">Sin movimientos hoy</div>';
+                    if(this.periodLogs.length===0) list.innerHTML='<div class="text-center text-xs text-gray-600 py-10 italic">Sin movimientos en este periodo</div>';
 
-                    dailyLogs.forEach(l => {
+                    // Sort logs by date desc
+                    this.periodLogs.sort((a,b) => {
+                        const da = a.date.toDate ? a.date.toDate() : new Date(a.date);
+                        const db = b.date.toDate ? b.date.toDate() : new Date(b.date);
+                        return db - da; 
+                    });
+
+                    this.periodLogs.forEach(l => {
                         const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
                         if (l.type === 'income') {
-                            extras += l.amnt;
-                            list.innerHTML += `<div class="tx-item"><div class="flex items-center"><div class="tx-icon extra"><i class="ph-bold ph-coin"></i></div><div class="tx-info"><div class="tx-title">Extra</div><div class="tx-date">${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div></div><div class="tx-amount text-green-500">+$${l.amnt}</div></div>`;
+                            extrasPeriod += l.amnt;
+                            list.innerHTML += `<div class="tx-item"><div class="flex items-center"><div class="tx-icon extra"><i class="ph-bold ph-coin"></i></div><div class="tx-info"><div class="tx-title">Extra</div><div class="tx-date">${d.toLocaleDateString()}</div></div></div><div class="tx-amount text-green-500">+$${l.amnt}</div></div>`;
                         } else {
-                            spent += l.amnt;
-                            // Add ONCLICK for editing
-                            list.innerHTML += `<div class="tx-item" onclick="app.openSheet('log', '${l.id}')"><div class="flex items-center"><div class="tx-icon variable"><i class="ph-bold ph-shopping-bag"></i></div><div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div></div><div class="tx-amount text-red-500">-$${l.amnt}</div></div>`;
+                            spentPeriod += l.amnt;
+                            list.innerHTML += `<div class="tx-item" onclick="app.openSheet('log', null, '${l.id}')"><div class="flex items-center"><div class="tx-icon variable"><i class="ph-bold ph-shopping-bag"></i></div><div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleDateString()}</div></div></div><div class="tx-amount text-red-500">-$${l.amnt}</div></div>`;
                         }
                     });
-                    this.todaySpent = spent;
-                    this.todayExtras = extras;
                     
-                    const totalEl = document.getElementById('todaySpentTotal');
-                    if(totalEl) totalEl.textContent = `-$${this.fmt(spent)}`; 
-                    
-                    this.render(); 
+                    this.spentInPeriod = spentPeriod;
+                    this.extrasInPeriod = extrasPeriod;
+                    this.render(); // Recalculate totals
                 };
 
                 if(this.user && !this.user.isAnonymous) {
-                     db.collection(COLLECTION).doc(this.user.uid).collection('logs').orderBy('date','desc').limit(20)
+                     // Fetch last 100 to ensure we catch the period range
+                     db.collection(COLLECTION).doc(this.user.uid).collection('logs').orderBy('date','desc').limit(100)
                        .onSnapshot(s => process(s.docs.map(d=> ({ id: d.id, ...d.data() }))));
                 } else {
                     const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]');
-                    process(logs.reverse());
+                    process(logs);
                 }
             },
             
             // --- HISTORY ---
-            changeMonth(d) {
+            changeHistoryMonth(d) {
                 this.histDate.setMonth(this.histDate.getMonth() + d);
                 this.renderHistory();
             },
@@ -729,50 +805,47 @@
             renderHistory() {
                 const label = document.getElementById('histMonthLabel');
                 const list = document.getElementById('historyList');
-                const totalEl = document.getElementById('histTotal');
                 if(!label || !list) return;
 
                 const m = this.histDate.getMonth();
                 const y = this.histDate.getFullYear();
                 label.textContent = `${["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"][m]} ${y}`;
 
-                list.innerHTML = '<div class="text-center text-xs text-gray-600 py-4">Cargando...</div>';
-                
-                // Function to filter and render logs for selected month
-                const showHist = (allLogs) => {
-                    list.innerHTML = '';
-                    let monthSpent = 0;
-                    const filtered = allLogs.filter(l => {
-                        const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
-                        return d.getMonth() === m && d.getFullYear() === y && l.type === 'expense';
-                    });
-                    
-                    if(filtered.length === 0) list.innerHTML = '<div class="text-center text-xs text-gray-600 py-10">Sin gastos este mes</div>';
-
-                    filtered.forEach(l => {
-                         monthSpent += l.amnt;
-                         const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
-                         list.innerHTML += `
-                            <div class="tx-item">
-                                <div class="flex items-center">
-                                    <div class="tx-icon variable"><i class="ph-bold ph-calendar-blank"></i></div>
-                                    <div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleDateString()}</div></div>
-                                </div>
-                                <div class="tx-amount text-red-500">-$${l.amnt}</div>
-                            </div>`;
-                    });
-                    totalEl.textContent = this.fmt(monthSpent);
-                };
-
                 if(this.user && !this.user.isAnonymous) {
-                     // Query specific month range (Simplification: getting last 100 and filtering locally for now)
+                     // Simple implementation: fetch all (limit 200) and filter. Better would be query by date range.
                      db.collection(COLLECTION).doc(this.user.uid).collection('logs')
-                       .orderBy('date', 'desc').limit(100)
-                       .get().then(s => showHist(s.docs.map(d=>d.data())));
+                       .orderBy('date', 'desc').limit(200)
+                       .get().then(s => {
+                           const logs = s.docs.map(d=>d.data());
+                           this.buildHistoryList(list, logs, m, y);
+                       });
                 } else {
                     const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]');
-                    showHist(logs);
+                    this.buildHistoryList(list, logs, m, y);
                 }
+            },
+
+            buildHistoryList(list, logs, m, y) {
+                list.innerHTML = '';
+                const filtered = logs.filter(l => {
+                    const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
+                    return d.getMonth() === m && d.getFullYear() === y;
+                });
+                
+                if(filtered.length === 0) { list.innerHTML = '<div class="text-center text-xs text-gray-600 py-4">Sin datos</div>'; return; }
+                
+                filtered.forEach(l => {
+                    const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
+                    const isInc = l.type === 'income';
+                    list.innerHTML += `
+                    <div class="tx-item">
+                        <div class="flex items-center">
+                            <div class="tx-icon ${isInc?'extra':'variable'}"><i class="ph-bold ${isInc?'ph-coin':'ph-receipt'}"></i></div>
+                            <div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleDateString()}</div></div>
+                        </div>
+                        <div class="tx-amount ${isInc?'text-green-500':'text-red-500'}">${isInc?'+':'-'}$${l.amnt}</div>
+                    </div>`;
+                });
             },
 
             // --- UTILS ---
