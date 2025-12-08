@@ -71,6 +71,7 @@
         .tx-icon.variable { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
         .tx-icon.extra { color: #34d399; background: rgba(52, 211, 153, 0.1); }
         .tx-icon.fixed { color: #f87171; background: rgba(248, 113, 113, 0.1); }
+        .tx-icon.future { color: #6b7280; background: rgba(107, 114, 128, 0.1); } /* Candado cerrado */
         
         .tx-info { flex: 1; min-width: 0; }
         .tx-title { font-weight: 700; font-size: 0.95rem; color: #e4e4e7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -120,7 +121,7 @@
         }
         .fab:active { transform: scale(0.9); }
 
-        /* MODAL */
+        /* MODALES Y SHEETS */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 100;
@@ -146,6 +147,8 @@
         .modal-overlay.active .auth-card { transform: scale(1); }
 
         .btn-primary { width: 100%; background: #ef4444; color: white; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 1rem; border: none; cursor: pointer; }
+        .btn-delete { width: 100%; background: #27272a; color: #ef4444; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 1rem; border: 1px solid #ef4444; cursor: pointer; margin-top: 10px; }
+
         .chip-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 20px; }
         .chip { background: #262626; padding: 8px 16px; border-radius: 50px; font-size: 0.85rem; color: #a3a3a3; white-space: nowrap; cursor: pointer; border: 1px solid transparent; font-weight: 600; }
         .chip.selected { background: #ef4444; color: white; border-color: #ef4444; }
@@ -157,8 +160,6 @@
         }
         .extra-title { font-size: 0.7rem; color: #34d399; font-weight: 700; text-transform: uppercase; }
         .extra-date { font-size: 0.9rem; font-weight: 600; color: #d1fae5; }
-        
-        .btn-delete { width: 100%; padding: 12px; border-radius: 8px; font-weight: 800; cursor: pointer; margin-bottom: 10px; color: var(--alert); border: 1px solid var(--alert); background: transparent; }
     </style>
 </head>
 <body>
@@ -182,17 +183,18 @@
                 <div id="statusBadge" class="text-[10px] bg-gray-900 border border-gray-800 px-3 py-1 rounded-full text-gray-500">...</div>
             </div>
 
-            <!-- HERO CARD (SALDO REAL) -->
+            <!-- HERO CARD -->
             <div class="onyx-card">
                 <div>
-                    <div class="card-label">RESTANTE DEL PERIODO</div>
-                    <div class="card-value mt-2" id="valFree">--</div>
+                    <div class="card-label">LIBRE PARA HOY</div>
+                    <div class="card-value mt-2" id="valDaily">--</div>
+                    <div class="text-[10px] text-gray-500 mt-1 font-mono">Límite Diario Base: <span id="dailyLimit" class="text-gray-300">--</span></div>
                 </div>
                 
                 <div class="flex justify-between items-end mt-4">
                     <div>
-                        <div class="text-[10px] text-gray-500 font-bold uppercase mb-1">Disponible para Hoy</div>
-                        <div class="text-lg font-bold text-white" id="valDaily">--</div>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase mb-1">Restante del Periodo</div>
+                        <div class="text-lg font-bold text-white" id="valFree">--</div>
                     </div>
                     <div class="text-right">
                         <div class="text-[10px] text-gray-500 font-bold uppercase mb-1">Días Restantes</div>
@@ -215,7 +217,7 @@
             <!-- HISTORIAL VARIABLES (GASTOS DE HOY) -->
             <div class="section-title">
                 <span>Movimientos del Periodo</span>
-                <span class="text-xs text-red-500" id="periodSpentTotal">$0</span>
+                <span class="text-xs text-red-500" id="todaySpentTotal">$0</span>
             </div>
             
             <div id="logList" class="pb-20 space-y-3">
@@ -247,19 +249,6 @@
             <div id="fixedList" class="space-y-3 mb-24"></div>
         </div>
 
-        <!-- VISTA HISTORIAL (NUEVA) -->
-        <div id="view-history" class="view">
-             <h2 class="text-2xl font-black text-white mb-6 px-2">Historial</h2>
-             <div class="flex justify-center items-center gap-4 mb-6">
-                 <button onclick="app.changeHistoryMonth(-1)" class="p-2 bg-gray-800 rounded-full text-gray-400"><i class="ph-bold ph-caret-left"></i></button>
-                 <span id="histDateDisplay" class="font-bold text-lg uppercase">...</span>
-                 <button onclick="app.changeHistoryMonth(1)" class="p-2 bg-gray-800 rounded-full text-gray-400"><i class="ph-bold ph-caret-right"></i></button>
-             </div>
-             <div id="historyList" class="pb-20 space-y-3">
-                 <!-- Injected -->
-             </div>
-        </div>
-
         <!-- VISTA CUENTA -->
         <div id="view-settings" class="view">
             <h2 class="text-2xl font-black text-white mb-6 px-2">Cuenta</h2>
@@ -268,6 +257,7 @@
                 <div class="w-20 h-20 bg-gray-800 rounded-full mx-auto flex items-center justify-center mb-4 text-3xl shadow-xl border border-gray-700" id="userAvatar">👤</div>
                 <h3 class="font-bold text-xl text-white mb-1" id="userName">Invitado</h3>
                 <p class="text-xs text-gray-500 mb-6 font-mono uppercase tracking-widest" id="userEmail">MODO LOCAL</p>
+                
                 <button id="btnLogin" onclick="app.login()" class="btn-primary mb-3 bg-blue-600 hover:bg-blue-500">Conectar Google</button>
                 <button id="btnLogout" onclick="app.logout()" class="btn-primary bg-transparent border border-red-900 text-red-500 hover:bg-red-900/20 hidden">Cerrar Sesión</button>
             </div>
@@ -279,6 +269,10 @@
                 <p class="text-[10px] text-gray-600">Este monto se sugerirá los martes.</p>
             </div>
 
+            <button onclick="app.generateEmailReport()" class="w-full bg-gray-800 text-gray-300 py-4 rounded-xl font-bold hover:bg-gray-700 transition mb-3 flex items-center justify-center gap-2">
+                <i class="ph-bold ph-envelope"></i> Generar Reporte de Cierre
+            </button>
+            
             <button onclick="app.resetData()" class="w-full py-4 text-xs font-bold text-gray-600 hover:text-red-500 transition border border-gray-800 rounded-xl">REINICIAR DATOS</button>
         </div>
 
@@ -296,9 +290,6 @@
         </div>
         <div class="nav-item" onclick="app.switchTab('plan', this)">
             <i class="ph-bold ph-strategy"></i><span>PLAN</span>
-        </div>
-        <div class="nav-item" onclick="app.switchTab('history', this)">
-            <i class="ph-bold ph-clock-counter-clockwise"></i><span>HIST</span>
         </div>
         <div class="nav-item" onclick="app.switchTab('settings', this)">
             <i class="ph-bold ph-user-circle"></i><span>CUENTA</span>
@@ -335,18 +326,23 @@
         </div>
     </div>
 
-    <!-- SHEET: REGISTRAR EXTRA -->
+    <!-- SHEET: REGISTRAR EXTRA (Y EDITAR) -->
     <div id="sheet-extra" class="modal-overlay sheet" onclick="if(event.target===this) app.closeSheet('extra')">
         <div class="bottom-sheet">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-coin text-green-500"></i> Ingreso Extra</h3>
+                <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-coin text-green-500"></i> <span id="extraSheetTitle">Ingreso Extra</span></h3>
                 <button onclick="app.closeSheet('extra')" class="text-gray-500"><i class="ph-bold ph-x text-xl"></i></button>
             </div>
+            <!-- Date Input for Extra -->
+            <label class="input-label">Fecha del Ingreso</label>
+            <input type="date" id="extraDate" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white mb-4 outline-none font-bold">
+
             <div class="relative mb-6">
                 <span class="absolute left-0 top-1/2 -translate-y-1/2 text-3xl font-black text-gray-600">$</span>
                 <input type="number" id="extraAmnt" class="w-full bg-transparent text-center text-5xl font-black text-green-400 border-b border-gray-700 pb-2 focus:outline-none focus:border-green-500" placeholder="0">
             </div>
-            <button onclick="app.addExtra()" class="btn-primary bg-green-600 hover:bg-green-500 shadow-lg shadow-green-900/20">SUMAR AL DÍA</button>
+            <button onclick="app.saveExtra()" class="btn-primary bg-green-600 hover:bg-green-500 shadow-lg shadow-green-900/20">GUARDAR</button>
+            <button id="btnDeleteExtra" onclick="app.deleteExtra()" class="btn-delete hidden">ELIMINAR</button>
         </div>
     </div>
 
@@ -387,12 +383,11 @@
         const app = {
             user: null,
             data: { income: 0, items: [], payDay1: 5, payDay2: 20, avgExtra: 0 },
-            period: { start: null, end: null, daysLeft: 15 },
-            periodLogs: [], // Logs for the current period
-            spentInPeriod: 0, 
-            extrasInPeriod: 0,
-            editingItem: null, editingLogId: null,
-            histDate: new Date(),
+            period: { daysLeft: 15 },
+            todaySpent: 0, todayExtras: 0,
+            editingItem: null, editingLogId: null, editingExtraId: null,
+            periodLogs: [],
+            totalFixedPeriod: 0, // NEW: Store for report
 
             init() {
                 document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric' }).toUpperCase();
@@ -403,7 +398,7 @@
                         document.getElementById('authModal').classList.remove('active');
                         this.updateAuthUI(u);
                         this.loadData();
-                        this.loadLogs(); // Will call render internally
+                        this.loadLogs();
                     } else {
                         document.getElementById('authModal').classList.add('active');
                     }
@@ -471,7 +466,6 @@
                 const inpIncome = document.getElementById('inpIncome');
                 if (inpIncome) inpIncome.value = this.data.income || '';
                 if(this.data.avgExtra) document.getElementById('inpAvgExtra').value = this.data.avgExtra;
-                if(this.data.avgExtra) document.getElementById('extraAmnt').value = this.data.avgExtra;
                 this.renderFixedList();
             },
 
@@ -499,7 +493,6 @@
                 else if (d >= p2) { start = new Date(now.getFullYear(), now.getMonth(), p2); end = new Date(now.getFullYear(), now.getMonth() + 1, p1); }
                 else { start = new Date(now.getFullYear(), now.getMonth() - 1, p2); end = new Date(now.getFullYear(), now.getMonth(), p1); }
                 
-                // Adjustment logic (weekend) - Keep simple for now or use complex
                 this.period.start = start; 
                 this.period.end = end;
                 
@@ -512,43 +505,29 @@
                 const d = new Date().getDate();
                 const p1 = 5, p2 = 20;
                 
-                // Logic for expense active
                 const isExpenseActive = (day) => {
                     if (d >= p1 && d < p2) return day >= p1 && day < p2;
                     else return day >= p2 || day < p1;
                 };
 
                 const totalFixed = this.data.items.reduce((s, i) => isExpenseActive(i.day||1) ? s+(i.amount||0) : s, 0);
+                this.totalFixedPeriod = totalFixed; // Save for report
+
                 const income = this.data.income || 0;
-                const baseFree = income - totalFixed; // Libre antes de gastos variables
-
-                // Calculo Real
-                // Restante Periodo = (Ingreso - FijosActivos - GastosVariablesPeriodo + ExtrasPeriodo)
-                const currentPeriodFree = baseFree - this.spentInPeriod + this.extrasInPeriod;
+                const free = Math.max(0, income - totalFixed);
                 
-                const dailyLimit = currentPeriodFree / this.period.daysLeft;
+                const dailyLimit = free / this.daysLeft;
+                const availableToday = dailyLimit - this.todaySpent + this.todayExtras;
 
-                // UI UPDATE
-                const elFree = document.getElementById('valFree');
-                if(elFree) elFree.textContent = this.fmt(currentPeriodFree);
-                
-                // Used in Hero "Libre para hoy" -> Daily Limit calculated from remaining period money
-                const elDaily = document.getElementById('valDaily');
-                if(elDaily) {
-                    elDaily.textContent = this.fmt(dailyLimit);
-                    elDaily.className = `card-value mt-2 ${dailyLimit < 0 ? 'text-red-500' : 'text-white'}`;
+                const elAvail = document.getElementById('valDaily');
+                if (elAvail) {
+                    elAvail.textContent = this.fmt(availableToday);
+                    elAvail.className = `card-value mt-2 ${availableToday < 0 ? 'text-red-500' : 'text-white'}`;
                 }
                 
-                if(document.getElementById('dailyLimit')) document.getElementById('dailyLimit').textContent = this.fmt(dailyLimit); // Redundant visually but keeps consistency
-                if(document.getElementById('daysLeft')) document.getElementById('daysLeft').textContent = this.period.daysLeft;
-                
-                // Update Period Spent Label
-                const elSpent = document.getElementById('todaySpentTotal'); // Actually Period Spent
-                if(elSpent) elSpent.textContent = `-${this.fmt(this.spentInPeriod)}`;
-                
-                // Update label to reflect Period
-                const secTitle = document.querySelector('.section-title span');
-                if(secTitle && secTitle.textContent === "Gastos del Día") secTitle.textContent = "Movimientos del Periodo";
+                if(document.getElementById('dailyLimit')) document.getElementById('dailyLimit').textContent = this.fmt(dailyLimit);
+                if(document.getElementById('valFree')) document.getElementById('valFree').textContent = this.fmt(free);
+                if(document.getElementById('daysLeft')) document.getElementById('daysLeft').textContent = this.daysLeft;
             },
 
             // --- GASTOS FIJOS (CRUD) ---
@@ -556,6 +535,8 @@
                 const sheet = document.getElementById('sheet-'+id);
                 if (sheet) sheet.classList.add('active');
                 
+                const todayISO = new Date().toISOString().split('T')[0];
+
                 if (id === 'fixed') {
                     this.editingItem = idx;
                     const btnDel = document.getElementById('btnDeleteFixed');
@@ -574,22 +555,17 @@
                     }
                     document.getElementById('fixName').focus();
                 } else if(id === 'log') {
-                     // Set date default to today
-                     const todayISO = new Date().toISOString().split('T')[0];
                      document.getElementById('logDate').value = todayISO;
                      
                      if (logId) {
                          this.editingLogId = logId;
-                         // Find log in periodLogs to edit
                          const log = this.periodLogs.find(l => l.id === logId);
                          if (log) {
                              document.getElementById('logSheetTitle').textContent = "Editar Gasto";
                              document.getElementById('logAmnt').value = log.amnt;
                              document.getElementById('logDesc').value = log.desc;
-                             // Set correct date
                              const d = log.date.toDate ? log.date.toDate() : new Date(log.date);
                              document.getElementById('logDate').value = d.toISOString().split('T')[0];
-                             
                              document.getElementById('btnDeleteLog').style.display = 'block';
                          }
                      } else {
@@ -601,7 +577,25 @@
                          document.getElementById('logAmnt').focus();
                      }
                 } else if(id === 'extra') {
-                     document.getElementById('extraAmnt').focus();
+                     document.getElementById('extraDate').value = todayISO;
+
+                     if (logId) {
+                         this.editingExtraId = logId;
+                         const log = this.periodLogs.find(l => l.id === logId);
+                         if (log) {
+                             document.getElementById('extraSheetTitle').textContent = "Editar Extra";
+                             document.getElementById('extraAmnt').value = log.amnt;
+                             const d = log.date.toDate ? log.date.toDate() : new Date(log.date);
+                             document.getElementById('extraDate').value = d.toISOString().split('T')[0];
+                             document.getElementById('btnDeleteExtra').style.display = 'block';
+                         }
+                     } else {
+                         this.editingExtraId = null;
+                         document.getElementById('extraSheetTitle').textContent = "Ingreso Extra";
+                         if(this.data.avgExtra) document.getElementById('extraAmnt').value = this.data.avgExtra; else document.getElementById('extraAmnt').value = '';
+                         document.getElementById('btnDeleteExtra').style.display = 'none';
+                         document.getElementById('extraAmnt').focus();
+                     }
                 }
             },
 
@@ -677,41 +671,38 @@
                 const dateVal = document.getElementById('logDate').value;
                 if(!amnt || !dateVal) return;
                 
-                // Create date object from input (preserve local day)
                 const [y,m,d] = dateVal.split('-').map(Number);
-                const dateObj = new Date(y, m-1, d, 12, 0, 0); // Noon to avoid timezone shift
-
+                const dateObj = new Date(y, m-1, d, 12, 0, 0); 
                 const logData = { desc, amnt, type: 'expense', date: dateObj.toISOString() };
                 
-                if (this.editingLogId) {
-                    await this.updateLogDb(this.editingLogId, logData);
-                } else {
-                    await this.saveLogToDb(logData);
-                }
-                
+                if (this.editingLogId) await this.updateLogDb(this.editingLogId, logData);
+                else await this.saveLogToDb(logData);
                 this.closeSheet('log');
             },
             
             async deleteLog() {
                 if(!this.editingLogId || !confirm("¿Eliminar gasto?")) return;
-                
-                if(this.user && !this.user.isAnonymous) {
-                     await db.collection(COLLECTION).doc(this.user.uid).collection('logs').doc(this.editingLogId).delete();
-                } else {
-                     // Local delete
-                     const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]');
-                     const filtered = logs.filter(l => l.id !== this.editingLogId);
-                     localStorage.setItem('gp_tr_logs', JSON.stringify(filtered));
-                     this.loadLogs();
-                }
+                await this.deleteLogDb(this.editingLogId);
                 this.closeSheet('log');
             },
 
-            async addExtra() {
+            async saveExtra() {
                 const amnt = parseFloat(document.getElementById('extraAmnt').value);
-                if(!amnt) return;
-                const log = { desc: 'Pago Extra', amnt, type: 'income', date: new Date().toISOString() };
-                this.saveLogToDb(log);
+                const dateVal = document.getElementById('extraDate').value;
+                if(!amnt || !dateVal) return;
+                
+                const [y,m,d] = dateVal.split('-').map(Number);
+                const dateObj = new Date(y, m-1, d, 12, 0, 0);
+                const logData = { desc: 'Pago Extra', amnt, type: 'income', date: dateObj.toISOString() };
+
+                if (this.editingExtraId) await this.updateLogDb(this.editingExtraId, logData);
+                else await this.saveLogToDb(logData);
+                this.closeSheet('extra');
+            },
+
+            async deleteExtra() {
+                if(!this.editingExtraId || !confirm("¿Eliminar ingreso?")) return;
+                await this.deleteLogDb(this.editingExtraId);
                 this.closeSheet('extra');
             },
 
@@ -728,9 +719,6 @@
             
             async updateLogDb(id, data) {
                 if(this.user && !this.user.isAnonymous) {
-                    // Update timestamp is tricky if we want to keep user date, so we use user date string mostly, 
-                    // but for ordering we rely on Firestore timestamp. If user changes date, we might need to update a sorting field.
-                    // For simplicity, we update 'date' to the new date chosen.
                     await db.collection(COLLECTION).doc(this.user.uid).collection('logs').doc(id).update({
                         ...data, date: firebase.firestore.Timestamp.fromDate(new Date(data.date))
                     });
@@ -745,8 +733,19 @@
                 }
             },
 
+            async deleteLogDb(id) {
+                if(this.user && !this.user.isAnonymous) {
+                     await db.collection(COLLECTION).doc(this.user.uid).collection('logs').doc(id).delete();
+                } else {
+                     const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]');
+                     const filtered = logs.filter(l => l.id !== id);
+                     localStorage.setItem('gp_tr_logs', JSON.stringify(filtered));
+                     this.loadLogs();
+                }
+            },
+
             loadLogs() {
-                this.calcPeriodDates(); // Ensure periods are fresh
+                this.calcPeriodDates(); 
                 const process = (arr) => {
                     const list = document.getElementById('logList');
                     if (!list) return; 
@@ -755,15 +754,13 @@
                     let spentPeriod = 0;
                     let extrasPeriod = 0;
                     
-                    // Filter logs for CURRENT PERIOD
                     this.periodLogs = arr.filter(l => {
                         const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
-                        return d >= this.period.start && d < this.period.end; // Only logs within 5-19 or 20-4 range
+                        return d >= this.period.start && d < this.period.end; 
                     });
 
                     if(this.periodLogs.length===0) list.innerHTML='<div class="text-center text-xs text-gray-600 py-10 italic">Sin movimientos en este periodo</div>';
 
-                    // Sort logs by date desc
                     this.periodLogs.sort((a,b) => {
                         const da = a.date.toDate ? a.date.toDate() : new Date(a.date);
                         const db = b.date.toDate ? b.date.toDate() : new Date(b.date);
@@ -774,7 +771,7 @@
                         const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
                         if (l.type === 'income') {
                             extrasPeriod += l.amnt;
-                            list.innerHTML += `<div class="tx-item"><div class="flex items-center"><div class="tx-icon extra"><i class="ph-bold ph-coin"></i></div><div class="tx-info"><div class="tx-title">Extra</div><div class="tx-date">${d.toLocaleDateString()}</div></div></div><div class="tx-amount text-green-500">+$${l.amnt}</div></div>`;
+                            list.innerHTML += `<div class="tx-item" onclick="app.openSheet('extra', null, '${l.id}')"><div class="flex items-center"><div class="tx-icon extra"><i class="ph-bold ph-coin"></i></div><div class="tx-info"><div class="tx-title">Extra</div><div class="tx-date">${d.toLocaleDateString()}</div></div></div><div class="tx-amount text-green-500">+$${l.amnt}</div></div>`;
                         } else {
                             spentPeriod += l.amnt;
                             list.innerHTML += `<div class="tx-item" onclick="app.openSheet('log', null, '${l.id}')"><div class="flex items-center"><div class="tx-icon variable"><i class="ph-bold ph-shopping-bag"></i></div><div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleDateString()}</div></div></div><div class="tx-amount text-red-500">-$${l.amnt}</div></div>`;
@@ -783,11 +780,14 @@
                     
                     this.spentInPeriod = spentPeriod;
                     this.extrasInPeriod = extrasPeriod;
-                    this.render(); // Recalculate totals
+                    
+                    const totalEl = document.getElementById('todaySpentTotal');
+                    if(totalEl) totalEl.textContent = `-${this.fmt(spentPeriod)}`; 
+                    
+                    this.render(); 
                 };
 
                 if(this.user && !this.user.isAnonymous) {
-                     // Fetch last 100 to ensure we catch the period range
                      db.collection(COLLECTION).doc(this.user.uid).collection('logs').orderBy('date','desc').limit(100)
                        .onSnapshot(s => process(s.docs.map(d=> ({ id: d.id, ...d.data() }))));
                 } else {
@@ -795,57 +795,25 @@
                     process(logs);
                 }
             },
-            
-            // --- HISTORY ---
-            changeHistoryMonth(d) {
-                this.histDate.setMonth(this.histDate.getMonth() + d);
-                this.renderHistory();
-            },
-            
-            renderHistory() {
-                const label = document.getElementById('histMonthLabel');
-                const list = document.getElementById('historyList');
-                if(!label || !list) return;
 
-                const m = this.histDate.getMonth();
-                const y = this.histDate.getFullYear();
-                label.textContent = `${["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"][m]} ${y}`;
+            // --- REPORTING (EMAIL) ---
+            generateEmailReport() {
+                const income = this.data.income || 0;
+                const fixed = this.totalFixedPeriod || 0;
+                const variable = this.spentInPeriod || 0;
+                const extra = this.extrasInPeriod || 0;
+                const finalBalance = (income + extra) - (fixed + variable);
 
-                if(this.user && !this.user.isAnonymous) {
-                     // Simple implementation: fetch all (limit 200) and filter. Better would be query by date range.
-                     db.collection(COLLECTION).doc(this.user.uid).collection('logs')
-                       .orderBy('date', 'desc').limit(200)
-                       .get().then(s => {
-                           const logs = s.docs.map(d=>d.data());
-                           this.buildHistoryList(list, logs, m, y);
-                       });
-                } else {
-                    const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]');
-                    this.buildHistoryList(list, logs, m, y);
-                }
-            },
+                const subject = `Reporte Financiero GodsPlan - ${new Date().toLocaleDateString()}`;
+                const body = `REPORTE DE PERIODO%0D%0A--------------------------------%0D%0A` +
+                             `Ingreso Neto: ${this.fmt(income)}%0D%0A` +
+                             `Gastos Fijos: -${this.fmt(fixed)}%0D%0A` +
+                             `Gastos Variables: -${this.fmt(variable)}%0D%0A` +
+                             `Ingresos Extra: +${this.fmt(extra)}%0D%0A` +
+                             `--------------------------------%0D%0A` +
+                             `BALANCE FINAL: ${this.fmt(finalBalance)}`;
 
-            buildHistoryList(list, logs, m, y) {
-                list.innerHTML = '';
-                const filtered = logs.filter(l => {
-                    const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
-                    return d.getMonth() === m && d.getFullYear() === y;
-                });
-                
-                if(filtered.length === 0) { list.innerHTML = '<div class="text-center text-xs text-gray-600 py-4">Sin datos</div>'; return; }
-                
-                filtered.forEach(l => {
-                    const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
-                    const isInc = l.type === 'income';
-                    list.innerHTML += `
-                    <div class="tx-item">
-                        <div class="flex items-center">
-                            <div class="tx-icon ${isInc?'extra':'variable'}"><i class="ph-bold ${isInc?'ph-coin':'ph-receipt'}"></i></div>
-                            <div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleDateString()}</div></div>
-                        </div>
-                        <div class="tx-amount ${isInc?'text-green-500':'text-red-500'}">${isInc?'+':'-'}$${l.amnt}</div>
-                    </div>`;
-                });
+                window.open(`mailto:tizorplayer@gmail.com?subject=${subject}&body=${body}`);
             },
 
             // --- UTILS ---
@@ -853,7 +821,10 @@
             loginAnon() { auth.signInAnonymously(); },
             logout() { auth.signOut(); location.reload(); },
             resetData() { if(confirm("¿Borrar todo?")) { localStorage.clear(); if(this.user && !this.user.isAnonymous) { db.collection(COLLECTION).doc(this.user.uid).delete(); } location.reload(); } },
-            fmt(n) { return '$' + n.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); }
+            fmt(n) { 
+                if (isNaN(n) || !isFinite(n)) return '$0.00';
+                return '$' + n.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); 
+            }
         };
         document.addEventListener('DOMContentLoaded', () => app.init());
     </script>
