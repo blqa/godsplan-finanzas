@@ -4,14 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>God's Plan | Treasury</title>
+    <!-- Tailwind CSS (Estilos rápidos) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Fuente Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Iconos Phosphor (Esto ahorra cientos de líneas) -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Gráficas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- PDF & FIREBASE -->
+    <!-- PDF GENERATION (Reportes) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- FIREBASE (Base de Datos) -->
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
@@ -20,152 +26,84 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f0f11; color: white; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
 
         /* NAV GLOBAL */
-        #global-nav {
-            height: 40px; background: #000; display: flex; align-items: center; 
-            justify-content: space-between; padding: 0 15px; flex-shrink: 0;
-            border-bottom: 1px solid #222; z-index: 50;
-        }
+        #global-nav { height: 40px; background: #000; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid #222; z-index: 50; flex-shrink: 0; }
         .g-logo { color: #fff; font-weight: 900; font-size: 0.8rem; letter-spacing: 1px; display: flex; align-items: center; gap: 5px; text-decoration: none; }
         .g-links { display: flex; gap: 15px; }
         .g-link { color: #666; text-decoration: none; font-size: 0.75rem; font-weight: 700; transition: color 0.2s; }
         .g-link:hover, .g-link.active { color: #fff; }
 
         /* AREA PRINCIPAL */
-        #main-content {
-            flex-grow: 1; overflow-y: auto; padding: 20px; padding-bottom: 110px;
-            background: linear-gradient(180deg, #0f0f11 0%, #050505 100%);
-        }
+        #main-content { flex-grow: 1; overflow-y: auto; padding: 20px; padding-bottom: 110px; background: linear-gradient(180deg, #0f0f11 0%, #050505 100%); }
 
-        /* TARJETA ONYX */
-        .onyx-card {
-            background: linear-gradient(135deg, #1f1f23, #0a0a0a);
-            border-radius: 24px; padding: 25px; position: relative; overflow: hidden;
-            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,255,255,0.05);
-            min-height: 180px; display: flex; flex-direction: column; justify-content: space-between;
-        }
-        .onyx-card::before {
-            content: ''; position: absolute; top: -50%; right: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 50%); pointer-events: none;
-        }
-        .onyx-card::after {
-            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px;
-            background: linear-gradient(90deg, #ef4444, #b91c1c);
-        }
-
+        /* TARJETA ONYX (Estilo Visa Infinite) */
+        .onyx-card { background: linear-gradient(135deg, #1f1f23, #0a0a0a); border-radius: 24px; padding: 25px; position: relative; overflow: hidden; box-shadow: 0 20px 50px -10px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); min-height: 180px; display: flex; flex-direction: column; justify-content: space-between; }
+        .onyx-card::before { content: ''; position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 50%); pointer-events: none; }
+        .onyx-card::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #ef4444, #b91c1c); }
         .card-label { font-size: 0.7rem; color: #71717a; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
         .card-value { font-size: 3rem; font-weight: 800; color: white; line-height: 1; letter-spacing: -1px; }
 
-        /* SECCIONES Y LISTAS */
-        .section-title { font-size: 0.8rem; font-weight: 800; color: #52525b; margin: 25px 0 15px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+        /* LISTA DE MOVIMIENTOS */
+        .tx-item { display: grid; grid-template-columns: auto 1fr auto; gap: 15px; align-items: center; padding: 16px; background: #18181b; border: 1px solid #27272a; border-radius: 16px; margin-bottom: 10px; cursor: pointer; transition: background 0.2s; }
+        .tx-item:active { background: #27272a; transform: scale(0.98); }
         
-        .tx-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 16px; background: #18181b; border: 1px solid #27272a; border-radius: 16px; margin-bottom: 10px;
-            transition: transform 0.1s; cursor: pointer;
-        }
-        .tx-item:active { transform: scale(0.98); background: #27272a; }
-        
-        .tx-icon {
-            width: 44px; height: 44px; border-radius: 12px; background: #27272a;
-            display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #a1a1aa; margin-right: 15px; flex-shrink: 0;
-        }
+        .tx-icon { width: 44px; height: 44px; border-radius: 12px; background: #27272a; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #a1a1aa; flex-shrink: 0; }
+        /* Variantes de Iconos */
         .tx-icon.variable { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
         .tx-icon.extra { color: #34d399; background: rgba(52, 211, 153, 0.1); }
-        .tx-icon.fixed { color: #f87171; background: rgba(248, 113, 113, 0.1); }
-        .tx-icon.future { color: #6b7280; background: rgba(107, 114, 128, 0.1); } 
+        .tx-icon.fixed-active { color: #f87171; background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.2); } /* Candado Abierto */
+        .tx-icon.fixed-inactive { color: #52525b; background: rgba(39, 39, 42, 0.5); } /* Candado Cerrado */
         
-        .tx-info { flex: 1; min-width: 0; }
-        .tx-title { font-weight: 700; font-size: 0.95rem; color: #e4e4e7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .tx-date { font-size: 0.75rem; color: #71717a; font-weight: 600; }
-        .tx-amount { font-weight: 800; font-size: 1rem; color: #e4e4e7; white-space: nowrap; }
-        
+        .tx-info { min-width: 0; overflow: hidden; }
+        .tx-title { font-weight: 700; font-size: 0.95rem; color: #e4e4e7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .tx-date { font-size: 0.75rem; color: #71717a; font-weight: 600; display: block; margin-top: 2px; }
+        .tx-amount { font-weight: 800; font-size: 1rem; color: #e4e4e7; white-space: nowrap; flex-shrink: 0; }
+
         /* BOTTOM NAV */
-        .bottom-nav {
-            height: 80px; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(20px);
-            border-top: 1px solid #262626; display: grid; grid-template-columns: 1fr 1fr 1fr;
-            position: fixed; bottom: 0; left: 0; width: 100%; z-index: 50;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: #525252; cursor: pointer; transition: all 0.3s;
-        }
+        .bottom-nav { height: 80px; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(20px); border-top: 1px solid #262626; display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; bottom: 0; left: 0; width: 100%; z-index: 50; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #525252; cursor: pointer; transition: all 0.3s; }
         .nav-item.active { color: #ef4444; }
         .nav-item i { font-size: 1.8rem; margin-bottom: 4px; transition: transform 0.2s; }
         .nav-item.active i { transform: translateY(-2px); }
         .nav-item span { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* VISTAS */
+        /* UI ELEMENTS */
         .view { display: none; opacity: 0; transition: opacity 0.3s ease; }
         .view.active { display: block; opacity: 1; }
-
-        /* INPUTS LIMPIOS */
-        .clean-input-group {
-            background: #18181b; border-radius: 16px; padding: 20px;
-            border: 1px solid #27272a; display: flex; flex-direction: column;
-            margin-bottom: 10px; transition: border-color 0.2s;
-        }
+        .clean-input-group { background: #18181b; border-radius: 16px; padding: 20px; border: 1px solid #27272a; display: flex; flex-direction: column; margin-bottom: 10px; transition: border-color 0.2s; }
         .clean-input-group:focus-within { border-color: #ef4444; }
+        .clean-input { background: transparent; border: none; color: white; width: 100%; font-weight: 800; font-size: 1.5rem; outline: none; placeholder-gray-600; }
         .input-label { font-size: 0.7rem; color: #71717a; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
-        .clean-input {
-            background: transparent; border: none; color: white; width: 100%; font-weight: 800; font-size: 1.5rem;
-            outline: none; placeholder-gray-600;
-        }
-        
-        /* FAB */
-        .fab {
-            position: fixed; bottom: 95px; right: 25px;
-            width: 60px; height: 60px; background: #ef4444; border-radius: 20px;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 1.8rem; box-shadow: 0 10px 30px rgba(220, 38, 38, 0.4);
-            z-index: 40; cursor: pointer; transition: transform 0.2s; border: none;
-        }
-        .fab:active { transform: scale(0.9); }
 
-        /* MODALES Y SHEETS */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 100;
-            display: none; justify-content: center; opacity: 0; transition: opacity 0.2s;
-        }
+        .fab { position: fixed; bottom: 95px; right: 25px; width: 60px; height: 60px; background: #ef4444; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.8rem; box-shadow: 0 10px 30px rgba(220, 38, 38, 0.4); z-index: 40; cursor: pointer; transition: transform 0.2s; border: none; }
+        .fab:active { transform: scale(0.95); }
+
+        /* MODALS */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 100; display: none; justify-content: center; opacity: 0; transition: opacity 0.2s; }
         .modal-overlay.active { display: flex; opacity: 1; }
-        
         .modal-overlay.sheet { align-items: flex-end; }
-        .bottom-sheet {
-            background: #171717; width: 100%; max-width: 600px; border-top-left-radius: 24px; border-top-right-radius: 24px;
-            padding: 30px; box-shadow: 0 -10px 50px rgba(0,0,0,0.8); border-top: 1px solid #333;
-            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        .bottom-sheet { background: #171717; width: 100%; max-width: 600px; border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 30px; box-shadow: 0 -10px 50px rgba(0,0,0,0.8); border-top: 1px solid #333; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         .modal-overlay.active .bottom-sheet { transform: translateY(0); }
-
         .modal-overlay.center { align-items: center; }
-        .auth-card {
-            background: #171717; padding: 30px; border-radius: 24px; border: 1px solid #333;
-            text-align: center; max-width: 350px; width: 90%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
-            transform: scale(0.95); transition: transform 0.3s;
-        }
+        .auth-card { background: #171717; padding: 30px; border-radius: 24px; border: 1px solid #333; text-align: center; max-width: 350px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.7); transform: scale(0.95); transition: transform 0.3s; }
         .modal-overlay.active .auth-card { transform: scale(1); }
 
         .btn-primary { width: 100%; background: #ef4444; color: white; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 1rem; border: none; cursor: pointer; }
         .btn-delete { width: 100%; background: #27272a; color: #ef4444; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 1rem; border: 1px solid #ef4444; cursor: pointer; margin-top: 10px; }
-
         .chip-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 20px; }
         .chip { background: #262626; padding: 8px 16px; border-radius: 50px; font-size: 0.85rem; color: #a3a3a3; white-space: nowrap; cursor: pointer; border: 1px solid transparent; font-weight: 600; }
         .chip.selected { background: #ef4444; color: white; border-color: #ef4444; }
 
-        /* EXTRA CARD */
-        .extra-card {
-            background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.1);
-            border-radius: 16px; padding: 15px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center;
-        }
+        .extra-card { background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.1); border-radius: 16px; padding: 15px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
         .extra-title { font-size: 0.7rem; color: #34d399; font-weight: 700; text-transform: uppercase; }
         .extra-date { font-size: 0.9rem; font-weight: 600; color: #d1fae5; }
         
+        /* PROYECCIONES Y HISTORIAL */
         .projection-card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 10px; }
         .proj-label { font-size: 0.65rem; font-weight: 800; color: #71717a; text-transform: uppercase; margin-bottom: 5px; display: flex; justify-content: space-between; }
         .proj-val { font-size: 1.5rem; font-weight: 800; color: white; }
+        .month-nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .month-label { font-size: 1rem; font-weight: 800; color: white; width: 100px; text-align: center; }
+        .nav-btn { background: #262626; border: none; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -182,29 +120,29 @@
     <!-- CONTENIDO -->
     <div id="main-content">
         
-        <!-- VISTA HOY: Solo lo vital -->
+        <!-- VISTA HOY: Dashboard -->
         <div id="view-today" class="view active">
             <div class="flex justify-between items-center mb-6 opacity-70 px-2">
                 <div class="text-xs font-bold text-gray-400 uppercase tracking-widest" id="dateDisplay">HOY</div>
                 <div id="statusBadge" class="text-[10px] bg-gray-900 border border-gray-800 px-3 py-1 rounded-full text-gray-500">...</div>
             </div>
 
-            <!-- HERO CARD -->
+            <!-- HERO CARD (DINERO REAL) -->
             <div class="onyx-card">
                 <div>
                     <div class="card-label">LIBRE PARA HOY</div>
-                    <div class="card-value mt-2" id="valDaily">--</div>
-                    <div class="text-[10px] text-gray-500 mt-1 font-mono">Sugerido Diario: <span id="dailyLimit" class="text-gray-300">--</span></div>
+                    <div class="card-value mt-2" id="valDaily">$0.00</div>
+                    <div class="text-[10px] text-gray-500 mt-1 font-mono">Límite Diario Base: <span id="dailyLimit" class="text-gray-300">$0.00</span></div>
                 </div>
                 
                 <div class="flex justify-between items-end mt-4">
                     <div>
                         <div class="text-[10px] text-gray-500 font-bold uppercase mb-1">Restante Total</div>
-                        <div class="text-lg font-bold text-white" id="valFree">--</div>
+                        <div class="text-lg font-bold text-white" id="valFree">$0.00</div>
                     </div>
                     <div class="text-right">
                         <div class="text-[10px] text-gray-500 font-bold uppercase mb-1">Días Restantes</div>
-                        <div class="text-lg font-bold text-red-400" id="daysLeft">--</div>
+                        <div class="text-lg font-bold text-red-400" id="daysLeft">0</div>
                     </div>
                 </div>
             </div>
@@ -220,14 +158,14 @@
                 </div>
             </div>
 
-            <!-- HISTORIAL VARIABLES (GASTOS DE HOY) -->
-            <div class="section-title">
-                <span>Movimientos del Periodo</span>
-                <span class="text-xs text-red-500" id="todaySpentTotal">$0</span>
+            <!-- HISTORIAL (GASTOS DE HOY) -->
+            <div class="flex justify-between items-center mt-8 mb-4 px-2">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Movimientos del Periodo</span>
+                <span class="text-xs font-bold text-red-500" id="todaySpentTotal">$0.00</span>
             </div>
             
-            <div id="logList" class="pb-20 space-y-3">
-                <div class="text-center text-xs text-gray-600 py-10 italic">Cargando movimientos...</div>
+            <div id="logList" class="pb-20 space-y-2">
+                <!-- JS Inject -->
             </div>
         </div>
 
@@ -243,31 +181,44 @@
                 </div>
             </div>
 
-            <div class="section-title">
-                <span>Gastos Fijos & Deudas</span>
+            <!-- PROYECCIONES -->
+            <div class="projection-card border-l-4 border-l-blue-500">
+                <div class="proj-label"><span>Proyección Q1 (Día 5-19)</span></div>
+                <div class="proj-val" id="projQ1">$0.00</div>
+                <div class="text-[10px] text-gray-500 mt-1">Ingreso - Fijos</div>
+            </div>
+            <div class="projection-card border-l-4 border-l-purple-500">
+                <div class="proj-label"><span>Proyección Q2 (Día 20-4)</span></div>
+                <div class="proj-val" id="projQ2">$0.00</div>
+                <div class="text-[10px] text-gray-500 mt-1">Ingreso - Fijos</div>
+            </div>
+
+            <div class="flex justify-between items-center mb-4 mt-8 px-2">
+                <span class="text-xs font-bold text-gray-500 uppercase">Gastos Fijos & Deudas</span>
                 <button onclick="app.openSheet('fixed')" class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-lg hover:bg-gray-700">+ NUEVO</button>
             </div>
             
-            <div class="text-[10px] text-gray-600 mb-4 px-2">
-                Gastos activos en este periodo (Día 5-19 o 20-4).
+            <div class="text-[10px] text-gray-600 mb-4 px-2 flex items-center gap-4">
+                <span class="flex items-center gap-1"><i class="ph-bold ph-lock-key-open text-red-400"></i> Activos</span>
+                <span class="flex items-center gap-1"><i class="ph-bold ph-lock-key text-gray-600"></i> Futuros</span>
             </div>
 
-            <div id="fixedList" class="space-y-3 mb-24"></div>
+            <div id="fixedList" class="space-y-2 mb-24"></div>
         </div>
 
         <!-- VISTA HISTORIAL -->
         <div id="view-history" class="view">
              <h2 class="text-2xl font-black text-white mb-6 px-2">Historial</h2>
-             <div style="display:flex; justify-content:center; gap:15px; margin-bottom:20px; align-items:center;">
-                 <button onclick="app.changeHistoryMonth(-1)" class="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-white hover:bg-gray-700"><i class="ph-bold ph-caret-left"></i></button>
-                 <span id="histMonthLabel" class="font-bold text-lg uppercase w-32 text-center">...</span>
-                 <button onclick="app.changeHistoryMonth(1)" class="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-white hover:bg-gray-700"><i class="ph-bold ph-caret-right"></i></button>
+             <div class="month-nav">
+                 <button class="nav-btn" onclick="app.changeHistoryMonth(-1)"><i class="ph-bold ph-caret-left"></i></button>
+                 <span id="histMonthLabel" class="month-label">...</span>
+                 <button class="nav-btn" onclick="app.changeHistoryMonth(1)"><i class="ph-bold ph-caret-right"></i></button>
              </div>
-             <div class="onyx-card !p-5 !min-h-0 mb-6">
-                <div class="text-[10px] text-gray-500 uppercase font-bold mb-1">Total Gastado</div>
-                <div class="text-2xl font-black text-red-400" id="histTotal">$0</div>
+             <div class="onyx-card !p-5 !min-h-0 mb-6 flex flex-row items-center justify-between">
+                <div class="text-[10px] text-gray-500 uppercase font-bold">Total Gastado</div>
+                <div class="text-2xl font-black text-red-400" id="histTotal">$0.00</div>
             </div>
-             <div id="historyList" class="pb-20 space-y-3"></div>
+             <div id="historyList" class="pb-20 space-y-2"></div>
         </div>
 
         <!-- VISTA CUENTA -->
@@ -283,25 +234,20 @@
             </div>
 
             <div class="bg-gray-900/50 p-6 rounded-3xl border border-gray-800 mb-6">
-                <h4 class="text-xs text-gray-500 font-bold uppercase mb-4">Configuración de Horas Extra</h4>
-                <label class="input-label">Pago Promedio de Horas</label>
-                <input type="number" id="inpAvgExtra" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none mb-2" placeholder="$0.00" onchange="app.saveConfig()">
-                <p class="text-[10px] text-gray-600">Este monto se sugerirá los martes.</p>
+                <h4 class="text-xs text-gray-500 font-bold uppercase mb-4">Configuración de Cortes</h4>
+                <div class="flex gap-4">
+                    <div class="w-1/2"><label class="input-label">Corte 1</label><input type="number" id="inpPay1" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none text-center" value="5" onchange="app.saveConfig()"></div>
+                    <div class="w-1/2"><label class="input-label">Corte 2</label><input type="number" id="inpPay2" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none text-center" value="20" onchange="app.saveConfig()"></div>
+                </div>
             </div>
 
-            <!-- PDF EXPORT BUTTON -->
-            <button onclick="app.generatePDFReport()" class="w-full bg-gray-800 text-gray-300 py-4 rounded-xl font-bold hover:bg-gray-700 transition mb-3 flex items-center justify-center gap-2 border border-gray-700">
-                <i class="ph-bold ph-file-pdf text-red-500 text-xl"></i> Descargar Estado de Cuenta
-            </button>
-            
+            <button onclick="app.generatePDFReport()" class="w-full bg-gray-800 text-gray-300 py-4 rounded-xl font-bold hover:bg-gray-700 transition mb-3 flex items-center justify-center gap-2 border border-gray-700"><i class="ph-bold ph-file-pdf text-red-500 text-xl"></i> Descargar Estado de Cuenta</button>
             <button onclick="app.resetData()" class="w-full py-4 text-xs font-bold text-gray-600 hover:text-red-500 transition border border-gray-800 rounded-xl">REINICIAR DATOS</button>
         </div>
     </div>
 
-    <!-- FAB: SOLO EN VISTA HOY -->
-    <button class="fab" id="fabBtn" onclick="app.openSheet('log')">
-        <i class="ph-bold ph-plus"></i>
-    </button>
+    <!-- FAB -->
+    <button class="fab" id="fabBtn" onclick="app.openSheet('log')"><i class="ph-bold ph-plus"></i></button>
 
     <!-- BOTTOM NAV -->
     <div class="bottom-nav">
@@ -311,11 +257,13 @@
         <div class="nav-item" onclick="app.switchTab('settings', this)"><i class="ph-bold ph-user-circle"></i><span>CUENTA</span></div>
     </div>
 
-    <!-- SHEET: GASTO VARIABLE (EDITAR/CREAR) -->
+    <!-- MODAL SHEETS -->
+    
+    <!-- GASTO VARIABLE -->
     <div id="sheet-log" class="modal-overlay sheet" onclick="if(event.target===this) app.closeSheet('log')">
         <div class="bottom-sheet">
             <div class="flex justify-between items-center mb-6"><h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-money text-yellow-500"></i> <span id="logSheetTitle">Gasto Variable</span></h3><button onclick="app.closeSheet('log')" class="text-gray-500"><i class="ph-bold ph-x text-xl"></i></button></div>
-            <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Fecha del Gasto</label><input type="date" id="logDate" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white mb-4 outline-none font-bold">
+            <label class="input-label">Fecha</label><input type="date" id="logDate" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white mb-4 outline-none font-bold">
             <div class="relative mb-6"><span class="absolute left-0 top-1/2 -translate-y-1/2 text-3xl font-black text-gray-600">$</span><input type="number" id="logAmnt" class="w-full bg-transparent text-center text-5xl font-black text-white border-b border-gray-700 pb-2 focus:outline-none focus:border-red-500" placeholder="0"></div>
             <div class="chip-container">
                 <div class="chip" onclick="app.setDesc('Comida', this)">🍔 Comida</div><div class="chip" onclick="app.setDesc('Transporte', this)">🚌 Transporte</div><div class="chip" onclick="app.setDesc('Antojo', this)">🍫 Antojo</div><div class="chip" onclick="app.setDesc('Servicios', this)">💡 Servicios</div><div class="chip" onclick="app.setDesc('Salida', this)">🍺 Salida</div>
@@ -326,22 +274,22 @@
         </div>
     </div>
 
-    <!-- SHEET: REGISTRAR EXTRA (Y EDITAR) -->
+    <!-- INGRESO EXTRA -->
     <div id="sheet-extra" class="modal-overlay sheet" onclick="if(event.target===this) app.closeSheet('extra')">
         <div class="bottom-sheet">
             <div class="flex justify-between items-center mb-6"><h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-coin text-green-500"></i> <span id="extraSheetTitle">Ingreso Extra</span></h3><button onclick="app.closeSheet('extra')" class="text-gray-500"><i class="ph-bold ph-x text-xl"></i></button></div>
-            <label class="input-label">Fecha del Ingreso</label><input type="date" id="extraDate" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white mb-4 outline-none font-bold">
-            <div class="relative mb-6"><span class="absolute left-0 top-1/2 -translate-y-1/2 text-3xl font-black text-gray-600">$</span><input type="number" id="extraAmnt" class="w-full bg-transparent text-center text-5xl font-black text-green-400 border-b border-gray-700 pb-2 focus:outline-none focus:border-green-500" placeholder="0"></div>
+            <label class="input-label">Fecha</label><input type="date" id="extraDate" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white mb-4 outline-none font-bold">
+            <div class="relative mb-6"><span class="absolute left-0 top-1/2 -translate-y-1/2 text-3xl font-black text-green-400">$</span><input type="number" id="extraAmnt" class="w-full bg-transparent text-center text-5xl font-black text-green-400 border-b border-gray-700 pb-2 focus:outline-none focus:border-green-500" placeholder="0"></div>
             <button onclick="app.saveExtra()" class="btn-primary bg-green-600 hover:bg-green-500 shadow-lg shadow-green-900/20">GUARDAR</button>
             <button id="btnDeleteExtra" onclick="app.deleteExtra()" class="btn-delete hidden">ELIMINAR</button>
         </div>
     </div>
 
-    <!-- SHEET: GASTO FIJO -->
+    <!-- GASTO FIJO -->
     <div id="sheet-fixed" class="modal-overlay sheet" onclick="if(event.target===this) app.closeSheet('fixed')">
         <div class="bottom-sheet">
             <div class="flex justify-between items-center mb-6"><h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-lock-key text-red-500"></i> Gasto Fijo</h3><button onclick="app.closeSheet('fixed')" class="text-gray-500"><i class="ph-bold ph-x text-xl"></i></button></div>
-            <label class="form-label">Nombre del Gasto</label><input type="text" id="fixName" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white mb-4 outline-none">
+            <label class="form-label">Nombre</label><input type="text" id="fixName" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white mb-4 outline-none">
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <div><label class="form-label">Monto</label><input type="number" id="fixAmount" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none" placeholder="$0"></div>
                 <div><label class="form-label">Día de Pago</label><input type="number" id="fixDay" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none text-center" placeholder="1-31"></div>
@@ -360,17 +308,20 @@
         </div>
     </div>
 
+    <!-- UTILS MODALS -->
+    <div class="modal" id="msgModal"><div class="modal-content auth-card"><i id="msgIcon" style="font-size:2.5rem; margin-bottom:10px;"></i><p id="msgText" style="font-weight:700; margin-bottom:20px;"></p><button class="btn-primary" onclick="document.getElementById('msgModal').classList.remove('active')">OK</button></div></div>
+
     <script>
-        const COLLECTION = "treasury_v7_final";
+        const COLLECTION = "treasury_v8_golden";
         const firebaseConfig = { apiKey: "AIzaSyCrHBz94UtgiaYntHCYhC5jNa6auUI63vQ", authDomain: "god-s-plan-d737b.firebaseapp.com", projectId: "god-s-plan-d737b", storageBucket: "god-s-plan-d737b.firebasestorage.app", messagingSenderId: "458198314028", appId: "1:458198314028:web:d62b24cee2d19ee5b47589" };
         try { firebase.initializeApp(firebaseConfig); var auth=firebase.auth(), db=firebase.firestore(); } catch(e){}
 
         const app = {
             user: null,
-            data: { income: 0, items: [], payDay1: 5, payDay2: 20, avgExtra: 0 },
-            period: { daysLeft: 15 },
+            data: { income: 0, items: [], payDay1: 5, payDay2: 20 },
+            period: { start: null, end: null, daysLeft: 15 },
             todaySpent: 0, todayExtras: 0,
-            editingItem: null, editingLogId: null,
+            editingItem: null, editingLogId: null, editingExtraId: null,
             periodLogs: [],
             totalFixedPeriod: 0,
             histDate: new Date(),
@@ -384,13 +335,11 @@
                         document.getElementById('authModal').classList.remove('active');
                         this.updateAuthUI(u);
                         this.loadData();
-                        this.loadLogs();
+                        this.calculateNextExtra();
                     } else {
                         document.getElementById('authModal').classList.add('active');
                     }
                 });
-                
-                this.calculateNextExtra();
             },
 
             // --- LÓGICA DE HORAS EXTRA ---
@@ -436,23 +385,25 @@
             // --- DATA ---
             async loadData() {
                 if(!this.user) return;
-                const local = localStorage.getItem('gp_treasury_v7');
-                if(local) { this.data = JSON.parse(local); this.render(); }
+                const local = localStorage.getItem('gp_treasury_v8');
+                if(local) { this.data = JSON.parse(local); }
 
                 if(!this.user.isAnonymous) {
                     const doc = await db.collection(COLLECTION).doc(this.user.uid).get();
                     if(doc.exists) {
                         this.data = doc.data();
-                        if(!this.data.items) this.data.items = [];
-                        this.render();
-                        localStorage.setItem('gp_treasury_v7', JSON.stringify(this.data));
+                        localStorage.setItem('gp_treasury_v8', JSON.stringify(this.data));
                     }
                 }
                 
                 if(!this.data.items) this.data.items = [];
                 const inpIncome = document.getElementById('inpIncome');
                 if (inpIncome) inpIncome.value = this.data.income || '';
-                this.renderFixedList();
+                if(this.data.payDay1) document.getElementById('inpPay1').value = this.data.payDay1;
+                if(this.data.payDay2) document.getElementById('inpPay2').value = this.data.payDay2;
+                
+                // Initialize Logs Listener AFTER data loaded
+                this.loadLogs();
             },
 
             saveConfig() {
@@ -460,11 +411,11 @@
                 this.data.payDay1 = parseInt(document.getElementById('inpPay1').value) || 5;
                 this.data.payDay2 = parseInt(document.getElementById('inpPay2').value) || 20;
                 this.save();
-                this.render();
+                this.loadLogs(); // Re-render to update calculations
             },
 
             save() {
-                localStorage.setItem('gp_treasury_v7', JSON.stringify(this.data));
+                localStorage.setItem('gp_treasury_v8', JSON.stringify(this.data));
                 if(this.user && !this.user.isAnonymous) db.collection(COLLECTION).doc(this.user.uid).set(this.data);
             },
 
@@ -476,19 +427,18 @@
                 const p2 = this.data.payDay2 || 20;
                 
                 let start, end;
+                // Definir los dos periodos posibles
                 if (d >= p1 && d < p2) { start = new Date(now.getFullYear(), now.getMonth(), p1); end = new Date(now.getFullYear(), now.getMonth(), p2); } 
                 else if (d >= p2) { start = new Date(now.getFullYear(), now.getMonth(), p2); end = new Date(now.getFullYear(), now.getMonth() + 1, p1); }
                 else { start = new Date(now.getFullYear(), now.getMonth() - 1, p2); end = new Date(now.getFullYear(), now.getMonth(), p1); }
                 
-                this.period.start = start; 
-                this.period.end = end;
-                
+                this.period.start = start; this.period.end = end;
                 const diffTime = end - now;
                 this.period.daysLeft = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
             },
 
             render() {
-                this.calcPeriodDates();
+                // IMPORTANT: calcPeriodDates already called in loadLogs
                 const d = new Date().getDate();
                 const p1 = this.data.payDay1 || 5;
                 const p2 = this.data.payDay2 || 20;
@@ -503,24 +453,38 @@
 
                 const income = this.data.income || 0;
                 // Calculo REAL: Ingreso - Fijos - Gastos Variables (Periodo) + Extras (Periodo)
-                const free = Math.max(0, income - totalFixed - (this.spentInPeriod||0) + (this.extrasInPeriod||0));
+                const free = (income + this.extrasInPeriod) - (this.totalFixedPeriod + this.spentInPeriod);
+                const safeFree = Math.max(0, free);
                 
-                const dailyLimit = free / this.daysLeft;
-                const availableToday = dailyLimit; 
+                const dailyLimit = safeFree / this.period.daysLeft;
 
                 // UI UPDATE
                 const elAvail = document.getElementById('valDaily');
                 if (elAvail) {
-                    elAvail.textContent = this.fmt(availableToday);
-                    elAvail.className = `card-value mt-2 ${availableToday < 0 ? 'text-red-500' : 'text-white'}`;
+                    elAvail.textContent = this.fmt(dailyLimit);
+                    elAvail.className = `card-value mt-2 ${dailyLimit < 0 ? 'text-red-500' : 'text-white'}`;
                 }
                 
                 if(document.getElementById('dailyLimit')) document.getElementById('dailyLimit').textContent = this.fmt(dailyLimit);
-                if(document.getElementById('valFree')) document.getElementById('valFree').textContent = this.fmt(free);
-                if(document.getElementById('daysLeft')) document.getElementById('daysLeft').textContent = this.daysLeft;
+                if(document.getElementById('valFree')) document.getElementById('valFree').textContent = this.fmt(safeFree);
+                if(document.getElementById('daysLeft')) document.getElementById('daysLeft').textContent = this.period.daysLeft;
+                
+                const totalEl = document.getElementById('todaySpentTotal');
+                if(totalEl) totalEl.textContent = `-${this.fmt(this.spentInPeriod)}`; 
+
+                // Proyecciones
+                const fixedQ1 = this.data.items.reduce((s, i) => (i.day >= p1 && i.day < p2) ? s + (i.amount||0) : s, 0);
+                const freeQ1 = income - fixedQ1;
+                const fixedQ2 = this.data.items.reduce((s, i) => (i.day >= p2 || i.day < p1) ? s + (i.amount||0) : s, 0);
+                const freeQ2 = income - fixedQ2;
+
+                document.getElementById('projQ1').textContent = this.fmt(freeQ1);
+                document.getElementById('projQ2').textContent = this.fmt(freeQ2);
+
+                this.renderFixedList(); // Re-render fixed list to update locks based on date
             },
 
-            // --- GASTOS FIJOS ---
+            // --- GASTOS FIJOS (CRUD) ---
             openSheet(id, idx = null, logId = null) {
                 const sheet = document.getElementById('sheet-'+id);
                 if (sheet) sheet.classList.add('active');
@@ -546,12 +510,11 @@
                     document.getElementById('fixName').focus();
                 } else if(id === 'log') {
                      document.getElementById('logDate').value = todayISO;
-                     
                      if (logId) {
                          this.editingLogId = logId;
                          const log = this.periodLogs.find(l => l.id === logId);
                          if (log) {
-                             document.getElementById('logSheetTitle').textContent = log.type==='income' ? "Editar Ingreso" : "Editar Gasto";
+                             document.getElementById('logSheetTitle').textContent = "Editar Gasto";
                              document.getElementById('logAmnt').value = log.amnt;
                              document.getElementById('logDesc').value = log.desc;
                              const d = log.date.toDate ? log.date.toDate() : new Date(log.date);
@@ -568,9 +531,8 @@
                      }
                 } else if(id === 'extra') {
                      document.getElementById('extraDate').value = todayISO;
-
                      if (logId) {
-                         this.editingLogId = logId; // Usamos editingLogId para extra también para simplicidad
+                         this.editingExtraId = logId;
                          const log = this.periodLogs.find(l => l.id === logId);
                          if (log) {
                              document.getElementById('extraSheetTitle').textContent = "Editar Extra";
@@ -580,9 +542,9 @@
                              document.getElementById('btnDeleteExtra').style.display = 'block';
                          }
                      } else {
-                         this.editingLogId = null;
+                         this.editingExtraId = null;
                          document.getElementById('extraSheetTitle').textContent = "Ingreso Extra";
-                         if(this.data.avgExtra) document.getElementById('extraAmnt').value = this.data.avgExtra; else document.getElementById('extraAmnt').value = '';
+                         document.getElementById('extraAmnt').value = '';
                          document.getElementById('btnDeleteExtra').style.display = 'none';
                          document.getElementById('extraAmnt').focus();
                      }
@@ -599,21 +561,15 @@
                 const amt = parseFloat(document.getElementById('fixAmount').value);
                 const day = parseInt(document.getElementById('fixDay').value);
                 if(!name || !amt || !day) return;
-                
                 const item = {name, amount:amt, day};
-                if (this.editingItem !== null) {
-                    this.data.items[this.editingItem] = item;
-                } else {
-                    this.data.items.push(item);
-                }
-                
-                this.renderFixedList(); this.save(); this.closeSheet('fixed');
+                if (this.editingItem !== null) this.data.items[this.editingItem] = item; else this.data.items.push(item);
+                this.save(); // Save calls render
+                this.closeSheet('fixed');
             },
             
             deleteFixed() { 
                 if(this.editingItem !== null && confirm("¿Borrar?")) { 
                     this.data.items.splice(this.editingItem,1); 
-                    this.renderFixedList(); 
                     this.save(); 
                     this.closeSheet('fixed'); 
                 } 
@@ -625,38 +581,30 @@
                 el.innerHTML = '';
                 const d = new Date().getDate();
                 const p1=this.data.payDay1 || 5, p2=this.data.payDay2 || 20;
-                const isActive = (day) => {
-                    if (d >= p1 && d < p2) return day >= p1 && day < p2;
-                    else return day >= p2 || day < p1;
-                };
+                const isActive = (day) => (d >= p1 && d < p2) ? (day >= p1 && day < p2) : (day >= p2 || day < p1);
                 
                 this.data.items.sort((a,b) => a.day - b.day);
 
                 this.data.items.forEach((it, i) => {
                     const active = isActive(it.day);
-                    let iconClass = active ? 'ph-lock-open text-red-400' : 'ph-lock text-gray-500';
-                    let bgClass = active ? 'fixed' : 'future'; 
+                    let iconClass = active ? 'ph-lock-key-open text-red-400' : 'ph-lock-key text-gray-500';
+                    let bgClass = active ? 'fixed-active' : 'fixed-inactive'; 
 
                     el.innerHTML += `
                     <div class="tx-item ${active ? '' : 'opacity-50'}" onclick="app.openSheet('fixed', ${i})">
-                        <div class="flex items-center">
-                            <div class="tx-icon ${bgClass}"><i class="ph-bold ${iconClass}"></i></div>
-                            <div><div class="tx-title">${it.name}</div><div class="tx-date">Día ${it.day}</div></div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="tx-amount text-red-400">$${it.amount}</div>
-                        </div>
+                        <div class="tx-icon ${bgClass}"><i class="ph-bold ${iconClass}"></i></div>
+                        <div class="tx-info"><div class="tx-title">${it.name}</div><div class="tx-date">Día ${it.day}</div></div>
+                        <div class="tx-amount text-red-400">$${it.amount}</div>
                     </div>`;
                 });
             },
 
-            // --- LOGS (CRUD) ---
+            // --- LOGS Y EXTRAS (CRUD) ---
             setDesc(t, el) { 
                 const logDesc = document.getElementById('logDesc');
                 if (logDesc) logDesc.value = t; 
                 document.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected')); 
                 if (el) el.classList.add('selected'); 
-                if(t==='Extra') this.tempLogType = 'income'; else this.tempLogType = 'expense';
             },
 
             async saveLog() {
@@ -667,12 +615,7 @@
                 
                 const [y,m,d] = dateVal.split('-').map(Number);
                 const dateObj = new Date(y, m-1, d, 12, 0, 0); 
-                
-                let type = 'expense';
-                if(this.tempLogType) type = this.tempLogType;
-                if(desc.toLowerCase().includes('extra') || desc.toLowerCase().includes('ingreso')) type = 'income';
-
-                const logData = { desc, amnt, type, date: dateObj.toISOString() };
+                const logData = { desc, amnt, type: 'expense', date: dateObj.toISOString() };
                 
                 if (this.editingLogId) await this.updateLogDb(this.editingLogId, logData);
                 else await this.saveLogToDb(logData);
@@ -689,19 +632,18 @@
                 const amnt = parseFloat(document.getElementById('extraAmnt').value);
                 const dateVal = document.getElementById('extraDate').value;
                 if(!amnt || !dateVal) return;
-                
                 const [y,m,d] = dateVal.split('-').map(Number);
                 const dateObj = new Date(y, m-1, d, 12, 0, 0);
                 const logData = { desc: 'Pago Extra', amnt, type: 'income', date: dateObj.toISOString() };
 
-                if (this.editingLogId) await this.updateLogDb(this.editingLogId, logData); // Use editingLogId since it's the same flow now
+                if (this.editingExtraId) await this.updateLogDb(this.editingExtraId, logData);
                 else await this.saveLogToDb(logData);
                 this.closeSheet('extra');
             },
 
             async deleteExtra() {
-                if(!this.editingLogId || !confirm("¿Eliminar ingreso?")) return; // Use editingLogId
-                await this.deleteLogDb(this.editingLogId);
+                if(!this.editingExtraId || !confirm("¿Eliminar ingreso?")) return;
+                await this.deleteLogDb(this.editingExtraId);
                 this.closeSheet('extra');
             },
 
@@ -746,44 +688,14 @@
             loadLogs() {
                 this.calcPeriodDates(); 
                 const process = (arr) => {
-                    const list = document.getElementById('logList');
-                    if (!list) return; 
-                    list.innerHTML = '';
-                    
-                    let spentPeriod = 0;
-                    let extrasPeriod = 0;
-                    
                     this.periodLogs = arr.filter(l => {
                         const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
                         return d >= this.period.start && d < this.period.end; 
                     });
-
-                    if(this.periodLogs.length===0) list.innerHTML='<div class="text-center text-xs text-gray-600 py-10 italic">Sin movimientos en este periodo</div>';
-
-                    this.periodLogs.sort((a,b) => {
-                        const da = a.date.toDate ? a.date.toDate() : new Date(a.date);
-                        const db = b.date.toDate ? b.date.toDate() : new Date(b.date);
-                        return db - da; 
-                    });
-
-                    this.periodLogs.forEach(l => {
-                        const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
-                        if (l.type === 'income') {
-                            extrasPeriod += l.amnt;
-                            list.innerHTML += `<div class="tx-item" onclick="app.openSheet('extra', null, '${l.id}')"><div class="flex items-center"><div class="tx-icon extra"><i class="ph-bold ph-coin"></i></div><div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleDateString()}</div></div></div><div class="tx-amount text-green-500">+$${l.amnt}</div></div>`;
-                        } else {
-                            spentPeriod += l.amnt;
-                            list.innerHTML += `<div class="tx-item" onclick="app.openSheet('log', null, '${l.id}')"><div class="flex items-center"><div class="tx-icon variable"><i class="ph-bold ph-shopping-bag"></i></div><div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleDateString()}</div></div></div><div class="tx-amount text-red-500">-$${l.amnt}</div></div>`;
-                        }
-                    });
                     
-                    this.spentInPeriod = spentPeriod;
-                    this.extrasInPeriod = extrasPeriod;
-                    
-                    const totalEl = document.getElementById('todaySpentTotal');
-                    if(totalEl) totalEl.textContent = `-${this.fmt(spentPeriod)}`; 
-                    
-                    this.render(); 
+                    this.calculateTotals();
+                    this.renderLogsList();
+                    this.render(); // Update main UI
                 };
 
                 if(this.user && !this.user.isAnonymous) {
@@ -795,104 +707,95 @@
                 }
             },
             
-            // --- HISTORY ---
-            changeHistoryMonth(d) {
-                this.histDate.setMonth(this.histDate.getMonth() + d);
-                this.renderHistory();
+            calculateTotals() {
+                this.spentInPeriod = 0;
+                this.extrasInPeriod = 0;
+                this.todaySpent = 0;
+                const todayStr = new Date().toDateString();
+
+                this.periodLogs.forEach(l => {
+                    if (l.type === 'income') this.extrasInPeriod += l.amnt;
+                    else this.spentInPeriod += l.amnt;
+                    
+                    // For today badge
+                    const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
+                    if(d.toDateString() === todayStr && l.type !== 'income') this.todaySpent += l.amnt;
+                });
+            },
+
+            renderLogsList() {
+                const list = document.getElementById('logList');
+                if (!list) return; 
+                list.innerHTML = '';
+                
+                if(this.periodLogs.length===0) {
+                    list.innerHTML='<div class="text-center text-xs text-gray-600 py-10 italic">Sin movimientos en este periodo</div>';
+                    return;
+                }
+
+                // Sort for display (Newest first)
+                const displayLogs = [...this.periodLogs].sort((a,b) => {
+                    const da = a.date.toDate ? a.date.toDate() : new Date(a.date);
+                    const db = b.date.toDate ? b.date.toDate() : new Date(b.date);
+                    return db - da; 
+                });
+
+                displayLogs.forEach(l => {
+                    const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
+                    const isIncome = l.type === 'income';
+                    const iconClass = isIncome ? 'ph-coin text-green-400' : 'ph-shopping-bag text-yellow-400';
+                    const bgClass = isIncome ? 'extra' : 'variable';
+                    const amtClass = isIncome ? 'text-green-500' : 'text-red-500';
+                    const sign = isIncome ? '+' : '-';
+                    const sheet = isIncome ? 'extra' : 'log';
+
+                    list.innerHTML += `
+                    <div class="tx-item" onclick="app.openSheet('${sheet}', null, '${l.id}')">
+                        <div class="tx-icon ${bgClass}"><i class="ph-bold ${iconClass}"></i></div>
+                        <div class="tx-info">
+                            <div class="tx-title">${l.desc}</div>
+                            <div class="tx-date">${d.toLocaleDateString()} ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+                        </div>
+                        <div class="tx-amount ${amtClass}">${sign}${this.fmt(l.amnt)}</div>
+                    </div>`;
+                });
             },
             
+            // --- HISTORY ---
+            changeHistoryMonth(d) { this.histDate.setMonth(this.histDate.getMonth() + d); this.renderHistory(); },
             renderHistory() {
-                const label = document.getElementById('histMonthLabel');
-                const list = document.getElementById('historyList');
-                const totalEl = document.getElementById('histTotal');
+                const label = document.getElementById('histMonthLabel'); const list = document.getElementById('historyList'); const totalEl = document.getElementById('histTotal');
                 if(!label || !list) return;
-
-                const m = this.histDate.getMonth();
-                const y = this.histDate.getFullYear();
+                const m = this.histDate.getMonth(); const y = this.histDate.getFullYear();
                 label.textContent = `${["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"][m]} ${y}`;
-
                 list.innerHTML = '<div class="text-center text-xs text-gray-600 py-4">Cargando...</div>';
-                
                 const showHist = (allLogs) => {
-                    list.innerHTML = '';
-                    let monthSpent = 0;
-                    const filtered = allLogs.filter(l => {
-                        const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
-                        return d.getMonth() === m && d.getFullYear() === y && l.type === 'expense';
-                    });
-                    
+                    list.innerHTML = ''; let monthSpent = 0;
+                    const filtered = allLogs.filter(l => { const d = l.date.toDate ? l.date.toDate() : new Date(l.date); return d.getMonth() === m && d.getFullYear() === y && l.type === 'expense'; });
                     if(filtered.length === 0) list.innerHTML = '<div class="text-center text-xs text-gray-600 py-10">Sin gastos este mes</div>';
-
                     filtered.forEach(l => {
-                         monthSpent += l.amnt;
-                         const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
-                         list.innerHTML += `
-                            <div class="tx-item">
-                                <div class="flex items-center">
-                                    <div class="tx-icon variable"><i class="ph-bold ph-calendar-blank"></i></div>
-                                    <div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleDateString()}</div></div>
-                                </div>
-                                <div class="tx-amount text-red-500">-$${l.amnt}</div>
-                            </div>`;
+                         monthSpent += l.amnt; const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
+                         list.innerHTML += `<div class="tx-item"><div class="tx-icon variable"><i class="ph-bold ph-calendar-blank"></i></div><div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleDateString()}</div></div><div class="tx-amount text-red-500">-$${l.amnt}</div></div>`;
                     });
                     totalEl.textContent = this.fmt(monthSpent);
                 };
-
-                if(this.user && !this.user.isAnonymous) {
-                     db.collection(COLLECTION).doc(this.user.uid).collection('logs')
-                       .orderBy('date', 'desc').limit(200)
-                       .get().then(s => showHist(s.docs.map(d=>d.data())));
-                } else {
-                    const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]');
-                    showHist(logs);
-                }
+                if(this.user && !this.user.isAnonymous) { db.collection(COLLECTION).doc(this.user.uid).collection('logs').orderBy('date', 'desc').limit(200).get().then(s => showHist(s.docs.map(d=>d.data()))); } 
+                else { const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]'); showHist(logs); }
             },
 
-            // --- PDF GENERATION LOGIC ---
+            // --- PDF ---
             generatePDFReport() {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                const userName = this.user.displayName || "Invitado";
-                const dateStr = new Date().toLocaleDateString();
+                const { jsPDF } = window.jspdf; const doc = new jsPDF();
+                const userName = this.user.displayName || "Invitado"; const dateStr = new Date().toLocaleDateString();
                 const black = [10, 10, 10]; const red = [220, 38, 38]; const gray = [100, 100, 100];
-
-                doc.setFillColor(...black); doc.rect(0, 0, 210, 40, 'F'); 
+                doc.setFillColor(10, 10, 10); doc.rect(0, 0, 210, 40, 'F'); 
                 doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.setTextColor(255, 255, 255); doc.text("GOD'S PLAN | TREASURY", 15, 25);
-                doc.setFontSize(10); doc.setTextColor(200, 200, 200); doc.text("ESTADO DE CUENTA PERSONAL", 15, 32);
-                doc.setTextColor(0, 0, 0); doc.setFontSize(10);
-                doc.text(`Usuario: ${userName}`, 15, 50); doc.text(`Fecha de Corte: ${dateStr}`, 15, 55); doc.text(`Periodo: ${this.period.daysLeft} días restantes`, 15, 60);
-
-                const income = this.data.income || 0;
-                const fixed = this.totalFixedPeriod || 0;
-                const variable = this.spentInPeriod || 0;
-                const extra = this.extrasInPeriod || 0;
-                const finalBalance = (income + extra) - (fixed + variable);
-
-                doc.setDrawColor(200, 200, 200); doc.roundedRect(15, 65, 180, 35, 3, 3);
-                doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.text("RESUMEN DEL PERIODO", 20, 75);
-                doc.setFontSize(10); doc.setFont("helvetica", "normal");
-                doc.text("Ingreso Neto:", 20, 85); doc.text(this.fmt(income), 60, 85, {align: 'right'});
-                doc.text("Ingresos Extra:", 20, 92); doc.text(this.fmt(extra), 60, 92, {align: 'right'});
-                doc.text("Gastos Fijos:", 80, 85); doc.text(`-${this.fmt(fixed)}`, 120, 85, {align: 'right'});
-                doc.text("Gastos Variables:", 80, 92); doc.text(`-${this.fmt(variable)}`, 120, 92, {align: 'right'});
-                doc.setFontSize(16); doc.setFont("helvetica", "bold"); doc.setTextColor(...(finalBalance >= 0 ? [16, 185, 129] : red)); 
-                doc.text("SALDO DISPONIBLE:", 130, 80); doc.text(this.fmt(finalBalance), 190, 90, {align: 'right'});
-                doc.setTextColor(0, 0, 0);
-
-                const tableData = this.periodLogs.map(l => [
-                    (l.date.toDate ? l.date.toDate() : new Date(l.date)).toLocaleDateString(),
-                    l.type === 'income' ? 'INGRESO EXTRA' : 'GASTO', l.desc,
-                    l.type === 'income' ? `+${this.fmt(l.amnt)}` : `-${this.fmt(l.amnt)}`
-                ]);
-                doc.autoTable({ startY: 110, head: [['Fecha', 'Tipo', 'Descripción', 'Monto']], body: tableData, theme: 'grid', headStyles: { fillColor: black, textColor: 255 }, alternateRowStyles: { fillColor: [245, 245, 245] }, styles: { fontSize: 9 } });
-
-                const fixedData = this.data.items.map(i => [`Día ${i.day}`, i.name, `$${i.amount}`]);
-                doc.text("COMPROMISOS FIJOS (PLAN)", 15, doc.lastAutoTable.finalY + 15);
-                doc.autoTable({ startY: doc.lastAutoTable.finalY + 20, head: [['Día de Pago', 'Concepto', 'Monto']], body: fixedData, theme: 'striped', headStyles: { fillColor: red, textColor: 255 }, styles: { fontSize: 9 } });
-
-                const pageHeight = doc.internal.pageSize.height;
-                doc.setFontSize(8); doc.setTextColor(...gray); doc.text("Generado por God's Plan Treasury System v6.6", 105, pageHeight - 10, { align: 'center' });
-                doc.save(`EstadoCuenta_GodsPlan_${dateStr.replace(/\//g, '-')}.pdf`);
+                doc.setTextColor(0, 0, 0); doc.setFontSize(10); doc.text(`Usuario: ${userName}`, 15, 50); doc.text(`Fecha: ${dateStr}`, 15, 55);
+                const income = this.data.income || 0; const fixed = this.totalFixedPeriod || 0; const variable = this.spentInPeriod || 0; const extra = this.extrasInPeriod || 0; const finalBalance = (income + extra) - (fixed + variable);
+                doc.text("Ingreso Neto:", 20, 85); doc.text(this.fmt(income), 60, 85, {align: 'right'}); doc.text("Ingresos Extra:", 20, 92); doc.text(this.fmt(extra), 60, 92, {align: 'right'});
+                doc.text("Gastos Fijos:", 80, 85); doc.text(`-${this.fmt(fixed)}`, 120, 85, {align: 'right'}); doc.text("Gastos Variables:", 80, 92); doc.text(`-${this.fmt(variable)}`, 120, 92, {align: 'right'});
+                doc.setFontSize(16); doc.setTextColor(...(finalBalance >= 0 ? [16, 185, 129] : red)); doc.text("SALDO DISPONIBLE:", 130, 80); doc.text(this.fmt(finalBalance), 190, 90, {align: 'right'});
+                doc.save(`EstadoCuenta_${dateStr}.pdf`);
             },
 
             // --- UTILS ---
@@ -900,10 +803,7 @@
             loginAnon() { auth.signInAnonymously(); },
             logout() { auth.signOut(); location.reload(); },
             resetData() { if(confirm("¿Borrar todo?")) { localStorage.clear(); if(this.user && !this.user.isAnonymous) { db.collection(COLLECTION).doc(this.user.uid).delete(); } location.reload(); } },
-            fmt(n) { 
-                if (isNaN(n) || !isFinite(n)) return '$0.00';
-                return '$' + n.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); 
-            }
+            fmt(n) { if (isNaN(n) || !isFinite(n)) return '$0.00'; return '$' + n.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); }
         };
         document.addEventListener('DOMContentLoaded', () => app.init());
     </script>
