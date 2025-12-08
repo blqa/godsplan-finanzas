@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- PDF GENERATION LIBS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -169,7 +169,7 @@
 <body>
 
     <nav id="global-nav">
-        <a href="https://godsplan.site" class="g-logo"><i class="ph-bold ph-circles-three-plus"></i> asd</a>
+        <a href="https://godsplan.site" class="g-logo"><i class="ph-bold ph-circles-three-plus"></i> NEXUS</a>
         <div class="g-links">
             <a href="https://adherencia.godsplan.site" class="g-link">ADHERENCIA</a>
             <a href="https://chat.godsplan.site" class="g-link">CHAT</a>
@@ -208,7 +208,7 @@
             </div>
 
             <!-- PRÓXIMO EXTRA -->
-            <div class="extra-card"> 
+            <div class="extra-card">
                 <div>
                     <div class="extra-title">Próximo Pago Extra</div>
                     <div class="extra-date" id="nextExtraDate">Calculando...</div>
@@ -636,12 +636,16 @@
                 this.totalFixedPeriod = totalFixed; 
 
                 const income = this.data.income || 0;
-                const free = Math.max(0, income - totalFixed);
+                // Calculo REAL: Ingreso - Fijos - Gastos Variables (Periodo) + Extras (Periodo)
+                const free = Math.max(0, income - totalFixed - (this.spentInPeriod||0) + (this.extrasInPeriod||0));
                 
                 const dailyLimit = free / this.daysLeft;
                 
-                const availableToday = dailyLimit - this.todaySpent + this.todayExtras;
+                // Como 'free' ya incluye la resta de los gastos variables, 'availableToday' ES 'dailyLimit'
+                // o podemos mostrar 'free' como el total y 'dailyLimit' como el sugerido para hoy
+                const availableToday = dailyLimit;
 
+                // UI UPDATE
                 const elAvail = document.getElementById('valDaily');
                 if (elAvail) {
                     elAvail.textContent = this.fmt(availableToday);
@@ -933,4 +937,3 @@
     </script>
 </body>
 </html>
-
