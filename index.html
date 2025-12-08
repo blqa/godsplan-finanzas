@@ -32,9 +32,7 @@
         #main-content {
             flex-grow: 1; overflow-y: auto; padding: 20px; padding-bottom: 110px;
             background: linear-gradient(180deg, #0f0f11 0%, #050505 100%);
-            scrollbar-width: none; /* Firefox */
         }
-        #main-content::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 
         /* TARJETA ONYX */
         .onyx-card {
@@ -54,8 +52,7 @@
         }
 
         .card-label { font-size: 0.7rem; color: #71717a; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
-        /* Ajuste de tamaño de fuente responsivo para evitar roturas */
-        .card-value { font-size: clamp(2rem, 8vw, 3.5rem); font-weight: 800; color: white; line-height: 1.1; letter-spacing: -1px; }
+        .card-value { font-size: 3rem; font-weight: 800; color: white; line-height: 1; letter-spacing: -1px; }
 
         /* SECCIONES Y LISTAS */
         .section-title { font-size: 0.8rem; font-weight: 800; color: #52525b; margin: 25px 0 15px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
@@ -63,7 +60,10 @@
         .tx-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 16px; background: #18181b; border: 1px solid #27272a; border-radius: 16px; margin-bottom: 10px;
+            cursor: pointer; transition: background 0.2s;
         }
+        .tx-item:active { background: #27272a; }
+        
         .tx-icon {
             width: 44px; height: 44px; border-radius: 12px; background: #27272a;
             display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #a1a1aa; margin-right: 15px; flex-shrink: 0;
@@ -71,8 +71,9 @@
         .tx-icon.variable { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
         .tx-icon.extra { color: #34d399; background: rgba(52, 211, 153, 0.1); }
         .tx-icon.fixed { color: #f87171; background: rgba(248, 113, 113, 0.1); }
+        .tx-icon.future { color: #6b7280; background: rgba(107, 114, 128, 0.1); } /* Candado cerrado/futuro */
         
-        .tx-info { flex: 1; min-width: 0; /* Evita desbordamiento de texto */ }
+        .tx-info { flex: 1; min-width: 0; }
         .tx-title { font-weight: 700; font-size: 0.95rem; color: #e4e4e7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .tx-date { font-size: 0.75rem; color: #71717a; font-weight: 600; }
         .tx-amount { font-weight: 800; font-size: 1rem; color: #e4e4e7; white-space: nowrap; }
@@ -80,7 +81,7 @@
         /* BOTTOM NAV */
         .bottom-nav {
             height: 80px; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(20px);
-            border-top: 1px solid #262626; display: grid; grid-template-columns: 1fr 1fr 1fr;
+            border-top: 1px solid #262626; display: grid; grid-template-columns: repeat(4, 1fr); /* 4 Columnas ahora */
             position: fixed; bottom: 0; left: 0; width: 100%; z-index: 50;
             padding-bottom: env(safe-area-inset-bottom);
         }
@@ -146,17 +147,23 @@
         .modal-overlay.active .auth-card { transform: scale(1); }
 
         .btn-primary { width: 100%; background: #ef4444; color: white; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 1rem; border: none; cursor: pointer; }
+        .btn-delete { width: 100%; background: #27272a; color: #ef4444; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 1rem; border: 1px solid #ef4444; cursor: pointer; margin-top: 10px; }
+        
         .chip-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 20px; }
         .chip { background: #262626; padding: 8px 16px; border-radius: 50px; font-size: 0.85rem; color: #a3a3a3; white-space: nowrap; cursor: pointer; border: 1px solid transparent; font-weight: 600; }
         .chip.selected { background: #ef4444; color: white; border-color: #ef4444; }
 
-        /* EXTRA CARD */
-        .extra-card {
-            background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.1);
-            border-radius: 16px; padding: 15px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center;
+        /* PROYECCION CARDS (Q1/Q2) */
+        .projection-card {
+            background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 10px;
         }
-        .extra-title { font-size: 0.7rem; color: #34d399; font-weight: 700; text-transform: uppercase; }
-        .extra-date { font-size: 0.9rem; font-weight: 600; color: #d1fae5; }
+        .proj-label { font-size: 0.65rem; font-weight: 800; color: #71717a; text-transform: uppercase; margin-bottom: 5px; display: flex; justify-content: space-between; }
+        .proj-val { font-size: 1.5rem; font-weight: 800; color: white; }
+        
+        /* MONTH NAV */
+        .month-nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .month-label { font-size: 1rem; font-weight: 800; color: white; width: 100px; text-align: center; }
+        .nav-btn { background: #262626; border: none; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -201,13 +208,13 @@
             </div>
 
             <!-- PRÓXIMO EXTRA -->
-            <div class="extra-card">
+            <div class="extra-card bg-green-900/10 border border-green-900/30 rounded-2xl p-4 mt-6 flex justify-between items-center">
                 <div>
-                    <div class="extra-title">Próximo Pago Extra</div>
-                    <div class="extra-date" id="nextExtraDate">Calculando...</div>
+                    <div class="text-[10px] font-bold text-green-500 uppercase">Próximo Pago Extra</div>
+                    <div class="text-sm font-bold text-green-100" id="nextExtraDate">Calculando...</div>
                 </div>
                 <div class="text-right">
-                    <button onclick="app.openSheet('extra')" class="text-xs bg-green-900/30 text-green-400 px-3 py-1.5 rounded-lg border border-green-800 hover:bg-green-900/50 font-bold">REGISTRAR</button>
+                    <button onclick="app.openSheet('extra')" class="text-xs bg-green-900/30 text-green-400 px-3 py-2 rounded-lg border border-green-800 hover:bg-green-900/50 font-bold">REGISTRAR</button>
                 </div>
             </div>
 
@@ -222,11 +229,25 @@
             </div>
         </div>
 
-        <!-- VISTA PLAN: Configuración y Fijos -->
+        <!-- VISTA PLAN: Proyección Q1 y Q2 -->
         <div id="view-plan" class="view">
             <h2 class="text-2xl font-black text-white mb-6 px-2">Planificación</h2>
             
-            <div class="clean-input-group">
+            <!-- PROYECCIONES -->
+            <div class="projection-card border-l-4 border-l-blue-500">
+                <div class="proj-label"><span>Proyección Q1 (Día 5-19)</span> <span class="text-blue-500">ACTIVO</span></div>
+                <div class="proj-val" id="projQ1">$0</div>
+                <div class="text-[10px] text-gray-500 mt-1" id="detQ1">Ingreso - Fijos</div>
+            </div>
+
+            <div class="projection-card border-l-4 border-l-purple-500">
+                <div class="proj-label"><span>Proyección Q2 (Día 20-4)</span></div>
+                <div class="proj-val" id="projQ2">$0</div>
+                <div class="text-[10px] text-gray-500 mt-1" id="detQ2">Ingreso - Fijos</div>
+            </div>
+
+            <!-- INGRESO CONFIG -->
+            <div class="clean-input-group mt-6">
                 <label class="input-label text-green-500">Ingreso Neto (Quincenal)</label>
                 <div class="flex items-center">
                     <span class="text-2xl font-bold text-gray-600 mr-2">$</span>
@@ -235,15 +256,31 @@
             </div>
 
             <div class="section-title">
-                <span>Gastos Fijos & Deudas</span>
+                <span>Gastos Fijos</span>
                 <button onclick="app.openSheet('fixed')" class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-lg hover:bg-gray-700">+ NUEVO</button>
             </div>
             
-            <div class="text-[10px] text-gray-600 mb-4 px-2">
-                Gastos activos en este periodo (Día 5-19 o 20-4).
+            <div id="fixedList" class="space-y-2 mb-24"></div>
+        </div>
+
+        <!-- VISTA HISTORIAL -->
+        <div id="view-history" class="view">
+            <h2 class="text-2xl font-black text-white mb-6 px-2">Historial</h2>
+            
+            <div class="month-nav">
+                <button class="nav-btn" onclick="app.changeMonth(-1)"><i class="ph-bold ph-caret-left"></i></button>
+                <span class="month-label" id="histMonthLabel">--</span>
+                <button class="nav-btn" onclick="app.changeMonth(1)"><i class="ph-bold ph-caret-right"></i></button>
             </div>
 
-            <div id="fixedList" class="space-y-3 mb-24"></div>
+            <div class="glass-card text-center !p-4 mb-6">
+                <div class="text-[10px] text-gray-500 uppercase font-bold mb-1">Total Gastado (Variables)</div>
+                <div class="text-2xl font-black text-red-400" id="histTotal">$0</div>
+            </div>
+
+            <div id="historyList" class="pb-24 space-y-3">
+                <!-- History Items -->
+            </div>
         </div>
 
         <!-- VISTA CUENTA -->
@@ -272,16 +309,16 @@
     <!-- BOTTOM NAV -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="app.switchTab('today', this)">
-            <i class="ph-fill ph-wallet"></i>
-            <span>HOY</span>
+            <i class="ph-fill ph-wallet"></i><span>HOY</span>
         </div>
         <div class="nav-item" onclick="app.switchTab('plan', this)">
-            <i class="ph-bold ph-strategy"></i>
-            <span>PLAN</span>
+            <i class="ph-bold ph-strategy"></i><span>PLAN</span>
+        </div>
+        <div class="nav-item" onclick="app.switchTab('history', this)">
+            <i class="ph-bold ph-clock-counter-clockwise"></i><span>HIST</span>
         </div>
         <div class="nav-item" onclick="app.switchTab('settings', this)">
-            <i class="ph-bold ph-user-circle"></i>
-            <span>CUENTA</span>
+            <i class="ph-bold ph-user-circle"></i><span>CUENTA</span>
         </div>
     </div>
 
@@ -323,11 +360,11 @@
         </div>
     </div>
 
-    <!-- SHEET: GASTO FIJO -->
+    <!-- SHEET: GASTO FIJO (EDITAR) -->
     <div id="sheet-fixed" class="modal-overlay sheet" onclick="if(event.target===this) app.closeSheet('fixed')">
         <div class="bottom-sheet">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-lock-key text-red-500"></i> Nuevo Gasto Fijo</h3>
+                <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-lock-key text-red-500"></i> Gasto Fijo</h3>
                 <button onclick="app.closeSheet('fixed')" class="text-gray-500"><i class="ph-bold ph-x text-xl"></i></button>
             </div>
             <label class="form-label">Nombre del Gasto</label>
@@ -336,7 +373,8 @@
                 <div><label class="form-label">Monto</label><input type="number" id="fixAmount" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none" placeholder="$0"></div>
                 <div><label class="form-label">Día de Pago</label><input type="number" id="fixDay" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none text-center" placeholder="1-31"></div>
             </div>
-            <button onclick="app.addFixed()" class="btn-primary">GUARDAR FIJO</button>
+            <button onclick="app.saveFixed()" class="btn-primary">GUARDAR</button>
+            <button id="btnDeleteFixed" onclick="app.deleteFixed()" class="btn-delete hidden">ELIMINAR GASTO</button>
         </div>
     </div>
     
@@ -352,20 +390,20 @@
     </div>
 
     <script>
-        const COLLECTION = "treasury_v5_pro";
+        const COLLECTION = "treasury_v7_final";
         const firebaseConfig = { apiKey: "AIzaSyCrHBz94UtgiaYntHCYhC5jNa6auUI63vQ", authDomain: "god-s-plan-d737b.firebaseapp.com", projectId: "god-s-plan-d737b", storageBucket: "god-s-plan-d737b.firebasestorage.app", messagingSenderId: "458198314028", appId: "1:458198314028:web:d62b24cee2d19ee5b47589" };
         try { firebase.initializeApp(firebaseConfig); var auth=firebase.auth(), db=firebase.firestore(); } catch(e){}
 
         const app = {
             user: null,
-            data: { income: 0, items: [], payDay1: 5, payDay2: 20 },
+            data: { income: 0, items: [] }, // items: { id, name, amount, day }
             period: { daysLeft: 15 },
-            todaySpent: 0,
-            todayExtras: 0, 
+            todaySpent: 0, todayExtras: 0,
+            editingItem: null, // Index of item being edited
+            histDate: new Date(),
 
             init() {
-                const dateEl = document.getElementById('dateDisplay');
-                if(dateEl) dateEl.textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric' }).toUpperCase();
+                document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric' }).toUpperCase();
                 
                 auth.onAuthStateChanged(u => {
                     if(u) {
@@ -374,6 +412,7 @@
                         this.updateAuthUI(u);
                         this.loadData();
                         this.loadLogs();
+                        this.renderHistory(); // Init history view
                     } else {
                         document.getElementById('authModal').classList.add('active');
                     }
@@ -388,21 +427,12 @@
                 let nextPay = new Date();
                 nextPay.setDate(today.getDate() + (2 + 7 - today.getDay()) % 7);
                 if (nextPay <= today) nextPay.setDate(nextPay.getDate() + 7);
-
                 let day = nextPay.getDate();
-                if (day === 5 || day === 20) {
-                    nextPay.setDate(nextPay.getDate() + 1);
-                }
-
-                const prevMonday = new Date(nextPay);
-                prevMonday.setDate(nextPay.getDate() - 1);
+                if (day === 5 || day === 20) nextPay.setDate(nextPay.getDate() + 1);
+                const prevMonday = new Date(nextPay); prevMonday.setDate(nextPay.getDate() - 1);
                 const holidays = ["1-1", "5-2", "21-3", "1-5", "16-9", "20-11", "25-12"];
                 const monStr = `${prevMonday.getDate()}-${prevMonday.getMonth()+1}`;
-                
-                if (holidays.includes(monStr)) {
-                     nextPay.setDate(nextPay.getDate() + 1);
-                }
-
+                if (holidays.includes(monStr)) nextPay.setDate(nextPay.getDate() + 1);
                 const opts = { weekday: 'short', day: 'numeric', month: 'short' };
                 const extraDateEl = document.getElementById('nextExtraDate');
                 if(extraDateEl) extraDateEl.textContent = nextPay.toLocaleDateString('es-ES', opts);
@@ -436,7 +466,7 @@
             // --- DATA ---
             async loadData() {
                 if(!this.user) return;
-                const local = localStorage.getItem('gp_treasury_v5');
+                const local = localStorage.getItem('gp_treasury_v7');
                 if(local) { this.data = JSON.parse(local); this.render(); }
 
                 if(!this.user.isAnonymous) {
@@ -445,14 +475,13 @@
                         this.data = doc.data();
                         if(!this.data.items) this.data.items = [];
                         this.render();
-                        localStorage.setItem('gp_treasury_v5', JSON.stringify(this.data));
+                        localStorage.setItem('gp_treasury_v7', JSON.stringify(this.data));
                     }
                 }
                 
                 if(!this.data.items) this.data.items = [];
                 const inpIncome = document.getElementById('inpIncome');
                 if (inpIncome) inpIncome.value = this.data.income || '';
-                
                 this.renderFixedList();
             },
 
@@ -463,7 +492,7 @@
             },
 
             save() {
-                localStorage.setItem('gp_treasury_v5', JSON.stringify(this.data));
+                localStorage.setItem('gp_treasury_v7', JSON.stringify(this.data));
                 if(this.user && !this.user.isAnonymous) db.collection(COLLECTION).doc(this.user.uid).set(this.data);
             },
 
@@ -473,31 +502,40 @@
                 const d = now.getDate();
                 const p1 = 5, p2 = 20; 
                 
-                // Dias Restantes
+                let start, end;
+                if (d >= p1 && d < p2) { start=p1; end=p2; } 
+                else { start=p2; end=p1; }
+
                 let targetDate = new Date();
                 if(d >= p2) targetDate.setMonth(targetDate.getMonth()+1);
-                targetDate.setDate(p2);
-                
+                targetDate.setDate(end);
                 if(targetDate.getDay()===6) targetDate.setDate(targetDate.getDate()+2);
                 if(targetDate.getDay()===0) targetDate.setDate(targetDate.getDate()+1);
                 
                 const diffTime = targetDate - now;
                 this.daysLeft = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
                 
-                const isExpenseActive = (day) => {
-                    if (d >= p1 && d < p2) return day >= p1 && day < p2;
-                    else return day >= p2 || day < p1;
-                };
-
-                const totalFixed = this.data.items.reduce((s, i) => isExpenseActive(i.day||1) ? s+(i.amount||0) : s, 0);
+                // Calculo Proyecciones
                 const income = this.data.income || 0;
-                const free = Math.max(0, income - totalFixed);
                 
-                const dailyLimit = free / this.daysLeft;
+                // Q1 Expenses (5-19)
+                const fixedQ1 = this.data.items.reduce((s, i) => (i.day >= 5 && i.day <= 19) ? s + (i.amount||0) : s, 0);
+                const freeQ1 = income - fixedQ1;
                 
+                // Q2 Expenses (20-4)
+                const fixedQ2 = this.data.items.reduce((s, i) => (i.day >= 20 || i.day <= 4) ? s + (i.amount||0) : s, 0);
+                const freeQ2 = income - fixedQ2;
+
+                document.getElementById('projQ1').textContent = this.fmt(freeQ1);
+                document.getElementById('projQ2').textContent = this.fmt(freeQ2);
+
+                // Calculo Hoy
+                const isQ1 = (d >= 5 && d < 20);
+                const currentPeriodFree = isQ1 ? freeQ1 : freeQ2;
+                
+                const dailyLimit = currentPeriodFree / this.daysLeft;
                 const availableToday = dailyLimit - this.todaySpent + this.todayExtras;
 
-                // UI UPDATE
                 const elAvail = document.getElementById('valDaily');
                 if (elAvail) {
                     elAvail.textContent = this.fmt(availableToday);
@@ -505,55 +543,98 @@
                 }
                 
                 if(document.getElementById('dailyLimit')) document.getElementById('dailyLimit').textContent = this.fmt(dailyLimit);
-                if(document.getElementById('valFree')) document.getElementById('valFree').textContent = this.fmt(free);
+                if(document.getElementById('valFree')) document.getElementById('valFree').textContent = this.fmt(currentPeriodFree);
                 if(document.getElementById('daysLeft')) document.getElementById('daysLeft').textContent = this.daysLeft;
             },
 
-            // --- GASTOS FIJOS (PLAN) ---
-            addFixed() {
+            // --- GASTOS FIJOS (CRUD) ---
+            openSheet(id, idx = null) {
+                const sheet = document.getElementById('sheet-'+id);
+                if (sheet) sheet.classList.add('active');
+                
+                if (id === 'fixed') {
+                    this.editingItem = idx;
+                    const btnDel = document.getElementById('btnDeleteFixed');
+                    
+                    if (idx !== null) {
+                        const item = this.data.items[idx];
+                        document.getElementById('fixName').value = item.name;
+                        document.getElementById('fixAmount').value = item.amount;
+                        document.getElementById('fixDay').value = item.day;
+                        btnDel.classList.remove('hidden');
+                    } else {
+                        document.getElementById('fixName').value = '';
+                        document.getElementById('fixAmount').value = '';
+                        document.getElementById('fixDay').value = '';
+                        btnDel.classList.add('hidden');
+                    }
+                    document.getElementById('fixName').focus();
+                } else if(id === 'log') {
+                     document.getElementById('logAmnt').focus();
+                } else if(id === 'extra') {
+                     document.getElementById('extraAmnt').focus();
+                }
+            },
+
+            closeSheet(id) { 
+                const sheet = document.getElementById('sheet-'+id);
+                if (sheet) sheet.classList.remove('active'); 
+            },
+
+            saveFixed() {
                 const name = document.getElementById('fixName').value;
                 const amt = parseFloat(document.getElementById('fixAmount').value);
                 const day = parseInt(document.getElementById('fixDay').value);
                 if(!name || !amt || !day) return;
-                this.data.items.push({name, amount:amt, day});
+                
+                const item = {name, amount:amt, day};
+                if (this.editingItem !== null) {
+                    this.data.items[this.editingItem] = item;
+                } else {
+                    this.data.items.push(item);
+                }
+                
                 this.renderFixedList(); this.save(); this.closeSheet('fixed');
-                document.getElementById('fixName').value=''; document.getElementById('fixAmount').value=''; document.getElementById('fixDay').value='';
             },
-            deleteFixed(idx) { if(confirm("¿Borrar?")) { this.data.items.splice(idx,1); this.renderFixedList(); this.save(); } },
+            
+            deleteFixed() { 
+                if(this.editingItem !== null && confirm("¿Borrar?")) { 
+                    this.data.items.splice(this.editingItem,1); 
+                    this.renderFixedList(); 
+                    this.save(); 
+                    this.closeSheet('fixed'); 
+                } 
+            },
+
             renderFixedList() {
                 const el = document.getElementById('fixedList');
                 if (!el) return;
                 el.innerHTML = '';
                 const d = new Date().getDate();
-                const p1=this.data.payDay1 || 5, p2=this.data.payDay2 || 20;
+                const p1=5, p2=20;
                 const isActive = (day) => (d >= p1 && d < p2) ? (day >= p1 && day < p2) : (day >= p2 || day < p1);
+                
+                // Ordenar por día
+                this.data.items.sort((a,b) => a.day - b.day);
+
                 this.data.items.forEach((it, i) => {
                     const active = isActive(it.day);
+                    // Icon logic
+                    let iconClass = active ? 'ph-lock-open text-red-400' : 'ph-lock text-gray-500';
+                    let bgClass = active ? 'fixed' : 'future'; // Use future style for inactive
+
                     el.innerHTML += `
-                    <div class="tx-item ${active ? '' : 'opacity-40 grayscale'}">
+                    <div class="tx-item ${active ? '' : 'opacity-50'}" onclick="app.openSheet('fixed', ${i})">
                         <div class="flex items-center">
-                            <div class="tx-icon fixed"><i class="ph-bold ${active ? 'ph-lock-open' : 'ph-lock'}"></i></div>
+                            <div class="tx-icon ${bgClass}"><i class="ph-bold ${iconClass}"></i></div>
                             <div><div class="tx-title">${it.name}</div><div class="tx-date">Día ${it.day}</div></div>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <div class="tx-amount text-red-400">$${it.amount}</div>
-                            <button onclick="app.deleteFixed(${i})" class="text-gray-600 hover:text-white"><i class="ph-bold ph-trash"></i></button>
-                        </div>
+                        <div class="tx-amount text-red-400">$${it.amount}</div>
                     </div>`;
                 });
             },
 
             // --- LOGS Y EXTRAS ---
-            openSheet(id) { 
-                const sheet = document.getElementById('sheet-'+id);
-                if (sheet) sheet.classList.add('active');
-                if(id==='log') document.getElementById('logAmnt')?.focus();
-                if(id==='extra') document.getElementById('extraAmnt')?.focus();
-            },
-            closeSheet(id) { 
-                const sheet = document.getElementById('sheet-'+id);
-                if (sheet) sheet.classList.remove('active'); 
-            },
             setDesc(t, el) { 
                 const logDesc = document.getElementById('logDesc');
                 if (logDesc) logDesc.value = t; 
@@ -597,7 +678,6 @@
                     if (!list) return; 
                     list.innerHTML = '';
                     let spent = 0;
-                    let extras = 0;
                     
                     if(arr.length===0) list.innerHTML='<div class="text-center text-xs text-gray-600 py-10 italic">Sin movimientos hoy</div>';
 
@@ -605,7 +685,7 @@
                         const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
                         if(d.toDateString() === todayStr) {
                             if (l.type === 'income') {
-                                extras += l.amnt;
+                                this.todayExtras += l.amnt;
                                 list.innerHTML += `<div class="tx-item"><div class="flex items-center"><div class="tx-icon extra"><i class="ph-bold ph-coin"></i></div><div class="tx-info"><div class="tx-title">Extra</div><div class="tx-date">${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div></div><div class="tx-amount text-green-500">+$${l.amnt}</div></div>`;
                             } else {
                                 spent += l.amnt;
@@ -614,7 +694,6 @@
                         }
                     });
                     this.todaySpent = spent;
-                    this.todayExtras = extras;
                     
                     const totalEl = document.getElementById('todaySpentTotal');
                     if(totalEl) totalEl.textContent = `-$${this.fmt(spent)}`; 
@@ -628,6 +707,61 @@
                 } else {
                     const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]');
                     process(logs.reverse());
+                }
+            },
+            
+            // --- HISTORY ---
+            changeMonth(d) {
+                this.histDate.setMonth(this.histDate.getMonth() + d);
+                this.renderHistory();
+            },
+            
+            renderHistory() {
+                const label = document.getElementById('histMonthLabel');
+                const list = document.getElementById('historyList');
+                const totalEl = document.getElementById('histTotal');
+                if(!label || !list) return;
+
+                const m = this.histDate.getMonth();
+                const y = this.histDate.getFullYear();
+                label.textContent = `${["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"][m]} ${y}`;
+
+                list.innerHTML = '<div class="text-center text-xs text-gray-600 py-4">Cargando...</div>';
+                
+                // Function to filter and render logs for selected month
+                const showHist = (allLogs) => {
+                    list.innerHTML = '';
+                    let monthSpent = 0;
+                    const filtered = allLogs.filter(l => {
+                        const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
+                        return d.getMonth() === m && d.getFullYear() === y && l.type === 'expense';
+                    });
+                    
+                    if(filtered.length === 0) list.innerHTML = '<div class="text-center text-xs text-gray-600 py-10">Sin gastos este mes</div>';
+
+                    filtered.forEach(l => {
+                         monthSpent += l.amnt;
+                         const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
+                         list.innerHTML += `
+                            <div class="tx-item">
+                                <div class="flex items-center">
+                                    <div class="tx-icon variable"><i class="ph-bold ph-calendar-blank"></i></div>
+                                    <div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleDateString()}</div></div>
+                                </div>
+                                <div class="tx-amount text-red-500">-$${l.amnt}</div>
+                            </div>`;
+                    });
+                    totalEl.textContent = this.fmt(monthSpent);
+                };
+
+                if(this.user && !this.user.isAnonymous) {
+                     // Query specific month range (Simplification: getting last 100 and filtering locally for now)
+                     db.collection(COLLECTION).doc(this.user.uid).collection('logs')
+                       .orderBy('date', 'desc').limit(100)
+                       .get().then(s => showHist(s.docs.map(d=>d.data())));
+                } else {
+                    const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]');
+                    showHist(logs);
                 }
             },
 
