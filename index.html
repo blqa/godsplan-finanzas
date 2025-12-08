@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>God's Plan | Treasury</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- FIREBASE COMPAT -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f0f11; color: white; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+
+        /* NAV GLOBAL */
+        #global-nav {
+            height: 40px; background: #000; display: flex; align-items: center; 
+            justify-content: space-between; padding: 0 15px; flex-shrink: 0;
+            border-bottom: 1px solid #222; z-index: 50;
+        }
+        .g-logo { color: #fff; font-weight: 900; font-size: 0.8rem; letter-spacing: 1px; display: flex; align-items: center; gap: 5px; text-decoration: none; }
+        .g-links { display: flex; gap: 15px; }
+        .g-link { color: #666; text-decoration: none; font-size: 0.75rem; font-weight: 700; transition: color 0.2s; }
+        .g-link:hover, .g-link.active { color: #fff; }
+
+        /* AREA PRINCIPAL */
+        #main-content {
+            flex-grow: 1; overflow-y: auto; padding: 20px; padding-bottom: 110px;
+            background: linear-gradient(180deg, #0f0f11 0%, #050505 100%);
+        }
+
+        /* TARJETA ONYX */
+        .onyx-card {
+            background: linear-gradient(135deg, #1f1f23, #0a0a0a);
+            border-radius: 24px; padding: 25px; position: relative; overflow: hidden;
+            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.05);
+            min-height: 180px; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .onyx-card::before {
+            content: ''; position: absolute; top: -50%; right: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 50%); pointer-events: none;
+        }
+        .onyx-card::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, #ef4444, #b91c1c);
+        }
+
+        .card-label { font-size: 0.7rem; color: #71717a; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+        .card-value { font-size: 3rem; font-weight: 800; color: white; line-height: 1; letter-spacing: -1px; }
+
+        /* SECCIONES Y LISTAS */
+        .section-title { font-size: 0.8rem; font-weight: 800; color: #52525b; margin: 25px 0 15px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .tx-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px; background: #18181b; border: 1px solid #27272a; border-radius: 16px; margin-bottom: 10px;
+        }
+        .tx-icon {
+            width: 44px; height: 44px; border-radius: 12px; background: #27272a;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #a1a1aa; margin-right: 15px;
+        }
+        .tx-icon.variable { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
+        .tx-icon.extra { color: #34d399; background: rgba(52, 211, 153, 0.1); }
+        
+        .tx-info { flex: 1; }
+        .tx-title { font-weight: 700; font-size: 0.95rem; color: #e4e4e7; }
+        .tx-date { font-size: 0.75rem; color: #71717a; font-weight: 600; }
+        .tx-amount { font-weight: 800; font-size: 1rem; color: #e4e4e7; }
+        
+        /* BOTTOM NAV */
+        .bottom-nav {
+            height: 80px; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(20px);
+            border-top: 1px solid #262626; display: grid; grid-template-columns: 1fr 1fr 1fr;
+            position: fixed; bottom: 0; left: 0; width: 100%; z-index: 50;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #525252; cursor: pointer; transition: all 0.3s;
+        }
+        .nav-item.active { color: #ef4444; }
+        .nav-item i { font-size: 1.8rem; margin-bottom: 4px; transition: transform 0.2s; }
+        .nav-item.active i { transform: translateY(-2px); }
+        .nav-item span { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* VISTAS */
+        .view { display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .view.active { display: block; opacity: 1; }
+
+        /* INPUTS LIMPIOS */
+        .clean-input-group {
+            background: #18181b; border-radius: 16px; padding: 20px;
+            border: 1px solid #27272a; display: flex; flex-direction: column;
+            margin-bottom: 10px; transition: border-color 0.2s;
+        }
+        .clean-input-group:focus-within { border-color: #ef4444; }
+        .input-label { font-size: 0.7rem; color: #71717a; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
+        .clean-input {
+            background: transparent; border: none; color: white; width: 100%; font-weight: 800; font-size: 1.5rem;
+            outline: none;
+        }
+        
+        /* FAB */
+        .fab {
+            position: fixed; bottom: 95px; right: 25px;
+            width: 60px; height: 60px; background: #ef4444; border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 1.8rem; box-shadow: 0 10px 30px rgba(220, 38, 38, 0.4);
+            z-index: 40; cursor: pointer; transition: transform 0.2s; border: none;
+        }
+        .fab:active { transform: scale(0.9); }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 100;
+            display: none; justify-content: center; opacity: 0; transition: opacity 0.2s;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        
+        .modal-overlay.sheet { align-items: flex-end; }
+        .bottom-sheet {
+            background: #171717; width: 100%; max-width: 600px; border-top-left-radius: 24px; border-top-right-radius: 24px;
+            padding: 30px; box-shadow: 0 -10px 50px rgba(0,0,0,0.8); border-top: 1px solid #333;
+            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-overlay.active .bottom-sheet { transform: translateY(0); }
+
+        .modal-overlay.center { align-items: center; }
+        .auth-card {
+            background: #171717; padding: 30px; border-radius: 24px; border: 1px solid #333;
+            text-align: center; max-width: 350px; width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+            transform: scale(0.95); transition: transform 0.3s;
+        }
+        .modal-overlay.active .auth-card { transform: scale(1); }
+
+        .btn-primary { width: 100%; background: #ef4444; color: white; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 1rem; border: none; cursor: pointer; }
+        .chip-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 20px; }
+        .chip { background: #262626; padding: 8px 16px; border-radius: 50px; font-size: 0.85rem; color: #a3a3a3; white-space: nowrap; cursor: pointer; border: 1px solid transparent; font-weight: 600; }
+        .chip.selected { background: #ef4444; color: white; border-color: #ef4444; }
+
+        /* EXTRA CARD */
+        .extra-card {
+            background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.1);
+            border-radius: 16px; padding: 15px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .extra-title { font-size: 0.7rem; color: #34d399; font-weight: 700; text-transform: uppercase; }
+        .extra-date { font-size: 0.9rem; font-weight: 600; color: #d1fae5; }
+    </style>
+</head>
+<body>
+
+    <nav id="global-nav">
+        <a href="https://godsplan.site" class="g-logo"><i class="ph-bold ph-circles-three-plus"></i> NEXUS</a>
+        <div class="g-links">
+            <a href="https://adherencia.godsplan.site" class="g-link">ADHERENCIA</a>
+            <a href="https://chat.godsplan.site" class="g-link">CHAT</a>
+            <a href="#" class="g-link active">TREASURY</a>
+        </div>
+    </nav>
+
+    <!-- CONTENIDO -->
+    <div id="main-content">
+        
+        <!-- VISTA HOY: Solo lo vital -->
+        <div id="view-today" class="view active">
+            <div class="flex justify-between items-center mb-6 opacity-70 px-2">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-widest" id="dateDisplay">HOY</div>
+                <div id="statusBadge" class="text-[10px] bg-gray-900 border border-gray-800 px-3 py-1 rounded-full text-gray-500">...</div>
+            </div>
+
+            <!-- HERO CARD -->
+            <div class="onyx-card">
+                <div>
+                    <div class="card-label">LIBRE PARA HOY</div>
+                    <div class="card-value mt-2" id="valDaily">$0</div>
+                    <div class="text-[10px] text-gray-500 mt-1 font-mono">Límite Diario Base: <span id="dailyLimit" class="text-gray-300">$0</span></div>
+                </div>
+                
+                <div class="flex justify-between items-end mt-4">
+                    <div>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase mb-1">Restante del Periodo</div>
+                        <div class="text-lg font-bold text-white" id="valFree">$0</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] text-gray-500 font-bold uppercase mb-1">Días Restantes</div>
+                        <div class="text-lg font-bold text-red-400" id="daysLeft">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRÓXIMO EXTRA (NUEVO) -->
+            <div class="extra-card">
+                <div>
+                    <div class="extra-title">Próximo Pago Extra</div>
+                    <div class="extra-date" id="nextExtraDate">Calculando...</div>
+                </div>
+                <div class="text-right">
+                    <button onclick="app.openSheet('extra')" class="text-xs bg-green-900/30 text-green-400 px-3 py-1.5 rounded-lg border border-green-800 hover:bg-green-900/50 font-bold">REGISTRAR</button>
+                </div>
+            </div>
+
+            <!-- HISTORIAL VARIABLES -->
+            <div class="section-title">
+                <span>Gastos del Día</span>
+                <span class="text-xs text-red-500" id="todaySpentTotal">-$0</span>
+            </div>
+            
+            <div id="logList" class="pb-20 space-y-3">
+                <div class="text-center text-xs text-gray-600 py-10 italic">Cargando movimientos...</div>
+            </div>
+        </div>
+
+        <!-- VISTA PLAN -->
+        <div id="view-plan" class="view">
+            <h2 class="text-2xl font-black text-white mb-6 px-2">Planificación</h2>
+            
+            <div class="clean-input-group">
+                <label class="input-label text-green-500">Ingreso Neto (Quincenal)</label>
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-gray-600 mr-2">$</span>
+                    <input type="number" id="inpIncome" class="clean-input text-green-400" placeholder="0.00" onchange="app.saveConfig()">
+                </div>
+            </div>
+
+            <div class="section-title">
+                <span>Gastos Fijos & Deudas</span>
+                <button onclick="app.openSheet('fixed')" class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-lg hover:bg-gray-700">+ NUEVO</button>
+            </div>
+            
+            <div class="text-[10px] text-gray-600 mb-4 px-2">
+                Gastos activos en este periodo (Día 5-19 o 20-4).
+            </div>
+
+            <div id="fixedList" class="space-y-3 mb-24"></div>
+        </div>
+
+        <!-- VISTA CUENTA -->
+        <div id="view-settings" class="view">
+            <h2 class="text-2xl font-black text-white mb-6 px-2">Cuenta</h2>
+            
+            <div class="bg-gray-900/50 p-6 rounded-3xl border border-gray-800 text-center mb-6">
+                <div class="w-20 h-20 bg-gray-800 rounded-full mx-auto flex items-center justify-center mb-4 text-3xl shadow-xl border border-gray-700" id="userAvatar">👤</div>
+                <h3 class="font-bold text-xl text-white mb-1" id="userName">Invitado</h3>
+                <p class="text-xs text-gray-500 mb-6 font-mono uppercase tracking-widest" id="userEmail">MODO LOCAL</p>
+                
+                <button id="btnLogin" onclick="app.login()" class="btn-primary mb-3 bg-blue-600 hover:bg-blue-500">Conectar Google</button>
+                <button id="btnLogout" onclick="app.logout()" class="btn-primary bg-transparent border border-red-900 text-red-500 hover:bg-red-900/20 hidden">Cerrar Sesión</button>
+            </div>
+
+            <div class="bg-gray-900/50 p-6 rounded-3xl border border-gray-800 mb-6">
+                <h4 class="text-xs text-gray-500 font-bold uppercase mb-4">Configuración de Horas Extra</h4>
+                <label class="input-label">Pago Promedio de Horas</label>
+                <input type="number" id="inpAvgExtra" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none mb-2" placeholder="$0.00" onchange="app.saveConfig()">
+                <p class="text-[10px] text-gray-600">Este monto se sugerirá los martes.</p>
+            </div>
+
+            <button onclick="app.resetData()" class="w-full py-4 text-xs font-bold text-gray-600 hover:text-red-500 transition border border-gray-800 rounded-xl">REINICIAR DATOS</button>
+        </div>
+
+    </div>
+
+    <!-- FAB -->
+    <button class="fab" id="fabBtn" onclick="app.openSheet('log')">
+        <i class="ph-bold ph-plus"></i>
+    </button>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="app.switchTab('today', this)">
+            <i class="ph-fill ph-wallet"></i>
+            <span>HOY</span>
+        </div>
+        <div class="nav-item" onclick="app.switchTab('plan', this)">
+            <i class="ph-bold ph-strategy"></i>
+            <span>PLAN</span>
+        </div>
+        <div class="nav-item" onclick="app.switchTab('settings', this)">
+            <i class="ph-bold ph-user-circle"></i>
+            <span>CUENTA</span>
+        </div>
+    </div>
+
+    <!-- SHEET: GASTO VARIABLE -->
+    <div id="sheet-log" class="modal-overlay sheet" onclick="if(event.target===this) app.closeSheet('log')">
+        <div class="bottom-sheet">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-money text-yellow-500"></i> Gasto Variable</h3>
+                <button onclick="app.closeSheet('log')" class="text-gray-500"><i class="ph-bold ph-x text-xl"></i></button>
+            </div>
+            <div class="relative mb-6">
+                <span class="absolute left-0 top-1/2 -translate-y-1/2 text-3xl font-black text-gray-600">$</span>
+                <input type="number" id="logAmnt" class="w-full bg-transparent text-center text-5xl font-black text-white border-b border-gray-700 pb-2 focus:outline-none focus:border-red-500" placeholder="0">
+            </div>
+            <div class="chip-container">
+                <div class="chip" onclick="app.setDesc('Comida', this)">🍔 Comida</div>
+                <div class="chip" onclick="app.setDesc('Transporte', this)">🚌 Transporte</div>
+                <div class="chip" onclick="app.setDesc('Antojo', this)">🍫 Antojo</div>
+                <div class="chip" onclick="app.setDesc('Servicios', this)">💡 Servicios</div>
+            </div>
+            <input type="text" id="logDesc" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 text-white mb-6 outline-none" placeholder="Descripción...">
+            <button onclick="app.addLog()" class="btn-primary shadow-lg shadow-yellow-900/20 bg-yellow-600 text-white">REGISTRAR GASTO</button>
+        </div>
+    </div>
+
+    <!-- SHEET: REGISTRAR EXTRA -->
+    <div id="sheet-extra" class="modal-overlay sheet" onclick="if(event.target===this) app.closeSheet('extra')">
+        <div class="bottom-sheet">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-coin text-green-500"></i> Ingreso Extra</h3>
+                <button onclick="app.closeSheet('extra')" class="text-gray-500"><i class="ph-bold ph-x text-xl"></i></button>
+            </div>
+            <div class="relative mb-6">
+                <span class="absolute left-0 top-1/2 -translate-y-1/2 text-3xl font-black text-gray-600">$</span>
+                <input type="number" id="extraAmnt" class="w-full bg-transparent text-center text-5xl font-black text-green-400 border-b border-gray-700 pb-2 focus:outline-none focus:border-green-500" placeholder="0">
+            </div>
+            <button onclick="app.addExtra()" class="btn-primary bg-green-600 hover:bg-green-500 shadow-lg shadow-green-900/20">SUMAR AL DÍA</button>
+        </div>
+    </div>
+
+    <!-- SHEET: GASTO FIJO -->
+    <div id="sheet-fixed" class="modal-overlay sheet" onclick="if(event.target===this) app.closeSheet('fixed')">
+        <div class="bottom-sheet">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-lock-key text-red-500"></i> Nuevo Gasto Fijo</h3>
+                <button onclick="app.closeSheet('fixed')" class="text-gray-500"><i class="ph-bold ph-x text-xl"></i></button>
+            </div>
+            <label class="form-label">Nombre</label>
+            <input type="text" id="fixName" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white mb-4 outline-none">
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div><label class="form-label">Monto</label><input type="number" id="fixAmount" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none" placeholder="$0"></div>
+                <div><label class="form-label">Día de Pago</label><input type="number" id="fixDay" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none text-center" placeholder="1-31"></div>
+            </div>
+            <button onclick="app.addFixed()" class="btn-primary">GUARDAR FIJO</button>
+        </div>
+    </div>
+    
+    <!-- AUTH MODAL -->
+    <div id="authModal" class="modal-overlay center active">
+        <div class="auth-card">
+            <i class="ph-duotone ph-vault text-5xl text-red-600 mb-4"></i>
+            <h2 class="text-2xl font-black text-white mb-2 tracking-tight">TREASURY</h2>
+            <p class="text-gray-500 text-sm mb-8">Gestión financiera encriptada.</p>
+            <button onclick="app.login()" class="w-full bg-white text-black py-4 rounded-xl font-bold hover:bg-gray-200 transition mb-3 flex items-center justify-center gap-2"><i class="ph-bold ph-google-logo text-lg"></i> Conectar Google</button>
+            <button onclick="app.loginAnon()" class="w-full bg-gray-800 text-gray-400 py-4 rounded-xl font-bold hover:bg-gray-700 transition text-sm">Entrar como Invitado</button>
+        </div>
+    </div>
+
+    <script>
+        const COLLECTION = "treasury_v5_pro";
+        const firebaseConfig = { apiKey: "AIzaSyCrHBz94UtgiaYntHCYhC5jNa6auUI63vQ", authDomain: "god-s-plan-d737b.firebaseapp.com", projectId: "god-s-plan-d737b", storageBucket: "god-s-plan-d737b.firebasestorage.app", messagingSenderId: "458198314028", appId: "1:458198314028:web:d62b24cee2d19ee5b47589" };
+        try { firebase.initializeApp(firebaseConfig); var auth=firebase.auth(), db=firebase.firestore(); } catch(e){}
+
+        const app = {
+            user: null,
+            data: { income: 0, items: [], payDay1: 5, payDay2: 20, avgExtra: 0 },
+            period: { daysLeft: 15 },
+            todaySpent: 0,
+            todayExtras: 0, // Nueva variable para ingresos extras del día
+
+            init() {
+                document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric' }).toUpperCase();
+                
+                auth.onAuthStateChanged(u => {
+                    if(u) {
+                        this.user = u;
+                        document.getElementById('authModal').classList.remove('active');
+                        this.updateAuthUI(u);
+                        this.loadData();
+                        this.loadLogs();
+                    } else {
+                        document.getElementById('authModal').classList.add('active');
+                    }
+                });
+                
+                // Calcular fecha de proximo extra al inicio
+                this.calculateNextExtra();
+            },
+
+            // --- LÓGICA DE HORAS EXTRA ---
+            calculateNextExtra() {
+                const today = new Date();
+                let nextPay = new Date();
+                // 1. Encontrar el siguiente Martes
+                nextPay.setDate(today.getDate() + (2 + 7 - today.getDay()) % 7);
+                // Si hoy es martes, mover al siguiente semana? No, si hoy es martes y no ha pasado, es hoy. 
+                // Pero asumamos proximo martes futuro.
+                if (nextPay <= today) nextPay.setDate(nextPay.getDate() + 7);
+
+                // 2. Verificar cruce con quincena (5 o 20)
+                let day = nextPay.getDate();
+                if (day === 5 || day === 20) {
+                    nextPay.setDate(nextPay.getDate() + 1); // Mover a Miércoles
+                }
+
+                // 3. Verificar Lunes Festivo (Simple: Lunes anterior a este martes)
+                const prevMonday = new Date(nextPay);
+                prevMonday.setDate(nextPay.getDate() - 1);
+                const holidays = ["1-1", "5-2", "21-3", "1-5", "16-9", "20-11", "25-12"]; // D-M
+                const monStr = `${prevMonday.getDate()}-${prevMonday.getMonth()+1}`;
+                
+                if (holidays.includes(monStr)) {
+                     nextPay.setDate(nextPay.getDate() + 1); // Mover a Miércoles
+                }
+
+                const opts = { weekday: 'short', day: 'numeric', month: 'short' };
+                document.getElementById('nextExtraDate').textContent = nextPay.toLocaleDateString('es-ES', opts);
+            },
+
+            updateAuthUI(u) {
+                const b = document.getElementById('statusBadge');
+                if(u.isAnonymous) { 
+                    b.textContent='Local'; 
+                    document.getElementById('userName').textContent = "Invitado";
+                    document.getElementById('btnLogin').classList.remove('hidden'); 
+                    document.getElementById('btnLogout').classList.add('hidden');
+                } else { 
+                    b.textContent='Nube'; b.className='text-[10px] font-bold bg-green-900/30 border border-green-800 px-3 py-1 rounded-full text-green-500';
+                    document.getElementById('userName').textContent = u.displayName;
+                    document.getElementById('userEmail').textContent = u.email;
+                    document.getElementById('userAvatar').innerHTML = `<img src="${u.photoURL}" class="w-full h-full rounded-full">`;
+                    document.getElementById('btnLogin').classList.add('hidden'); 
+                    document.getElementById('btnLogout').classList.remove('hidden');
+                }
+            },
+
+            switchTab(viewId, btn) {
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                document.getElementById('view-'+viewId).classList.add('active');
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelector('.fab').style.display = viewId === 'today' ? 'flex' : 'none';
+            },
+
+            // --- DATA ---
+            async loadData() {
+                if(!this.user) return;
+                const local = localStorage.getItem('gp_treasury_v5');
+                if(local) { this.data = JSON.parse(local); this.render(); }
+
+                if(!this.user.isAnonymous) {
+                    const doc = await db.collection(COLLECTION).doc(this.user.uid).get();
+                    if(doc.exists) {
+                        this.data = doc.data();
+                        if(!this.data.items) this.data.items = [];
+                        this.render();
+                        localStorage.setItem('gp_treasury_v5', JSON.stringify(this.data));
+                    }
+                }
+                
+                if(!this.data.items) this.data.items = [];
+                document.getElementById('inpIncome').value = this.data.income || '';
+                document.getElementById('inpAvgExtra').value = this.data.avgExtra || '';
+                document.getElementById('extraAmnt').value = this.data.avgExtra || ''; // Prellenar con promedio
+                this.renderFixedList();
+            },
+
+            saveConfig() {
+                this.data.income = parseFloat(document.getElementById('inpIncome').value) || 0;
+                this.data.avgExtra = parseFloat(document.getElementById('inpAvgExtra').value) || 0;
+                this.save();
+                this.render();
+            },
+
+            save() {
+                localStorage.setItem('gp_treasury_v5', JSON.stringify(this.data));
+                if(this.user && !this.user.isAnonymous) db.collection(COLLECTION).doc(this.user.uid).set(this.data);
+            },
+
+            // --- RENDER & CALC ---
+            render() {
+                const now = new Date();
+                const d = now.getDate();
+                const p1 = 5, p2 = 20; // Fijos según requerimiento
+                
+                // Rangos
+                let start, end;
+                if (d >= p1 && d < p2) { start=p1; end=p2; } 
+                else { start=p2; end=p1; }
+
+                // Dias Restantes
+                let targetDate = new Date();
+                if(d >= p2) targetDate.setMonth(targetDate.getMonth()+1);
+                targetDate.setDate(end);
+                
+                if(targetDate.getDay()===6) targetDate.setDate(targetDate.getDate()+2);
+                if(targetDate.getDay()===0) targetDate.setDate(targetDate.getDate()+1);
+                
+                const diffTime = targetDate - now;
+                this.daysLeft = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+                
+                // Filtro
+                const isExpenseActive = (day) => {
+                    if (d >= p1 && d < p2) return day >= p1 && day < p2;
+                    else return day >= p2 || day < p1;
+                };
+
+                const totalFixed = this.data.items.reduce((s, i) => isExpenseActive(i.day||1) ? s+(i.amount||0) : s, 0);
+                const income = this.data.income || 0;
+                const free = Math.max(0, income - totalFixed);
+                
+                const dailyLimit = free / this.daysLeft;
+                
+                // Lógica final: DailyLimit - GastadoHoy + ExtrasHoy
+                const availableToday = dailyLimit - this.todaySpent + this.todayExtras;
+
+                // UI
+                const elAvail = document.getElementById('valDaily');
+                elAvail.textContent = this.fmt(availableToday);
+                elAvail.className = `card-value mt-2 ${availableToday < 0 ? 'text-red-500' : 'text-white'}`;
+                
+                if(document.getElementById('dailyLimit')) document.getElementById('dailyLimit').textContent = this.fmt(dailyLimit);
+                document.getElementById('valFree').textContent = this.fmt(free);
+                document.getElementById('daysLeft').textContent = this.daysLeft;
+            },
+
+            // --- FIJOS ---
+            addFixed() {
+                const name = document.getElementById('fixName').value;
+                const amt = parseFloat(document.getElementById('fixAmount').value);
+                const day = parseInt(document.getElementById('fixDay').value);
+                if(!name || !amt || !day) return;
+                this.data.items.push({name, amount:amt, day});
+                this.renderFixedList(); this.save(); this.closeSheet('fixed');
+                document.getElementById('fixName').value=''; document.getElementById('fixAmount').value=''; document.getElementById('fixDay').value='';
+            },
+            deleteFixed(idx) { if(confirm("¿Borrar?")) { this.data.items.splice(idx,1); this.renderFixedList(); this.save(); } },
+            renderFixedList() {
+                const el = document.getElementById('fixedList');
+                el.innerHTML = '';
+                const d = new Date().getDate();
+                const p1=5, p2=20;
+                const isActive = (day) => (d >= p1 && d < p2) ? (day >= p1 && day < p2) : (day >= p2 || day < p1);
+                this.data.items.forEach((it, i) => {
+                    const active = isActive(it.day);
+                    el.innerHTML += `
+                    <div class="tx-item ${active ? '' : 'opacity-40 grayscale'}">
+                        <div class="flex items-center">
+                            <div class="tx-icon fixed"><i class="ph-bold ${active ? 'ph-lock-open' : 'ph-lock'}"></i></div>
+                            <div><div class="tx-title">${it.name}</div><div class="tx-date">Día ${it.day}</div></div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="tx-amount text-red-400">$${it.amount}</div>
+                            <button onclick="app.deleteFixed(${i})" class="text-gray-600 hover:text-white"><i class="ph-bold ph-trash"></i></button>
+                        </div>
+                    </div>`;
+                });
+            },
+
+            // --- LOGS Y EXTRAS ---
+            openSheet(id) { 
+                document.getElementById('sheet-'+id).classList.add('active'); 
+                if(id==='log') document.getElementById('quickAmnt').focus(); 
+                if(id==='extra') document.getElementById('extraAmnt').focus();
+            },
+            closeSheet(id) { document.getElementById('sheet-'+id).classList.remove('active'); },
+            setDesc(t, el) { document.getElementById('logDesc').value = t; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); },
+
+            async addLog() {
+                const desc = document.getElementById('logDesc').value || 'Gasto';
+                const amnt = parseFloat(document.getElementById('logAmnt').value);
+                if(!amnt) return;
+                const log = { desc, amnt, type: 'expense', date: new Date().toISOString() };
+                this.saveLogToDb(log);
+                this.closeSheet('log');
+                document.getElementById('logDesc').value = ''; document.getElementById('logAmnt').value = '';
+            },
+
+            async addExtra() {
+                const amnt = parseFloat(document.getElementById('extraAmnt').value);
+                if(!amnt) return;
+                const log = { desc: 'Pago Extra', amnt, type: 'income', date: new Date().toISOString() };
+                this.saveLogToDb(log);
+                this.closeSheet('extra');
+            },
+
+            async saveLogToDb(log) {
+                if(this.user && !this.user.isAnonymous) {
+                     await db.collection(COLLECTION).doc(this.user.uid).collection('logs').add({ ...log, date: firebase.firestore.FieldValue.serverTimestamp() });
+                } else {
+                    const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]');
+                    logs.push(log);
+                    localStorage.setItem('gp_tr_logs', JSON.stringify(logs));
+                    this.loadLogs();
+                }
+            },
+
+            loadLogs() {
+                const todayStr = new Date().toDateString();
+                const process = (arr) => {
+                    const list = document.getElementById('logList');
+                    list.innerHTML = '';
+                    let spent = 0;
+                    let extras = 0;
+                    
+                    if(arr.length===0) list.innerHTML='<div class="text-center text-xs text-gray-600 py-10 italic">Sin movimientos hoy</div>';
+
+                    arr.forEach(l => {
+                        const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
+                        if(d.toDateString() === todayStr) {
+                            if (l.type === 'income') {
+                                extras += l.amnt;
+                                list.innerHTML += `<div class="tx-item"><div class="flex items-center"><div class="tx-icon extra"><i class="ph-bold ph-coin"></i></div><div class="tx-info"><div class="tx-title">Extra</div><div class="tx-date">${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div></div><div class="tx-amount text-green-500">+$${l.amnt}</div></div>`;
+                            } else {
+                                spent += l.amnt;
+                                list.innerHTML += `<div class="tx-item"><div class="flex items-center"><div class="tx-icon variable"><i class="ph-bold ph-shopping-bag"></i></div><div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div></div><div class="tx-amount text-red-500">-$${l.amnt}</div></div>`;
+                            }
+                        }
+                    });
+                    this.todaySpent = spent;
+                    this.todayExtras = extras;
+                    
+                    const totalEl = document.getElementById('todaySpentTotal');
+                    if(totalEl) totalEl.textContent = `-$${this.fmt(spent)}`; 
+                    
+                    this.render(); 
+                };
+
+                if(this.user && !this.user.isAnonymous) {
+                     db.collection(COLLECTION).doc(this.user.uid).collection('logs').orderBy('date','desc').limit(20)
+                       .onSnapshot(s => process(s.docs.map(d=>d.data())));
+                } else {
+                    const logs = JSON.parse(localStorage.getItem('gp_tr_logs') || '[]');
+                    process(logs.reverse());
+                }
+            },
+
+            // --- UTILS ---
+            login() { const p = new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(p).catch(e => alert(e.message)); },
+            loginAnon() { auth.signInAnonymously(); },
+            logout() { auth.signOut(); location.reload(); },
+            resetData() { if(confirm("¿Borrar todo?")) { localStorage.clear(); if(this.user && !this.user.isAnonymous) { db.collection(COLLECTION).doc(this.user.uid).delete(); } location.reload(); } },
+            fmt(n) { return '$' + n.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); }
+        };
+        document.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>
