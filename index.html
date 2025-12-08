@@ -69,13 +69,18 @@
 </head>
 <body class="h-screen flex flex-col overflow-hidden text-sm sm:text-base">
 
-    <!-- NAV SUPERIOR -->
-    <nav class="h-14 bg-black border-b border-white/5 flex items-center justify-between px-5 shrink-0 z-50">
-        <div class="flex items-center gap-2 font-black tracking-wider text-white">
-            <i class="ph-fill ph-infinity text-red-500 text-lg"></i> GOD'S PLAN
-        </div>
-        <div class="flex gap-4 text-xs font-bold text-zinc-500">
-            <span id="syncStatus" class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-zinc-700"></div> OFFLINE</span>
+    <!-- NAV SUPERIOR (Global) -->
+    <nav id="global-nav" class="h-14 bg-black border-b border-white/5 flex items-center justify-between px-5 shrink-0 z-50">
+        <a href="https://godsplan.site" class="flex items-center gap-2 font-black tracking-wider text-white">
+            <i class="ph-bold ph-circles-three-plus text-lg"></i> God's Plan
+        </a>
+        <div class="flex gap-4 items-center">
+            <a href="#" class="text-[10px] font-bold text-white border-b border-white pb-0.5 tracking-wider">ADHERENCIA</a>
+            <a href="https://chat.godsplan.site" class="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors tracking-wider">CHAT</a>
+            <a href="https://godsplan.site/proyectos" class="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors tracking-wider">PROYECTOS</a>
+            
+            <!-- Pequeño indicador de estado (Opcional, integrado sutilmente) -->
+            <div id="syncStatus" class="w-1.5 h-1.5 rounded-full bg-zinc-800 ml-1" title="Estado"></div>
         </div>
     </nav>
 
@@ -401,7 +406,12 @@
                 // Escuchar Auth - SAFETY CHECK ADDED
                 if (!auth) {
                     UI.toast("Error: Firebase no pudo inicializarse", "error");
-                    document.getElementById('syncStatus').innerHTML = '<span class="text-red-500">ERROR CONEXIÓN</span>';
+                    const syncEl = document.getElementById('syncStatus');
+                    if(syncEl) {
+                        syncEl.classList.remove('bg-zinc-800', 'bg-emerald-500');
+                        syncEl.classList.add('bg-red-500');
+                        syncEl.title = "Offline";
+                    }
                     return;
                 }
 
@@ -469,8 +479,13 @@
                         this.updateChart();
                     }, err => console.error(err));
 
-                // UI Online Status
-                document.getElementById('syncStatus').innerHTML = '<div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div> ONLINE';
+                // UI Online Status (usando el nuevo puntito)
+                const syncEl = document.getElementById('syncStatus');
+                if(syncEl) {
+                    syncEl.classList.remove('bg-zinc-800');
+                    syncEl.classList.add('bg-emerald-500');
+                    syncEl.title = "Online";
+                }
             },
 
             calculateBalance() {
