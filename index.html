@@ -18,69 +18,150 @@
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f0f11; color: white; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
-        
+
         /* NAV GLOBAL */
-        #global-nav { height: 40px; background: #000; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid #222; z-index: 50; flex-shrink: 0; }
+        #global-nav {
+            height: 40px; background: #000; display: flex; align-items: center; 
+            justify-content: space-between; padding: 0 15px; flex-shrink: 0;
+            border-bottom: 1px solid #222; z-index: 50;
+        }
         .g-logo { color: #fff; font-weight: 900; font-size: 0.8rem; letter-spacing: 1px; display: flex; align-items: center; gap: 5px; text-decoration: none; }
         .g-links { display: flex; gap: 15px; }
         .g-link { color: #666; text-decoration: none; font-size: 0.75rem; font-weight: 700; transition: color 0.2s; }
         .g-link:hover, .g-link.active { color: #fff; }
 
-        /* CONTENT */
-        #main-content { flex-grow: 1; overflow-y: auto; padding: 20px; padding-bottom: 110px; background: linear-gradient(180deg, #0f0f11 0%, #050505 100%); }
+        /* AREA PRINCIPAL */
+        #main-content {
+            flex-grow: 1; overflow-y: auto; padding: 20px; padding-bottom: 110px;
+            background: linear-gradient(180deg, #0f0f11 0%, #050505 100%);
+        }
 
-        /* ONYX CARD */
-        .onyx-card { background: linear-gradient(135deg, #1f1f23, #0a0a0a); border-radius: 24px; padding: 25px; position: relative; overflow: hidden; box-shadow: 0 20px 50px -10px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); min-height: 180px; display: flex; flex-direction: column; justify-content: space-between; }
-        .onyx-card::before { content: ''; position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 50%); pointer-events: none; }
-        .onyx-card::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #ef4444, #b91c1c); }
+        /* TARJETA ONYX */
+        .onyx-card {
+            background: linear-gradient(135deg, #1f1f23, #0a0a0a);
+            border-radius: 24px; padding: 25px; position: relative; overflow: hidden;
+            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.05);
+            min-height: 180px; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .onyx-card::before {
+            content: ''; position: absolute; top: -50%; right: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 50%); pointer-events: none;
+        }
+        .onyx-card::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, #ef4444, #b91c1c);
+        }
+
         .card-label { font-size: 0.7rem; color: #71717a; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
         .card-value { font-size: 3rem; font-weight: 800; color: white; line-height: 1; letter-spacing: -1px; }
 
-        /* LIST ITEMS */
-        .tx-item { display: flex; align-items: center; padding: 16px; background: #18181b; border: 1px solid #27272a; border-radius: 16px; margin-bottom: 10px; transition: transform 0.1s; cursor: pointer; gap: 15px; }
+        /* SECCIONES Y LISTAS */
+        .section-title { font-size: 0.8rem; font-weight: 800; color: #52525b; margin: 25px 0 15px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .tx-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px; background: #18181b; border: 1px solid #27272a; border-radius: 16px; margin-bottom: 10px;
+            transition: transform 0.1s; cursor: pointer;
+        }
         .tx-item:active { transform: scale(0.98); background: #27272a; }
-        .tx-icon { width: 44px; height: 44px; border-radius: 12px; background: #27272a; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #a1a1aa; flex-shrink: 0; } /* Fixed width preventing overlap */
-        .tx-info { flex: 1; min-width: 0; overflow: hidden; }
-        .tx-title { font-weight: 700; font-size: 0.95rem; color: #e4e4e7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .tx-date { font-size: 0.75rem; color: #71717a; font-weight: 600; }
-        .tx-amount { font-weight: 800; font-size: 1rem; color: #e4e4e7; white-space: nowrap; flex-shrink: 0; }
-
-        /* COLORS */
+        
+        .tx-icon {
+            width: 44px; height: 44px; border-radius: 12px; background: #27272a;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #a1a1aa; margin-right: 15px; flex-shrink: 0;
+        }
         .tx-icon.variable { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
         .tx-icon.extra { color: #34d399; background: rgba(52, 211, 153, 0.1); }
         .tx-icon.fixed { color: #f87171; background: rgba(248, 113, 113, 0.1); }
         .tx-icon.future { color: #6b7280; background: rgba(107, 114, 128, 0.1); } 
-
-        /* BOTTOM NAV (CORREGIDO: 4 COLUMNAS) */
-        .bottom-nav { height: 80px; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(20px); border-top: 1px solid #262626; display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; bottom: 0; left: 0; width: 100%; z-index: 50; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #525252; cursor: pointer; transition: all 0.3s; }
+        
+        .tx-info { flex: 1; min-width: 0; }
+        .tx-title { font-weight: 700; font-size: 0.95rem; color: #e4e4e7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tx-date { font-size: 0.75rem; color: #71717a; font-weight: 600; }
+        .tx-amount { font-weight: 800; font-size: 1rem; color: #e4e4e7; white-space: nowrap; }
+        
+        /* BOTTOM NAV */
+        .bottom-nav {
+            height: 80px; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(20px);
+            border-top: 1px solid #262626; display: grid; grid-template-columns: 1fr 1fr 1fr;
+            position: fixed; bottom: 0; left: 0; width: 100%; z-index: 50;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #525252; cursor: pointer; transition: all 0.3s;
+        }
         .nav-item.active { color: #ef4444; }
         .nav-item i { font-size: 1.8rem; margin-bottom: 4px; transition: transform 0.2s; }
         .nav-item.active i { transform: translateY(-2px); }
         .nav-item span { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* UTILS */
+        /* VISTAS */
         .view { display: none; opacity: 0; transition: opacity 0.3s ease; }
         .view.active { display: block; opacity: 1; }
-        .clean-input { background: transparent; border: none; color: white; width: 100%; font-weight: 800; font-size: 1.5rem; outline: none; placeholder-gray-600; }
-        .clean-input-group { background: #18181b; border-radius: 16px; padding: 20px; border: 1px solid #27272a; margin-bottom: 10px; }
-        .fab { position: fixed; bottom: 95px; right: 25px; width: 60px; height: 60px; background: #ef4444; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.8rem; box-shadow: 0 10px 30px rgba(220, 38, 38, 0.4); z-index: 40; cursor: pointer; border: none; transition: transform 0.2s; }
-        .fab:active { transform: scale(0.95); }
 
-        /* MODALS */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 100; display: none; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+        /* INPUTS LIMPIOS */
+        .clean-input-group {
+            background: #18181b; border-radius: 16px; padding: 20px;
+            border: 1px solid #27272a; display: flex; flex-direction: column;
+            margin-bottom: 10px; transition: border-color 0.2s;
+        }
+        .clean-input-group:focus-within { border-color: #ef4444; }
+        .input-label { font-size: 0.7rem; color: #71717a; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
+        .clean-input {
+            background: transparent; border: none; color: white; width: 100%; font-weight: 800; font-size: 1.5rem;
+            outline: none; placeholder-gray-600;
+        }
+        
+        /* FAB */
+        .fab {
+            position: fixed; bottom: 95px; right: 25px;
+            width: 60px; height: 60px; background: #ef4444; border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 1.8rem; box-shadow: 0 10px 30px rgba(220, 38, 38, 0.4);
+            z-index: 40; cursor: pointer; transition: transform 0.2s; border: none;
+        }
+        .fab:active { transform: scale(0.9); }
+
+        /* MODALES Y SHEETS */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 100;
+            display: none; justify-content: center; opacity: 0; transition: opacity 0.2s;
+        }
         .modal-overlay.active { display: flex; opacity: 1; }
+        
         .modal-overlay.sheet { align-items: flex-end; }
-        .bottom-sheet { background: #171717; width: 100%; max-width: 600px; border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 30px; box-shadow: 0 -10px 50px rgba(0,0,0,0.8); border-top: 1px solid #333; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .bottom-sheet {
+            background: #171717; width: 100%; max-width: 600px; border-top-left-radius: 24px; border-top-right-radius: 24px;
+            padding: 30px; box-shadow: 0 -10px 50px rgba(0,0,0,0.8); border-top: 1px solid #333;
+            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
         .modal-overlay.active .bottom-sheet { transform: translateY(0); }
-        .auth-card { background: #171717; padding: 30px; border-radius: 24px; border: 1px solid #333; text-align: center; max-width: 350px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
+
         .modal-overlay.center { align-items: center; }
+        .auth-card {
+            background: #171717; padding: 30px; border-radius: 24px; border: 1px solid #333;
+            text-align: center; max-width: 350px; width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+            transform: scale(0.95); transition: transform 0.3s;
+        }
+        .modal-overlay.active .auth-card { transform: scale(1); }
 
         .btn-primary { width: 100%; background: #ef4444; color: white; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 1rem; border: none; cursor: pointer; }
         .btn-delete { width: 100%; background: #27272a; color: #ef4444; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 1rem; border: 1px solid #ef4444; cursor: pointer; margin-top: 10px; }
+
         .chip-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 20px; }
         .chip { background: #262626; padding: 8px 16px; border-radius: 50px; font-size: 0.85rem; color: #a3a3a3; white-space: nowrap; cursor: pointer; border: 1px solid transparent; font-weight: 600; }
         .chip.selected { background: #ef4444; color: white; border-color: #ef4444; }
+
+        /* EXTRA CARD */
+        .extra-card {
+            background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.1);
+            border-radius: 16px; padding: 15px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .extra-title { font-size: 0.7rem; color: #34d399; font-weight: 700; text-transform: uppercase; }
+        .extra-date { font-size: 0.9rem; font-weight: 600; color: #d1fae5; }
         
         .projection-card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 20px; margin-bottom: 10px; }
         .proj-label { font-size: 0.65rem; font-weight: 800; color: #71717a; text-transform: uppercase; margin-bottom: 5px; display: flex; justify-content: space-between; }
@@ -98,8 +179,10 @@
         </div>
     </nav>
 
+    <!-- CONTENIDO -->
     <div id="main-content">
-        <!-- VISTA HOY -->
+        
+        <!-- VISTA HOY: Solo lo vital -->
         <div id="view-today" class="view active">
             <div class="flex justify-between items-center mb-6 opacity-70 px-2">
                 <div class="text-xs font-bold text-gray-400 uppercase tracking-widest" id="dateDisplay">HOY</div>
@@ -113,6 +196,7 @@
                     <div class="card-value mt-2" id="valDaily">--</div>
                     <div class="text-[10px] text-gray-500 mt-1 font-mono">Sugerido Diario: <span id="dailyLimit" class="text-gray-300">--</span></div>
                 </div>
+                
                 <div class="flex justify-between items-end mt-4">
                     <div>
                         <div class="text-[10px] text-gray-500 font-bold uppercase mb-1">Restante Total</div>
@@ -125,42 +209,49 @@
                 </div>
             </div>
 
-            <div class="flex items-center justify-between mt-6 mb-2 px-2">
-                <h3 class="text-xs font-bold text-gray-600 uppercase tracking-widest">Movimientos (Periodo)</h3>
-                <span class="text-xs font-bold text-red-500" id="todaySpentTotal">$0</span>
+            <!-- PRÓXIMO EXTRA -->
+            <div class="extra-card">
+                <div>
+                    <div class="extra-title">Próximo Pago Extra</div>
+                    <div class="extra-date" id="nextExtraDate">Calculando...</div>
+                </div>
+                <div class="text-right">
+                    <button onclick="app.openSheet('extra')" class="text-xs bg-green-900/30 text-green-400 px-3 py-2 rounded-lg border border-green-800 hover:bg-green-900/50 font-bold">REGISTRAR</button>
+                </div>
             </div>
+
+            <!-- HISTORIAL VARIABLES (GASTOS DE HOY) -->
+            <div class="section-title">
+                <span>Movimientos del Periodo</span>
+                <span class="text-xs text-red-500" id="todaySpentTotal">$0</span>
+            </div>
+            
             <div id="logList" class="pb-20 space-y-3">
-                <div class="text-center text-xs text-gray-600 py-10 italic">Cargando...</div>
+                <div class="text-center text-xs text-gray-600 py-10 italic">Cargando movimientos...</div>
             </div>
         </div>
 
-        <!-- VISTA PLAN -->
+        <!-- VISTA PLAN: Configuración y Fijos -->
         <div id="view-plan" class="view">
             <h2 class="text-2xl font-black text-white mb-6 px-2">Planificación</h2>
+            
             <div class="clean-input-group">
-                <label class="text-[10px] text-green-500 font-bold uppercase mb-2">Ingreso Neto (Quincenal)</label>
+                <label class="input-label text-green-500">Ingreso Neto (Quincenal)</label>
                 <div class="flex items-center">
                     <span class="text-2xl font-bold text-gray-600 mr-2">$</span>
                     <input type="number" id="inpIncome" class="clean-input text-green-400" placeholder="0.00" oninput="app.saveConfig()">
                 </div>
             </div>
-            
-            <!-- PROYECCIONES -->
-            <div class="projection-card border-l-4 border-l-blue-500">
-                <div class="proj-label"><span>Proyección Q1 (Día 5-19)</span></div>
-                <div class="proj-val" id="projQ1">$0</div>
-                <div class="text-[10px] text-gray-500 mt-1">Ingreso - Fijos</div>
-            </div>
-            <div class="projection-card border-l-4 border-l-purple-500">
-                <div class="proj-label"><span>Proyección Q2 (Día 20-4)</span></div>
-                <div class="proj-val" id="projQ2">$0</div>
-                <div class="text-[10px] text-gray-500 mt-1">Ingreso - Fijos</div>
-            </div>
 
-            <div class="flex justify-between items-center mb-4 mt-8 px-2">
-                <span class="text-xs font-bold text-gray-500 uppercase">Gastos Fijos</span>
+            <div class="section-title">
+                <span>Gastos Fijos & Deudas</span>
                 <button onclick="app.openSheet('fixed')" class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-lg hover:bg-gray-700">+ NUEVO</button>
             </div>
+            
+            <div class="text-[10px] text-gray-600 mb-4 px-2">
+                Gastos activos en este periodo (Día 5-19 o 20-4).
+            </div>
+
             <div id="fixedList" class="space-y-3 mb-24"></div>
         </div>
 
@@ -182,6 +273,7 @@
         <!-- VISTA CUENTA -->
         <div id="view-settings" class="view">
             <h2 class="text-2xl font-black text-white mb-6 px-2">Cuenta</h2>
+            
             <div class="bg-gray-900/50 p-6 rounded-3xl border border-gray-800 text-center mb-6">
                 <div class="w-20 h-20 bg-gray-800 rounded-full mx-auto flex items-center justify-center mb-4 text-3xl shadow-xl border border-gray-700" id="userAvatar">👤</div>
                 <h3 class="font-bold text-xl text-white mb-1" id="userName">Invitado</h3>
@@ -189,20 +281,29 @@
                 <button id="btnLogin" onclick="app.login()" class="btn-primary mb-3 bg-blue-600 hover:bg-blue-500">Conectar Google</button>
                 <button id="btnLogout" onclick="app.logout()" class="btn-primary bg-transparent border border-red-900 text-red-500 hover:bg-red-900/20 hidden">Cerrar Sesión</button>
             </div>
+
             <div class="bg-gray-900/50 p-6 rounded-3xl border border-gray-800 mb-6">
-                <h4 class="text-xs text-gray-500 font-bold uppercase mb-4">Días de Corte</h4>
-                <div class="flex gap-4">
-                    <div class="w-1/2"><label class="text-[10px] font-bold text-gray-500 block mb-1">Corte 1</label><input type="number" id="inpPay1" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none text-center" value="5" onchange="app.saveConfig()"></div>
-                    <div class="w-1/2"><label class="text-[10px] font-bold text-gray-500 block mb-1">Corte 2</label><input type="number" id="inpPay2" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none text-center" value="20" onchange="app.saveConfig()"></div>
-                </div>
+                <h4 class="text-xs text-gray-500 font-bold uppercase mb-4">Configuración de Horas Extra</h4>
+                <label class="input-label">Pago Promedio de Horas</label>
+                <input type="number" id="inpAvgExtra" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none mb-2" placeholder="$0.00" onchange="app.saveConfig()">
+                <p class="text-[10px] text-gray-600">Este monto se sugerirá los martes.</p>
             </div>
-            <button onclick="app.generatePDFReport()" class="w-full bg-gray-800 text-gray-300 py-4 rounded-xl font-bold hover:bg-gray-700 transition mb-3 flex items-center justify-center gap-2 border border-gray-700"><i class="ph-bold ph-file-pdf text-red-500 text-xl"></i> Descargar Estado de Cuenta</button>
+
+            <!-- PDF EXPORT BUTTON -->
+            <button onclick="app.generatePDFReport()" class="w-full bg-gray-800 text-gray-300 py-4 rounded-xl font-bold hover:bg-gray-700 transition mb-3 flex items-center justify-center gap-2 border border-gray-700">
+                <i class="ph-bold ph-file-pdf text-red-500 text-xl"></i> Descargar Estado de Cuenta
+            </button>
+            
             <button onclick="app.resetData()" class="w-full py-4 text-xs font-bold text-gray-600 hover:text-red-500 transition border border-gray-800 rounded-xl">REINICIAR DATOS</button>
         </div>
     </div>
 
-    <button class="fab" id="fabBtn" onclick="app.openSheet('log')"><i class="ph-bold ph-plus"></i></button>
+    <!-- FAB: SOLO EN VISTA HOY -->
+    <button class="fab" id="fabBtn" onclick="app.openSheet('log')">
+        <i class="ph-bold ph-plus"></i>
+    </button>
 
+    <!-- BOTTOM NAV -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="app.switchTab('today', this)"><i class="ph-fill ph-wallet"></i><span>HOY</span></div>
         <div class="nav-item" onclick="app.switchTab('plan', this)"><i class="ph-bold ph-strategy"></i><span>PLAN</span></div>
@@ -210,14 +311,14 @@
         <div class="nav-item" onclick="app.switchTab('settings', this)"><i class="ph-bold ph-user-circle"></i><span>CUENTA</span></div>
     </div>
 
-    <!-- SHEETS -->
+    <!-- SHEET: GASTO VARIABLE (EDITAR/CREAR) -->
     <div id="sheet-log" class="modal-overlay sheet" onclick="if(event.target===this) app.closeSheet('log')">
         <div class="bottom-sheet">
             <div class="flex justify-between items-center mb-6"><h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-money text-yellow-500"></i> <span id="logSheetTitle">Gasto Variable</span></h3><button onclick="app.closeSheet('log')" class="text-gray-500"><i class="ph-bold ph-x text-xl"></i></button></div>
-            <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Fecha</label><input type="date" id="logDate" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white mb-4 outline-none font-bold">
+            <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Fecha del Gasto</label><input type="date" id="logDate" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white mb-4 outline-none font-bold">
             <div class="relative mb-6"><span class="absolute left-0 top-1/2 -translate-y-1/2 text-3xl font-black text-gray-600">$</span><input type="number" id="logAmnt" class="w-full bg-transparent text-center text-5xl font-black text-white border-b border-gray-700 pb-2 focus:outline-none focus:border-red-500" placeholder="0"></div>
             <div class="chip-container">
-                <div class="chip" onclick="app.setDesc('Comida', this)">🍔 Comida</div><div class="chip" onclick="app.setDesc('Transporte', this)">🚌 Transporte</div><div class="chip" onclick="app.setDesc('Antojo', this)">🍫 Antojo</div><div class="chip" onclick="app.setDesc('Servicios', this)">💡 Servicios</div><div class="chip" onclick="app.setDesc('Extra', this)">💰 Ingreso Extra</div>
+                <div class="chip" onclick="app.setDesc('Comida', this)">🍔 Comida</div><div class="chip" onclick="app.setDesc('Transporte', this)">🚌 Transporte</div><div class="chip" onclick="app.setDesc('Antojo', this)">🍫 Antojo</div><div class="chip" onclick="app.setDesc('Servicios', this)">💡 Servicios</div><div class="chip" onclick="app.setDesc('Salida', this)">🍺 Salida</div>
             </div>
             <input type="text" id="logDesc" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 text-white mb-6 outline-none" placeholder="Descripción...">
             <button onclick="app.saveLog()" class="btn-primary shadow-lg shadow-yellow-900/20 bg-yellow-600 text-white">GUARDAR</button>
@@ -225,19 +326,32 @@
         </div>
     </div>
 
+    <!-- SHEET: REGISTRAR EXTRA (Y EDITAR) -->
+    <div id="sheet-extra" class="modal-overlay sheet" onclick="if(event.target===this) app.closeSheet('extra')">
+        <div class="bottom-sheet">
+            <div class="flex justify-between items-center mb-6"><h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-coin text-green-500"></i> <span id="extraSheetTitle">Ingreso Extra</span></h3><button onclick="app.closeSheet('extra')" class="text-gray-500"><i class="ph-bold ph-x text-xl"></i></button></div>
+            <label class="input-label">Fecha del Ingreso</label><input type="date" id="extraDate" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white mb-4 outline-none font-bold">
+            <div class="relative mb-6"><span class="absolute left-0 top-1/2 -translate-y-1/2 text-3xl font-black text-gray-600">$</span><input type="number" id="extraAmnt" class="w-full bg-transparent text-center text-5xl font-black text-green-400 border-b border-gray-700 pb-2 focus:outline-none focus:border-green-500" placeholder="0"></div>
+            <button onclick="app.saveExtra()" class="btn-primary bg-green-600 hover:bg-green-500 shadow-lg shadow-green-900/20">GUARDAR</button>
+            <button id="btnDeleteExtra" onclick="app.deleteExtra()" class="btn-delete hidden">ELIMINAR</button>
+        </div>
+    </div>
+
+    <!-- SHEET: GASTO FIJO -->
     <div id="sheet-fixed" class="modal-overlay sheet" onclick="if(event.target===this) app.closeSheet('fixed')">
         <div class="bottom-sheet">
             <div class="flex justify-between items-center mb-6"><h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ph-fill ph-lock-key text-red-500"></i> Gasto Fijo</h3><button onclick="app.closeSheet('fixed')" class="text-gray-500"><i class="ph-bold ph-x text-xl"></i></button></div>
-            <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Nombre</label><input type="text" id="fixName" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white mb-4 outline-none">
+            <label class="form-label">Nombre del Gasto</label><input type="text" id="fixName" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white mb-4 outline-none">
             <div class="grid grid-cols-2 gap-4 mb-6">
-                <div><label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Monto</label><input type="number" id="fixAmount" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none" placeholder="$0"></div>
-                <div><label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Día de Pago</label><input type="number" id="fixDay" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none text-center" placeholder="1-31"></div>
+                <div><label class="form-label">Monto</label><input type="number" id="fixAmount" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none" placeholder="$0"></div>
+                <div><label class="form-label">Día de Pago</label><input type="number" id="fixDay" class="w-full bg-gray-900 border border-gray-800 rounded-xl p-3 text-white font-bold outline-none text-center" placeholder="1-31"></div>
             </div>
             <button onclick="app.saveFixed()" class="btn-primary">GUARDAR</button>
             <button id="btnDeleteFixed" onclick="app.deleteFixed()" class="btn-delete hidden">ELIMINAR</button>
         </div>
     </div>
     
+    <!-- AUTH MODAL -->
     <div id="authModal" class="modal-overlay center active">
         <div class="auth-card">
             <i class="ph-duotone ph-vault text-5xl text-red-600 mb-4"></i><h2 class="text-2xl font-black text-white mb-2 tracking-tight">TREASURY</h2><p class="text-gray-500 text-sm mb-8">Gestión financiera encriptada.</p>
@@ -253,7 +367,7 @@
 
         const app = {
             user: null,
-            data: { income: 0, items: [], payDay1: 5, payDay2: 20 },
+            data: { income: 0, items: [], payDay1: 5, payDay2: 20, avgExtra: 0 },
             period: { daysLeft: 15 },
             todaySpent: 0, todayExtras: 0,
             editingItem: null, editingLogId: null,
@@ -263,6 +377,7 @@
 
             init() {
                 document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric' }).toUpperCase();
+                
                 auth.onAuthStateChanged(u => {
                     if(u) {
                         this.user = u;
@@ -274,6 +389,21 @@
                         document.getElementById('authModal').classList.add('active');
                     }
                 });
+                
+                this.calculateNextExtra();
+            },
+
+            // --- LÓGICA DE HORAS EXTRA ---
+            calculateNextExtra() {
+                const today = new Date();
+                let nextPay = new Date();
+                nextPay.setDate(today.getDate() + (2 + 7 - today.getDay()) % 7);
+                if (nextPay <= today) nextPay.setDate(nextPay.getDate() + 7);
+                let day = nextPay.getDate();
+                if (day === 5 || day === 20) nextPay.setDate(nextPay.getDate() + 1);
+                const opts = { weekday: 'short', day: 'numeric', month: 'short' };
+                const extraDateEl = document.getElementById('nextExtraDate');
+                if(extraDateEl) extraDateEl.textContent = nextPay.toLocaleDateString('es-ES', opts);
             },
 
             updateAuthUI(u) {
@@ -376,9 +506,6 @@
                 const free = Math.max(0, income - totalFixed - (this.spentInPeriod||0) + (this.extrasInPeriod||0));
                 
                 const dailyLimit = free / this.daysLeft;
-                
-                // Si ya restamos los gastos del periodo a 'free', availableToday es simplemente el promedio diario restante
-                // OJO: 'spentInPeriod' ya está restado de 'free'.
                 const availableToday = dailyLimit; 
 
                 // UI UPDATE
@@ -391,18 +518,9 @@
                 if(document.getElementById('dailyLimit')) document.getElementById('dailyLimit').textContent = this.fmt(dailyLimit);
                 if(document.getElementById('valFree')) document.getElementById('valFree').textContent = this.fmt(free);
                 if(document.getElementById('daysLeft')) document.getElementById('daysLeft').textContent = this.daysLeft;
-                
-                // Proyecciones
-                const fixedQ1 = this.data.items.reduce((s, i) => (i.day >= p1 && i.day < p2) ? s + (i.amount||0) : s, 0);
-                const freeQ1 = income - fixedQ1;
-                const fixedQ2 = this.data.items.reduce((s, i) => (i.day >= p2 || i.day < p1) ? s + (i.amount||0) : s, 0);
-                const freeQ2 = income - fixedQ2;
-
-                document.getElementById('projQ1').textContent = this.fmt(freeQ1);
-                document.getElementById('projQ2').textContent = this.fmt(freeQ2);
             },
 
-            // --- GASTOS FIJOS (CRUD) ---
+            // --- GASTOS FIJOS ---
             openSheet(id, idx = null, logId = null) {
                 const sheet = document.getElementById('sheet-'+id);
                 if (sheet) sheet.classList.add('active');
@@ -448,6 +566,26 @@
                          document.getElementById('btnDeleteLog').style.display = 'none';
                          document.getElementById('logAmnt').focus();
                      }
+                } else if(id === 'extra') {
+                     document.getElementById('extraDate').value = todayISO;
+
+                     if (logId) {
+                         this.editingLogId = logId; // Usamos editingLogId para extra también para simplicidad
+                         const log = this.periodLogs.find(l => l.id === logId);
+                         if (log) {
+                             document.getElementById('extraSheetTitle').textContent = "Editar Extra";
+                             document.getElementById('extraAmnt').value = log.amnt;
+                             const d = log.date.toDate ? log.date.toDate() : new Date(log.date);
+                             document.getElementById('extraDate').value = d.toISOString().split('T')[0];
+                             document.getElementById('btnDeleteExtra').style.display = 'block';
+                         }
+                     } else {
+                         this.editingLogId = null;
+                         document.getElementById('extraSheetTitle').textContent = "Ingreso Extra";
+                         if(this.data.avgExtra) document.getElementById('extraAmnt').value = this.data.avgExtra; else document.getElementById('extraAmnt').value = '';
+                         document.getElementById('btnDeleteExtra').style.display = 'none';
+                         document.getElementById('extraAmnt').focus();
+                     }
                 }
             },
 
@@ -487,7 +625,10 @@
                 el.innerHTML = '';
                 const d = new Date().getDate();
                 const p1=this.data.payDay1 || 5, p2=this.data.payDay2 || 20;
-                const isActive = (day) => (d >= p1 && d < p2) ? (day >= p1 && day < p2) : (day >= p2 || day < p1);
+                const isActive = (day) => {
+                    if (d >= p1 && d < p2) return day >= p1 && day < p2;
+                    else return day >= p2 || day < p1;
+                };
                 
                 this.data.items.sort((a,b) => a.day - b.day);
 
@@ -515,7 +656,6 @@
                 if (logDesc) logDesc.value = t; 
                 document.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected')); 
                 if (el) el.classList.add('selected'); 
-                // Auto set income if 'Ingreso Extra' selected?
                 if(t==='Extra') this.tempLogType = 'income'; else this.tempLogType = 'expense';
             },
 
@@ -528,7 +668,6 @@
                 const [y,m,d] = dateVal.split('-').map(Number);
                 const dateObj = new Date(y, m-1, d, 12, 0, 0); 
                 
-                // Detect type from chip selection or manual desc
                 let type = 'expense';
                 if(this.tempLogType) type = this.tempLogType;
                 if(desc.toLowerCase().includes('extra') || desc.toLowerCase().includes('ingreso')) type = 'income';
@@ -541,9 +680,29 @@
             },
             
             async deleteLog() {
-                if(!this.editingLogId || !confirm("¿Eliminar?")) return;
+                if(!this.editingLogId || !confirm("¿Eliminar gasto?")) return;
                 await this.deleteLogDb(this.editingLogId);
                 this.closeSheet('log');
+            },
+
+            async saveExtra() {
+                const amnt = parseFloat(document.getElementById('extraAmnt').value);
+                const dateVal = document.getElementById('extraDate').value;
+                if(!amnt || !dateVal) return;
+                
+                const [y,m,d] = dateVal.split('-').map(Number);
+                const dateObj = new Date(y, m-1, d, 12, 0, 0);
+                const logData = { desc: 'Pago Extra', amnt, type: 'income', date: dateObj.toISOString() };
+
+                if (this.editingLogId) await this.updateLogDb(this.editingLogId, logData); // Use editingLogId since it's the same flow now
+                else await this.saveLogToDb(logData);
+                this.closeSheet('extra');
+            },
+
+            async deleteExtra() {
+                if(!this.editingLogId || !confirm("¿Eliminar ingreso?")) return; // Use editingLogId
+                await this.deleteLogDb(this.editingLogId);
+                this.closeSheet('extra');
             },
 
             async saveLogToDb(log) {
@@ -611,7 +770,7 @@
                         const d = l.date.toDate ? l.date.toDate() : new Date(l.date);
                         if (l.type === 'income') {
                             extrasPeriod += l.amnt;
-                            list.innerHTML += `<div class="tx-item" onclick="app.openSheet('log', null, '${l.id}')"><div class="flex items-center"><div class="tx-icon extra"><i class="ph-bold ph-coin"></i></div><div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleDateString()}</div></div></div><div class="tx-amount text-green-500">+$${l.amnt}</div></div>`;
+                            list.innerHTML += `<div class="tx-item" onclick="app.openSheet('extra', null, '${l.id}')"><div class="flex items-center"><div class="tx-icon extra"><i class="ph-bold ph-coin"></i></div><div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleDateString()}</div></div></div><div class="tx-amount text-green-500">+$${l.amnt}</div></div>`;
                         } else {
                             spentPeriod += l.amnt;
                             list.innerHTML += `<div class="tx-item" onclick="app.openSheet('log', null, '${l.id}')"><div class="flex items-center"><div class="tx-icon variable"><i class="ph-bold ph-shopping-bag"></i></div><div class="tx-info"><div class="tx-title">${l.desc}</div><div class="tx-date">${d.toLocaleDateString()}</div></div></div><div class="tx-amount text-red-500">-$${l.amnt}</div></div>`;
@@ -637,7 +796,7 @@
             },
             
             // --- HISTORY ---
-            changeMonth(d) {
+            changeHistoryMonth(d) {
                 this.histDate.setMonth(this.histDate.getMonth() + d);
                 this.renderHistory();
             },
@@ -741,7 +900,10 @@
             loginAnon() { auth.signInAnonymously(); },
             logout() { auth.signOut(); location.reload(); },
             resetData() { if(confirm("¿Borrar todo?")) { localStorage.clear(); if(this.user && !this.user.isAnonymous) { db.collection(COLLECTION).doc(this.user.uid).delete(); } location.reload(); } },
-            fmt(n) { if (isNaN(n) || !isFinite(n)) return '$0.00'; return '$' + n.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); }
+            fmt(n) { 
+                if (isNaN(n) || !isFinite(n)) return '$0.00';
+                return '$' + n.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); 
+            }
         };
         document.addEventListener('DOMContentLoaded', () => app.init());
     </script>
