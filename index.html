@@ -85,6 +85,7 @@
             flex-shrink: 0;
             position: relative;
             z-index: 1001;
+            cursor: pointer;
         }
         .g-logo:hover { color: #ef4444; transition: color 0.3s; }
         .g-links {
@@ -104,6 +105,7 @@
             position: relative;
             z-index: 1001;
             padding: 10px 0;
+            cursor: pointer;
         }
         .g-link:hover { color: #fff; }
         .g-link.active {
@@ -115,13 +117,13 @@
 </head>
 <body class="h-screen flex flex-col overflow-hidden text-sm sm:text-base">
 
-    <!-- NAV SUPERIOR (Global) - ORDEN CORREGIDO Y TARGET BLANK -->
+    <!-- NAV SUPERIOR (Global) - TARGET BLANK REMOVED -->
     <nav id="global-nav" class="h-14 bg-black border-b border-white/5 flex items-center justify-between px-5 shrink-0 z-50">
-        <a href="https://godsplan.site" class="g-logo" target="_blank"><i class="ph-bold ph-circles-three-plus text-lg"></i> God's Plan</a>
+        <a href="https://godsplan.site" class="g-logo"><i class="ph-bold ph-circles-three-plus text-lg"></i> God's Plan</a>
         <div class="g-links">
-            <a href="https://adherencia.godsplan.site" class="g-link" target="_blank">ADHERENCIA</a>
-            <a href="https://auth.godsplan.site" class="g-link" target="_blank">AUTH</a>
-            <a href="https://chat.godsplan.site" class="g-link" target="_blank">CHAT</a>
+            <a href="https://adherencia.godsplan.site" class="g-link">ADHERENCIA</a>
+            <a href="https://auth.godsplan.site" class="g-link">AUTH</a>
+            <a href="https://chat.godsplan.site" class="g-link">CHAT</a>
             <a href="#" class="g-link active">FINANZAS</a>
             
             <!-- Pequeño indicador de estado (Opcional, integrado sutilmente) -->
@@ -160,11 +162,11 @@
                     <div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-4">
                         <div>
                             <span class="block text-[10px] text-zinc-500 uppercase font-bold">Restante Total</span>
-                            <span class="text-lg font-bold text-zinc-200" id="totalFree">---</span>
+                            <span class="lg font-bold text-zinc-200" id="totalFree">---</span>
                         </div>
                         <div class="text-right">
                             <span class="block text-[10px] text-zinc-500 uppercase font-bold">Gastado Hoy</span>
-                            <span class="text-lg font-bold text-red-400" id="todayTotal">---</span>
+                            <span class="lg font-bold text-red-400" id="todayTotal">---</span>
                         </div>
                     </div>
                 </div>
