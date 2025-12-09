@@ -375,12 +375,26 @@
         // Configuración obligatoria del entorno
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'godsplan-local';
         
-        // --- FIX: CONFIGURACIÓN SEGURA PARA EVITAR PANTALLA BLANCA ---
-        // Manejo robusto de la configuración: si __firebase_config es string, lo parseamos. Si es objeto, lo usamos.
-        let firebaseConfig = {};
+        // --- FIX: CONFIGURACIÓN SEGURA PARA EVITAR PANTALLA BLANCA Y CLAVE VÁLIDA ---
+        // Se define un fallback explícito para asegurar que initializeApp tenga una clave válida
+        const fallbackConfig = {
+            apiKey: "AIzaSyCrHBz94UtgiaYntHCYhC5jNa6auUI63vQ",
+            authDomain: "god-s-plan-d737b.firebaseapp.com",
+            projectId: "god-s-plan-d737b",
+            storageBucket: "god-s-plan-d737b.firebasestorage.app",
+            messagingSenderId: "458198314028",
+            appId: "1:458198314028:web:d62b24cee2d19ee5b47589"
+        };
+
+        // Intentar usar configuración del entorno, o caer en fallback
+        let firebaseConfig = fallbackConfig;
         try {
-            if (typeof __firebase_config !== 'undefined') {
-                firebaseConfig = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                const envConfig = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
+                // Verificar que tenga apiKey válida
+                if (envConfig && envConfig.apiKey) {
+                    firebaseConfig = envConfig;
+                }
             }
         } catch(e) { console.error("Error parsing firebase config", e); }
 
@@ -1045,7 +1059,8 @@
                         if (loanNameEl) loanNameEl.value = item.name;
                         if (loanAmountEl) loanAmountEl.value = item.amount;
                         if (loanDueDateEl) loanDueDateEl.value = item.dueDate;
-                        if (btnDeleteLoanEl) btnDeleteLoanEl.classList.add('hidden'); // El botón de borrar se saca de la lista
+                        // El botón de borrar se saca de la lista, no del modal
+                        if (btnDeleteLoanEl) btnDeleteLoanEl.classList.add('hidden');
                     } else {
                         if (loanNameEl) loanNameEl.value = '';
                         if (loanAmountEl) loanAmountEl.value = '';
