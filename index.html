@@ -1403,7 +1403,8 @@
                         type: 'income',
                         date: new Date().toISOString()
                     };
-                    batch.add(logRef, incomeLog);
+                    const newLogDoc = doc(logRef); // Crea referencia de documento con ID autogenerado
+                    batch.set(newLogDoc, incomeLog);
                     UI.toast(`Préstamo de ${UI.fmtMoney(amount)} recibido y sumado al balance.`, 'success');
                 }
 
@@ -1444,7 +1445,8 @@
                     type: 'expense',
                     date: new Date().toISOString()
                 };
-                batch.add(logRef, paymentLog);
+                const newLogDoc = doc(logRef); // Crea referencia de documento con ID autogenerado
+                batch.set(newLogDoc, paymentLog);
 
                 try {
                     await batch.commit();
