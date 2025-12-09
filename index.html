@@ -14,13 +14,15 @@
     <!-- FIREBASE MODULAR (v9+) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // AGREGADO: signInWithEmailAndPassword
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, collection, query, orderBy, limit, setDoc, updateDoc, addDoc, deleteDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // Exponer módulos de Firebase al scope global (necesario para el objeto 'app')
         window.firebaseImports = {
             initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut,
-            GoogleAuthProvider, signInWithPopup, getFirestore, doc, onSnapshot, collection, query, orderBy, 
+            GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, // Nueva función expuesta
+            getFirestore, doc, onSnapshot, collection, query, orderBy, 
             limit, setDoc, updateDoc, addDoc, deleteDoc, getDocs, writeBatch
         };
     </script>
@@ -70,7 +72,7 @@
         .chip.active { background: #ef4444; color: white; transform: scale(1.05); box-shadow: 0 4px 12px (239, 68, 68, 0.3); }
 
         /* Toast Notification */
-        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; pointer-events: none; }
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; pointer-events: none; }
         .toast { background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(10px); padding: 12px 24px; border-radius: 30px; border: 1px solid #333; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 10px; animation: fadeIn 0.3s forwards; pointer-events: auto; }
         
         /* Global Nav Styles */
@@ -100,7 +102,7 @@
                 font-family: sans-serif;
             }
             /* Ocultar elementos de la app */
-            #global-nav, #fabContainer, .glass-nav, #app-content, #toast-container, #modalOverlay, #confirmDialog { 
+            #global-nav, #fabContainer, .glass-nav, #app-content, #toast-container, #modalOverlay, #confirmDialog, #loginModal { 
                 display: none !important; 
             }
             /* Mostrar solo el área de impresión */
@@ -136,7 +138,8 @@
         <div class="g-links">
             <a href="https://adherencia.godsplan.site" class="g-link">ADHERENCIA</a>
             <a href="https://auth.godsplan.site" class="g-link">AUTH</a>
-            <a href="https://chat.godsplan.site" class="g-link">CHAT</a>
+            <!-- Link a la app de gestión -->
+            <a href="https://cuenta.godsplan.site" class="g-link">CUENTA</a>
             <a href="#" class="g-link active">FINANZAS</a>
             
             <div id="syncStatus" class="w-1.5 h-1.5 rounded-full bg-zinc-800 ml-1" title="Estado"></div>
@@ -160,7 +163,7 @@
                 </div>
             </div>
 
-            <!-- TARJETA PRINCIPAL (Modernizada) -->
+            <!-- TARJETA PRINCIPAL -->
             <div class="glass rounded-3xl p-6 relative overflow-hidden group">
                 <div class="absolute -top-10 -right-10 w-32 h-32 bg-red-600/20 rounded-full blur-3xl group-hover:bg-red-600/30 transition-colors"></div>
                 
@@ -182,7 +185,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Barra de progreso del periodo -->
                 <div class="absolute bottom-0 left-0 h-1 bg-zinc-800 w-full">
                     <div id="periodProgress" class="h-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)] w-0 transition-all duration-1000"></div>
                 </div>
@@ -232,7 +234,6 @@
                     <span class="text-zinc-300">Total Gastos Fijos (Quincena)</span>
                     <span id="summaryFixed" class="font-bold text-red-400">---</span>
                 </div>
-                <!-- DETALLE DEUDA CORTA -->
                 <div class="flex justify-between items-center text-sm">
                     <span class="text-zinc-300">Total Deudas Cortas Pendientes</span>
                     <span id="summaryShortLoans" class="font-bold text-orange-400">---</span>
@@ -248,14 +249,13 @@
                 </div>
             </div>
             
-            <!-- PRÉSTAMOS (DEUDAS CORTAS Y DE FLUJO) -->
+            <!-- PRÉSTAMOS -->
             <div class="flex justify-between items-center mb-4 px-1">
                 <span class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Deudas Cortas Pendientes</span>
                 <button onclick="app.openModal('loan')" class="bg-white text-black text-[10px] font-black px-3 py-1.5 rounded-full hover:scale-105 transition-transform flex items-center gap-1">
                     <i class="ph-bold ph-plus"></i> AGREGAR DEUDA
                 </button>
             </div>
-            
             <div id="loansList" class="space-y-2 mb-8">
                 <div class="text-center py-4 text-zinc-700 text-xs">No hay deudas cortas registradas.</div>
             </div>
@@ -267,7 +267,6 @@
                     <i class="ph-bold ph-plus"></i> AGREGAR
                 </button>
             </div>
-            
             <div id="fixedExpensesList" class="space-y-2 mb-10">
                 <div class="text-center py-4 text-zinc-700 text-xs">Aún no has agregado gastos fijos.</div>
             </div>
@@ -285,7 +284,8 @@
                             <div id="userStatusText" class="text-[10px] text-zinc-500">Sin conexión</div>
                         </div>
                     </div>
-                    <button id="btnLogin" onclick="app.login()" class="text-xs bg-blue-600/20 text-blue-400 px-3 py-1.5 rounded-lg font-bold border border-blue-600/30">CONECTAR</button>
+                    <!-- BOTON LOGIN ACTUALIZADO -->
+                    <button id="btnLogin" onclick="app.openLoginModal()" class="text-xs bg-blue-600/20 text-blue-400 px-3 py-1.5 rounded-lg font-bold border border-blue-600/30">CONECTAR</button>
                     <button id="btnLogout" onclick="app.logout()" class="hidden text-xs text-zinc-500 hover:text-white"><i class="ph-bold ph-sign-out text-lg"></i></button>
                 </div>
                 
@@ -336,14 +336,8 @@
                     <span class="absolute left-1/2 -translate-x-[calc(50%+60px)] top-1/2 -translate-y-1/2 text-2xl text-zinc-600 font-light">$</span>
                     <input type="number" id="txAmount" inputmode="decimal" class="bg-transparent text-center text-6xl font-black text-white w-full border-none outline-none focus:ring-0 p-0 placeholder-zinc-800" placeholder="0">
                 </div>
-
-                <!-- Categorias -->
-                <div id="categoryChips" class="flex flex-wrap justify-center gap-2 mb-6">
-                    <!-- JS Injected -->
-                </div>
-
+                <div id="categoryChips" class="flex flex-wrap justify-center gap-2 mb-6"></div>
                 <input type="text" id="txDesc" class="input-modern w-full p-4 mb-4 text-center" placeholder="Nota opcional...">
-                
                 <button id="btnSaveTx" onclick="app.saveTransaction()" class="w-full bg-white text-black py-4 rounded-2xl font-black text-lg hover:scale-[1.02] transition-transform active:scale-95 shadow-lg shadow-white/10">GUARDAR</button>
                 <button id="btnDeleteTx" onclick="app.deleteTxConfirm()" class="w-full mt-3 text-red-500 py-3 font-bold text-xs hidden">ELIMINAR TRANSACCIÓN</button>
             </div>
@@ -371,7 +365,7 @@
             <!-- Form Préstamo/Deuda -->
             <div id="formLoan" class="hidden space-y-4">
                 <div>
-                    <label class="text-[10px] text-zinc-500 font-bold uppercase ml-2">Concepto del Préstamo (ej: Papá, Banco, Tarjeta)</label>
+                    <label class="text-[10px] text-zinc-500 font-bold uppercase ml-2">Concepto del Préstamo</label>
                     <input type="text" id="loanName" class="input-modern w-full p-4 mt-1" placeholder="Ej: Deuda a Papá">
                 </div>
                 <div>
@@ -382,13 +376,45 @@
                     <label class="text-[10px] text-zinc-500 font-bold uppercase ml-2">Fecha Límite de Pago</label>
                     <input type="date" id="loanDueDate" class="input-modern w-full p-4 mt-1">
                 </div>
-                <!-- <div class="grid grid-cols-2 gap-4">
-                    <Removed fields for simpler short-term loan model>
-                </div> -->
                 <button onclick="app.saveLoan()" class="w-full bg-white text-black py-4 rounded-2xl font-black mt-4">GUARDAR PRÉSTAMO Y SUMAR AL BALANCE</button>
                 <button id="btnDeleteLoan" onclick="app.deleteLoanConfirm()" class="w-full text-red-500 py-3 font-bold text-xs hidden">MARCAR COMO PAGADO (ELIMINAR DEUDA)</button>
             </div>
 
+        </div>
+    </div>
+    
+    <!-- NUEVO LOGIN MODAL (ID + PASS) -->
+    <div id="loginModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-6 transition-opacity opacity-0">
+        <div class="bg-[#121212] w-full max-w-sm rounded-3xl border border-zinc-800 p-8 shadow-2xl relative">
+            <button onclick="app.closeLoginModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-white bg-zinc-900 rounded-full"><i class="ph-bold ph-x"></i></button>
+            
+            <div class="text-center mb-6">
+                <i class="ph-duotone ph-fingerprint text-4xl text-white mb-2"></i>
+                <h3 class="text-xl font-bold text-white">Acceso a God's Plan</h3>
+            </div>
+            
+            <div class="space-y-3">
+                <input type="text" id="loginId" class="input-modern w-full p-4 text-sm" placeholder="ID o Correo">
+                <input type="password" id="loginPass" class="input-modern w-full p-4 text-sm" placeholder="Contraseña">
+                
+                <button onclick="app.loginWithId()" class="w-full bg-white text-black font-black py-3 rounded-xl hover:scale-[1.02] transition-transform">
+                    ENTRAR
+                </button>
+            </div>
+            
+            <div class="my-6 flex items-center gap-4 text-[10px] text-zinc-600 font-bold uppercase">
+                <div class="h-px bg-zinc-800 flex-1"></div>
+                O
+                <div class="h-px bg-zinc-800 flex-1"></div>
+            </div>
+            
+            <button onclick="app.loginGoogle()" class="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-800 hover:text-white transition-colors">
+                <i class="ph-bold ph-google-logo text-lg"></i> Google
+            </button>
+            
+            <div class="mt-4 text-center">
+                <a href="https://cuenta.godsplan.site" class="text-xs text-zinc-500 hover:text-blue-400 underline decoration-zinc-700 underline-offset-4">¿Olvidaste tu contraseña?</a>
+            </div>
         </div>
     </div>
     
@@ -411,7 +437,8 @@
         // Acceder a los imports modulares
         const {
             initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut,
-            GoogleAuthProvider, signInWithPopup, getFirestore, doc, onSnapshot, collection, query, orderBy, 
+            GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
+            getFirestore, doc, onSnapshot, collection, query, orderBy, 
             limit, setDoc, updateDoc, addDoc, deleteDoc, getDocs, writeBatch
         } = window.firebaseImports;
         
@@ -421,7 +448,6 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'godsplan-local';
         
         // --- FIX: CONFIGURACIÓN SEGURA PARA EVITAR PANTALLA BLANCA Y CLAVE VÁLIDA ---
-        // Se define un fallback explícito para asegurar que initializeApp tenga una clave válida
         const fallbackConfig = {
             apiKey: "AIzaSyCrHBz94UtgiaYntHCYhC5jNa6auUI63vQ",
             authDomain: "god-s-plan-d737b.firebaseapp.com",
@@ -431,12 +457,10 @@
             appId: "1:458198314028:web:d62b24cee2d19ee5b47589"
         };
 
-        // Intentar usar configuración del entorno, o caer en fallback
         let firebaseConfig = fallbackConfig;
         try {
             if (typeof __firebase_config !== 'undefined' && __firebase_config) {
                 const envConfig = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
-                // Verificar que tenga apiKey válida
                 if (envConfig && envConfig.apiKey) {
                     firebaseConfig = envConfig;
                 }
@@ -446,7 +470,7 @@
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         // ----------------------------------------------------
         
-        const PRIVATE_DATA_PATH = (uid) => `artifacts/${appId}/users/${uid}`;
+        const PRIVATE_DATA_PATH = (uid) => `godsPlanData/${uid}`; // FIX: Usar la colección raíz godsPlanData
         const LOGS_COLLECTION = (uid) => `${PRIVATE_DATA_PATH(uid)}/logs`;
 
         // Inicializar Firebase (Modular)
@@ -457,7 +481,6 @@
             db = getFirestore(fbApp);
         } catch(e) { 
             console.error("Error Firebase Init:", e); 
-            // Si Firebase falla en la inicialización, deshabilitamos la sincronización UI
             const syncEl = document.getElementById('syncStatus');
             if(syncEl) {
                 syncEl.classList.remove('bg-zinc-800', 'bg-emerald-500');
@@ -611,8 +634,6 @@
             },
 
             async init() {
-                // Generar Chips de Categorías dinámicamente: Ahora se llama desde openModal (lazy)
-
                 // Escuchar Auth y disparar listeners de Firestore
                 if (!auth) {
                     UI.toast("Error: Firebase no pudo inicializarse", "error");
@@ -681,8 +702,9 @@
             setupRealtimeListeners() {
                 if(!this.user || !db) return;
                 const uid = this.user.uid;
-                const userDocRef = doc(db, PRIVATE_DATA_PATH(uid));
-                const logsCollectionRef = collection(db, LOGS_COLLECTION(uid));
+                // FIX: Usar la ruta correcta godsPlanData
+                const userDocRef = doc(db, 'godsPlanData', uid);
+                const logsCollectionRef = collection(db, 'godsPlanData', uid, 'logs');
 
                 // 1. Escuchar Configuración (Ingreso, Fijos, Préstamos)
                 onSnapshot(userDocRef, (docSnap) => {
@@ -1492,10 +1514,60 @@
                 }
             },
 
+            // --- AUTH LOGIN/LOGOUT & MODAL ---
+            
+            openLoginModal() {
+                const modal = document.getElementById('loginModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    requestAnimationFrame(() => modal.classList.remove('opacity-0'));
+                }
+            },
+            
+            closeLoginModal() {
+                const modal = document.getElementById('loginModal');
+                if (modal) {
+                    modal.classList.add('opacity-0');
+                    setTimeout(() => modal.classList.add('hidden'), 300);
+                }
+            },
+
+            async loginWithId() {
+                const idVal = document.getElementById('loginId').value.trim();
+                const passVal = document.getElementById('loginPass').value;
+                
+                if (!idVal || !passVal) return UI.toast('Completa los campos', 'error');
+                
+                // --- LÓGICA DE ID COMPATIBLE ---
+                let email = idVal;
+                // Si no tiene @, asumimos que es un ID y agregamos el dominio ficticio
+                if (!email.includes('@')) {
+                    email = `${idVal}@godsplan.site`;
+                }
+
+                try {
+                    await signInWithEmailAndPassword(auth, email, passVal);
+                    this.closeLoginModal();
+                    UI.toast('¡Bienvenido de nuevo!', 'success');
+                } catch (e) {
+                    console.error(e);
+                    let msg = 'Error al iniciar sesión';
+                    if (e.code === 'auth/wrong-password') msg = 'Contraseña incorrecta';
+                    if (e.code === 'auth/user-not-found') msg = 'Usuario no encontrado';
+                    if (e.code === 'auth/invalid-email') msg = 'Formato de ID inválido';
+                    UI.toast(msg, 'error');
+                }
+            },
+
             // --- AUTH (Modular Firebase) ---
-            login() { 
+            async loginGoogle() { 
                 const provider = new GoogleAuthProvider(); 
-                signInWithPopup(auth, provider).catch(e => UI.toast(e.message, 'error')); 
+                try {
+                    await signInWithPopup(auth, provider);
+                    this.closeLoginModal();
+                } catch(e) { 
+                    UI.toast(e.message, 'error'); 
+                }
             },
             
             logout() { 
