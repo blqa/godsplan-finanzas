@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>God's Plan | Finanzas</title>
     
     <!-- LIBRERIAS -->
@@ -11,11 +11,20 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- FIREBASE COMPAT (Necesario para este entorno de ejecución simple, aunque v9 modular es mejor para producción) -->
-    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
-
+    <!-- FIREBASE MODULAR (v9+) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, collection, query, orderBy, limit, setDoc, updateDoc, addDoc, deleteDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Exponer módulos de Firebase al scope global (necesario para el objeto 'app')
+        window.firebaseImports = {
+            initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut,
+            GoogleAuthProvider, signInWithPopup, getFirestore, doc, onSnapshot, collection, query, orderBy, 
+            limit, setDoc, updateDoc, addDoc, deleteDoc, getDocs, writeBatch
+        };
+    </script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -41,8 +50,6 @@
     <style>
         /* CSS GLOBALES Y UTILIDADES */
         body { background-color: #050505; color: #e5e5e5; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
-        
-        /* Scrollbar oculta pero funcional */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
@@ -66,58 +73,27 @@
         #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; pointer-events: none; }
         .toast { background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(10px); padding: 12px 24px; border-radius: 30px; border: 1px solid #333; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 10px; animation: fadeIn 0.3s forwards; pointer-events: auto; }
         
-        /* --- GLOBAL NAV (ESTILO ECOSISTEMA UNIFICADO) --- */
-        #global-nav {
-            z-index: 1000; /* Alto para asegurar clics */
-            box-sizing: border-box;
-            position: sticky; top: 0;
-            height: 56px;
-        }
-        .g-logo {
-            color: #fff;
-            font-weight: 900;
-            text-decoration: none;
-            font-size: 1rem;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-shrink: 0;
-            position: relative;
-            z-index: 1001;
-            cursor: pointer;
-        }
+        /* Global Nav Styles */
+        #global-nav { z-index: 1000; box-sizing: border-box; position: sticky; top: 0; height: 56px; }
+        .g-logo { color: #fff; font-weight: 900; text-decoration: none; font-size: 1rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; position: relative; z-index: 1001; cursor: pointer; }
         .g-logo:hover { color: #ef4444; transition: color 0.3s; }
-        .g-links {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        .g-link {
-            color: #71717a; /* zinc-500 */
-            text-decoration: none;
-            font-size: 10px; /* text-[10px] */
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em; /* tracking-wider */
-            transition: color 0.2s;
-            white-space: nowrap;
-            position: relative;
-            z-index: 1001;
-            padding: 10px 0;
-            cursor: pointer;
-        }
+        .g-links { display: flex; align-items: center; gap: 20px; }
+        .g-link { color: #71717a; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.2s; white-space: nowrap; position: relative; z-index: 1001; padding: 10px 0; cursor: pointer; }
         .g-link:hover { color: #fff; }
-        .g-link.active {
-            color: #fff;
-            border-bottom: 2px solid #fff;
-            padding-bottom: 2px;
+        .g-link.active { color: #fff; border-bottom: 2px solid #fff; padding-bottom: 2px; }
+        
+        /* Custom Confirm Modal Style */
+        .custom-dialog {
+            background-color: #121212;
+            border: 1px solid #333;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 320px;
         }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden text-sm sm:text-base">
 
-    <!-- NAV SUPERIOR (Global) - TARGET BLANK REMOVED -->
+    <!-- NAV SUPERIOR (Global) -->
     <nav id="global-nav" class="h-14 bg-black border-b border-white/5 flex items-center justify-between px-5 shrink-0 z-50">
         <a href="https://godsplan.site" class="g-logo"><i class="ph-bold ph-circles-three-plus text-lg"></i> God's Plan</a>
         <div class="g-links">
@@ -126,7 +102,6 @@
             <a href="https://chat.godsplan.site" class="g-link">CHAT</a>
             <a href="#" class="g-link active">FINANZAS</a>
             
-            <!-- Pequeño indicador de estado (Opcional, integrado sutilmente) -->
             <div id="syncStatus" class="w-1.5 h-1.5 rounded-full bg-zinc-800 ml-1" title="Estado"></div>
         </div>
     </nav>
@@ -154,7 +129,7 @@
                 
                 <div class="relative z-10">
                     <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Disponible Hoy</span>
+                        <span class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Disponible por día</span>
                         <i class="ph ph-trend-up text-zinc-600"></i>
                     </div>
                     <div class="text-5xl font-black text-white tracking-tighter mb-6" id="dailyFree">---</div>
@@ -190,12 +165,11 @@
             <div class="mt-8">
                 <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 px-1">Actividad Reciente</h3>
                 <div id="transactionsList" class="space-y-3 pb-10">
-                    <!-- Se llena con JS -->
                     <div class="text-center py-10 text-zinc-600 animate-pulse">Cargando datos...</div>
                 </div>
             </div>
 
-            <!-- CHART SECTION (oculto inicialmente si no hay datos) -->
+            <!-- CHART SECTION -->
             <div id="chartSection" class="mt-8 mb-10 p-4 bg-zinc-900/50 rounded-3xl border border-zinc-800 hidden">
                 <h3 class="text-center text-xs font-bold text-zinc-500 mb-4">DISTRIBUCIÓN DE GASTOS</h3>
                 <div class="h-48 relative">
@@ -207,16 +181,41 @@
         <!-- VISTA: PLAN (CONFIG) -->
         <section id="view-plan" class="p-5 max-w-md mx-auto hidden fade-in">
             <h2 class="text-2xl font-black text-white mb-1">Estrategia</h2>
-            <p class="text-zinc-500 text-xs mb-6">Configura tus ingresos fijos y gastos recurrentes.</p>
+            <p class="text-zinc-500 text-xs mb-6">Configura tus ingresos fijos, deudas y gastos recurrentes.</p>
+            
+            <!-- RESUMEN DE OBLIGACIONES -->
+            <div class="glass rounded-2xl p-4 mb-6">
+                <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">Obligaciones</h4>
+                <div class="flex justify-between items-center text-sm mb-2">
+                    <span class="text-zinc-300">Total Gastos Fijos (Quincena)</span>
+                    <span id="summaryFixed" class="font-bold text-red-400">---</span>
+                </div>
+                <!-- DETALLE DEUDA CORTA -->
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-zinc-300">Total Deudas Cortas Pendientes</span>
+                    <span id="summaryShortLoans" class="font-bold text-orange-400">---</span>
+                </div>
+            </div>
 
             <!-- INGRESO -->
             <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl mb-6">
                 <label class="text-emerald-500 text-xs font-bold uppercase tracking-wider mb-2 block">Ingreso Neto (Quincenal)</label>
-                <!-- FIX: Estructura Relative para evitar overlapping -->
                 <div class="relative flex items-center">
                     <span class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-zinc-500 font-light pointer-events-none">$</span>
                     <input type="number" id="inpIncome" inputmode="decimal" class="bg-transparent text-3xl font-bold text-white w-full focus:outline-none placeholder-zinc-700 pl-8" placeholder="0.00" onblur="app.saveConfig()">
                 </div>
+            </div>
+            
+            <!-- PRÉSTAMOS (DEUDAS CORTAS Y DE FLUJO) -->
+            <div class="flex justify-between items-center mb-4 px-1">
+                <span class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Deudas Cortas Pendientes</span>
+                <button onclick="app.openModal('loan')" class="bg-white text-black text-[10px] font-black px-3 py-1.5 rounded-full hover:scale-105 transition-transform flex items-center gap-1">
+                    <i class="ph-bold ph-plus"></i> AGREGAR DEUDA
+                </button>
+            </div>
+            
+            <div id="loansList" class="space-y-2 mb-8">
+                <div class="text-center py-4 text-zinc-700 text-xs">No hay deudas cortas registradas.</div>
             </div>
 
             <!-- GASTOS FIJOS -->
@@ -228,7 +227,7 @@
             </div>
             
             <div id="fixedExpensesList" class="space-y-2 mb-10">
-                <!-- Se llena con JS -->
+                <div class="text-center py-4 text-zinc-700 text-xs">Aún no has agregado gastos fijos.</div>
             </div>
 
             <!-- CUENTA Y DATA -->
@@ -241,21 +240,21 @@
                         </div>
                         <div class="text-left">
                             <div id="userName" class="text-sm font-bold text-white">Invitado</div>
-                            <div id="userStatusText" class="text-[10px] text-zinc-500">Guardado Local</div>
+                            <div id="userStatusText" class="text-[10px] text-zinc-500">Sin conexión</div>
                         </div>
                     </div>
                     <button id="btnLogin" onclick="app.login()" class="text-xs bg-blue-600/20 text-blue-400 px-3 py-1.5 rounded-lg font-bold border border-blue-600/30">CONECTAR</button>
                     <button id="btnLogout" onclick="app.logout()" class="hidden text-xs text-zinc-500 hover:text-white"><i class="ph-bold ph-sign-out text-lg"></i></button>
                 </div>
                 
-                <button onclick="app.reset()" class="w-full text-xs text-red-500/70 py-3 font-bold hover:text-red-500 flex items-center justify-center gap-2">
+                <button onclick="app.resetData()" class="w-full text-xs text-red-500/70 py-3 font-bold hover:text-red-500 flex items-center justify-center gap-2">
                     <i class="ph-bold ph-trash"></i> BORRAR TODOS LOS DATOS
                 </button>
             </div>
         </section>
 
     </main>
-
+    
     <!-- FAB (NUEVO GASTO) -->
     <div id="fabContainer" class="fixed bottom-[100px] left-1/2 -translate-x-1/2 z-40 transition-all duration-300">
         <button onclick="app.openModal('expense')" class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-white shadow-[0_8px_25px_rgba(220,38,38,0.5)] border-4 border-[#050505] active:scale-95 transition-transform group">
@@ -275,7 +274,7 @@
         </button>
     </div>
 
-    <!-- MODAL SHEET -->
+    <!-- MODAL SHEET (PARA FORMS) -->
     <div id="modalOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] hidden flex-col justify-end transition-opacity opacity-0" onclick="if(event.target === this) app.closeModal()">
         <div id="modalSheet" class="bg-[#121212] w-full max-w-lg mx-auto rounded-t-[32px] border-t border-zinc-800 p-6 pb-10 translate-y-full transition-transform duration-300">
             <!-- Handle -->
@@ -286,9 +285,7 @@
                 <button onclick="app.closeModal()" class="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-400"><i class="ph-bold ph-x"></i></button>
             </div>
 
-            <!-- CONTENIDO DINÁMICO FORMULARIOS -->
-            
-            <!-- Form Transacción -->
+            <!-- Form Transacción / Ingreso -->
             <div id="formTransaction" class="hidden">
                 <div class="relative mb-6">
                     <span class="absolute left-1/2 -translate-x-[calc(50%+60px)] top-1/2 -translate-y-1/2 text-2xl text-zinc-600 font-light">$</span>
@@ -302,11 +299,11 @@
 
                 <input type="text" id="txDesc" class="input-modern w-full p-4 mb-4 text-center" placeholder="Nota opcional...">
                 
-                <button onclick="app.saveTransaction()" class="w-full bg-white text-black py-4 rounded-2xl font-black text-lg hover:scale-[1.02] transition-transform active:scale-95 shadow-lg shadow-white/10">GUARDAR</button>
-                <button id="btnDeleteTx" onclick="app.deleteTx()" class="w-full mt-3 text-red-500 py-3 font-bold text-xs hidden">ELIMINAR TRANSACCIÓN</button>
+                <button id="btnSaveTx" onclick="app.saveTransaction()" class="w-full bg-white text-black py-4 rounded-2xl font-black text-lg hover:scale-[1.02] transition-transform active:scale-95 shadow-lg shadow-white/10">GUARDAR</button>
+                <button id="btnDeleteTx" onclick="app.deleteTxConfirm()" class="w-full mt-3 text-red-500 py-3 font-bold text-xs hidden">ELIMINAR TRANSACCIÓN</button>
             </div>
 
-            <!-- Form Fijo -->
+            <!-- Form Gasto Fijo -->
             <div id="formFixed" class="hidden space-y-4">
                 <div>
                     <label class="text-[10px] text-zinc-500 font-bold uppercase ml-2">Nombre del Gasto</label>
@@ -323,39 +320,72 @@
                     </div>
                 </div>
                 <button onclick="app.saveFixed()" class="w-full bg-white text-black py-4 rounded-2xl font-black mt-4">GUARDAR FIJO</button>
-                <button id="btnDeleteFix" onclick="app.deleteFixed()" class="w-full text-red-500 py-3 font-bold text-xs hidden">ELIMINAR</button>
+                <button id="btnDeleteFix" onclick="app.deleteFixedConfirm()" class="w-full text-red-500 py-3 font-bold text-xs hidden">ELIMINAR</button>
+            </div>
+            
+            <!-- Form Préstamo/Deuda -->
+            <div id="formLoan" class="hidden space-y-4">
+                <div>
+                    <label class="text-[10px] text-zinc-500 font-bold uppercase ml-2">Concepto del Préstamo (ej: Papá, Banco, Tarjeta)</label>
+                    <input type="text" id="loanName" class="input-modern w-full p-4 mt-1" placeholder="Ej: Deuda a Papá">
+                </div>
+                <div>
+                    <label class="text-[10px] text-zinc-500 font-bold uppercase ml-2">Monto Prestado/Pendiente</label>
+                    <input type="number" id="loanAmount" inputmode="decimal" class="input-modern w-full p-4 mt-1" placeholder="$0.00">
+                </div>
+                <div>
+                    <label class="text-[10px] text-zinc-500 font-bold uppercase ml-2">Fecha Límite de Pago</label>
+                    <input type="date" id="loanDueDate" class="input-modern w-full p-4 mt-1">
+                </div>
+                <!-- <div class="grid grid-cols-2 gap-4">
+                    <Removed fields for simpler short-term loan model>
+                </div> -->
+                <button onclick="app.saveLoan()" class="w-full bg-white text-black py-4 rounded-2xl font-black mt-4">GUARDAR PRÉSTAMO Y SUMAR AL BALANCE</button>
+                <button id="btnDeleteLoan" onclick="app.deleteLoanConfirm()" class="w-full text-red-500 py-3 font-bold text-xs hidden">MARCAR COMO PAGADO (ELIMINAR DEUDA)</button>
             </div>
 
+        </div>
+    </div>
+    
+    <!-- DIALOGO DE CONFIRMACIÓN CUSTOM (REEMPLAZA A window.confirm()) -->
+    <div id="confirmDialog" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[70] hidden flex items-center justify-center opacity-0 transition-opacity">
+        <div class="custom-dialog rounded-xl p-5 m-5">
+            <h4 id="confirmTitle" class="text-lg font-bold text-white mb-2">Confirmación</h4>
+            <p id="confirmMessage" class="text-zinc-400 text-sm mb-5">¿Estás seguro de esta acción?</p>
+            <div class="flex justify-end gap-3">
+                <button id="confirmCancel" class="text-zinc-400 text-sm font-bold px-4 py-2 rounded-lg hover:bg-zinc-800 transition-colors">Cancelar</button>
+                <button id="confirmAction" class="bg-red-600 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">Aceptar</button>
+            </div>
         </div>
     </div>
 
     <!-- TOAST CONTAINER -->
     <div id="toast-container"></div>
 
-    <script>
+    <script type="module">
+        // Acceder a los imports modulares
+        const {
+            initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut,
+            GoogleAuthProvider, signInWithPopup, getFirestore, doc, onSnapshot, collection, query, orderBy, 
+            limit, setDoc, updateDoc, addDoc, deleteDoc, getDocs, writeBatch
+        } = window.firebaseImports;
+        
         // --- 1. CONFIGURACIÓN & UTILIDADES ---
         
-        // Simulación de environment para la respuesta de AI
-        const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'godsplan-local';
-        const COLLECTION_PREFIX = `artifacts/${APP_ID}/users`; // Path seguro para la preview de AI
-
-        const firebaseConfig = { 
-            apiKey: "AIzaSyCrHBz94UtgiaYntHCYhC5jNa6auUI63vQ", // Restored from original code
-            authDomain: "god-s-plan-d737b.firebaseapp.com", 
-            projectId: "god-s-plan-d737b", 
-            storageBucket: "god-s-plan-d737b.firebasestorage.app", 
-            messagingSenderId: "458198314028", 
-            appId: "1:458198314028:web:d62b24cee2d19ee5b47589" 
-        };
+        // Configuración obligatoria del entorno
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'godsplan-local';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { /* Fallback config */ };
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
-        // Inicializar Firebase
-        let auth, db;
-        try { 
-            if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth(); 
-            db = firebase.firestore(); 
-            // Habilitar persistencia offline si es posible
-            db.enablePersistence().catch(err => console.log("Persistencia off:", err.code));
+        const PRIVATE_DATA_PATH = (uid) => `artifacts/${appId}/users/${uid}`;
+        const LOGS_COLLECTION = (uid) => `${PRIVATE_DATA_PATH(uid)}/logs`;
+
+        // Inicializar Firebase (Modular)
+        let fbApp, auth, db;
+        try {
+            fbApp = initializeApp(firebaseConfig);
+            auth = getAuth(fbApp);
+            db = getFirestore(fbApp);
         } catch(e) { console.error("Error Firebase Init:", e); }
 
         // Utilidades UI
@@ -364,16 +394,47 @@
                 const con = document.getElementById('toast-container');
                 const el = document.createElement('div');
                 el.className = 'toast';
-                const icon = type === 'success' ? 'ph-check-circle text-green-400' : (type === 'error' ? 'ph-warning text-red-400' : 'ph-info text-blue-400');
-                el.innerHTML = `<i class="ph-fill ${icon} text-xl"></i><span class="text-xs font-bold text-white">${msg}</span>`;
+                const iconMap = {
+                    success: { class: 'ph-check-circle text-emerald-400', title: 'Éxito' },
+                    error: { class: 'ph-warning text-red-400', title: 'Error' },
+                    info: { class: 'ph-info text-blue-400', title: 'Info' }
+                };
+                const { class: iconClass } = iconMap[type] || iconMap.info;
+                el.innerHTML = `<i class="ph-fill ${iconClass} text-xl"></i><span class="text-xs font-bold text-white">${msg}</span>`;
                 con.appendChild(el);
                 setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
             },
             fmtMoney(n) { 
-                return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n || 0); 
+                return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 2 }).format(n || 0); 
             },
-            toggleLoader(loading) {
-                // Implementar loader global si se desea
+            // Custom Confirm Dialog (reemplaza window.confirm)
+            confirm(title, message) {
+                return new Promise(resolve => {
+                    const dialog = document.getElementById('confirmDialog');
+                    document.getElementById('confirmTitle').textContent = title;
+                    document.getElementById('confirmMessage').textContent = message;
+
+                    const actionBtn = document.getElementById('confirmAction');
+                    const cancelBtn = document.getElementById('confirmCancel');
+                    
+                    const cleanup = (result) => {
+                        dialog.classList.remove('opacity-100');
+                        dialog.classList.add('opacity-0');
+                        setTimeout(() => dialog.classList.add('hidden'), 300);
+                        actionBtn.removeEventListener('click', onAction);
+                        cancelBtn.removeEventListener('click', onCancel);
+                        resolve(result);
+                    };
+
+                    const onAction = () => cleanup(true);
+                    const onCancel = () => cleanup(false);
+
+                    actionBtn.addEventListener('click', onAction);
+                    cancelBtn.addEventListener('click', onCancel);
+
+                    dialog.classList.remove('hidden');
+                    requestAnimationFrame(() => dialog.classList.remove('opacity-0'));
+                });
             }
         };
 
@@ -390,31 +451,35 @@
                 let start, end;
                 
                 // Lógica de cortes: 5 al 19 | 20 al 4
-                if (d >= 5 && d < 20) {
+                if (d >= 5 && d <= 19) {
                     start = new Date(y, m, 5); 
                     end = new Date(y, m, 19);
                 } else {
-                    // Si es día 20 o más, el inicio es este mes día 20, fin es mes siguiente día 4
-                    // Si es día 4 o menos, el inicio fue mes pasado día 20, fin es este mes día 4
+                    // Si estamos entre el 20 y fin de mes
                     if (d >= 20) {
                         start = new Date(y, m, 20); 
-                        end = new Date(y, m + 1, 4);
-                    } else {
-                        start = new Date(y, m - 1, 20); 
+                        end = new Date(y, m + 1, 4); // Fin en el siguiente mes
+                    } 
+                    // Si estamos entre el 1 y el 4
+                    else { 
+                        start = new Date(y, m - 1, 20); // Inicio en el mes anterior
                         end = new Date(y, m, 4);
                     }
                 }
                 
-                // Normalizar horas
+                // Normalizar horas (inicio a 00:00:00, fin a 23:59:59)
                 start.setHours(0,0,0,0);
                 end.setHours(23,59,59,999);
                 
-                const totalDuration = end - start;
-                const elapsed = now - start;
-                const daysLeft = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
-                const progress = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+                const totalDurationMs = end.getTime() - start.getTime();
+                const elapsedMs = now.getTime() - start.getTime();
+                
+                const daysTotal = Math.ceil(totalDurationMs / (1000 * 60 * 60 * 24));
+                const daysLeft = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                
+                const progress = Math.min(100, Math.max(0, (elapsedMs / totalDurationMs) * 100));
 
-                return { start, end, daysLeft: Math.max(0, daysLeft), progress };
+                return { start, end, daysTotal, daysLeft: Math.max(0, daysLeft), progress };
             }
         };
 
@@ -424,19 +489,22 @@
             { id: 'Ocio', icon: 'ph-popcorn', color: 'text-purple-400' },
             { id: 'Servicios', icon: 'ph-lightning', color: 'text-yellow-400' },
             { id: 'Compras', icon: 'ph-shopping-bag', color: 'text-pink-400' },
-            { id: 'Salud', icon: 'ph-heart-beat', color: 'text-red-400' },
+            { id: 'Salud', icon: 'ph-heartbeat', color: 'text-red-400' },
+            { id: 'Deuda/Reembolso', icon: 'ph-receipt', color: 'text-indigo-400' },
             { id: 'Otro', icon: 'ph-dots-three-circle', color: 'text-gray-400' }
         ];
 
         // --- 3. APLICACIÓN PRINCIPAL ---
 
-        const app = {
+        // FIX: Asignar 'app' a window para que sea accesible desde los onclick de HTML (ya que el script es un módulo)
+        const app = window.app = {
             user: null,
-            data: { income: 0, fixed: [] }, 
+            // Agregamos 'loans' al modelo de datos
+            data: { income: 0, fixed: [], loans: [] }, 
             logs: [],
             currentPeriod: null,
-            mode: 'expense', // 'expense' | 'extra' | 'fixed'
-            editId: null,
+            mode: 'expense', // 'expense' | 'extra' | 'fixed' | 'loan'
+            editId: null, // ID de log (transacciones) o índice (gastos fijos/préstamos)
             chartInstance: null,
 
             async init() {
@@ -450,37 +518,39 @@
                     `;
                 });
 
-                // Escuchar Auth - SAFETY CHECK ADDED
+                // Escuchar Auth y disparar listeners de Firestore
                 if (!auth) {
                     UI.toast("Error: Firebase no pudo inicializarse", "error");
-                    const syncEl = document.getElementById('syncStatus');
-                    if(syncEl) {
-                        syncEl.classList.remove('bg-zinc-800', 'bg-emerald-500');
-                        syncEl.classList.add('bg-red-500');
-                        syncEl.title = "Offline";
-                    }
                     return;
                 }
 
-                auth.onAuthStateChanged(async u => {
-                    this.user = u;
+                // Autenticación inicial y listener de estado
+                onAuthStateChanged(auth, async (u) => {
+                    if (!u) {
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch(e) {
+                            console.error("Error signing in:", e);
+                            UI.toast("Error de conexión, usando datos locales.", "error");
+                        }
+                    }
+                    
+                    this.user = auth.currentUser; // Usar el estado actual después del intento de sign-in
                     this.updateUserUI();
                     
-                    if(u) {
+                    if (this.user) {
                         this.setupRealtimeListeners();
                     } else {
-                        // Intentar login anónimo o token local si estamos en entorno de prueba
-                        if(typeof __initial_auth_token !== 'undefined') {
-                            await auth.signInWithCustomToken(__initial_auth_token);
-                        } else {
-                            await auth.signInAnonymously();
-                        }
+                        // En caso de que falle la autenticación anónima/token
+                        console.log("No user authenticated. Data will not sync.");
                     }
                 });
 
-                // Calcular Periodo inicial
                 this.refreshPeriod();
-                // Recalcular cada minuto para mantener "Días restantes" fresco
                 setInterval(() => this.refreshPeriod(), 60000);
             },
 
@@ -501,46 +571,45 @@
             },
 
             setupRealtimeListeners() {
-                if(!this.user) return;
-                const userDocRef = db.collection(COLLECTION_PREFIX).doc(this.user.uid);
+                if(!this.user || !db) return;
+                const uid = this.user.uid;
+                const userDocRef = doc(db, PRIVATE_DATA_PATH(uid));
+                const logsCollectionRef = collection(db, LOGS_COLLECTION(uid));
 
-                // 1. Escuchar Configuración (Ingreso y Fijos)
-                userDocRef.onSnapshot(doc => {
-                    if(doc.exists) {
-                        this.data = doc.data();
-                        document.getElementById('inpIncome').value = this.data.income || '';
-                        this.renderFixedList();
-                        this.calculateBalance();
-                    }
-                });
-
-                // 2. Escuchar Logs (Transacciones)
-                // Solo traemos los últimos 100 para no saturar memoria
-                userDocRef.collection('logs')
-                    .orderBy('date', 'desc')
-                    .limit(100)
-                    .onSnapshot(snapshot => {
-                        this.logs = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
-                        this.renderTransactions();
-                        this.calculateBalance();
-                        this.updateChart();
-                    }, err => console.error(err));
-
-                // UI Online Status (usando el nuevo puntito)
-                const syncEl = document.getElementById('syncStatus');
-                if(syncEl) {
-                    syncEl.classList.remove('bg-zinc-800');
+                // 1. Escuchar Configuración (Ingreso, Fijos, Préstamos)
+                onSnapshot(userDocRef, (docSnap) => {
+                    const syncEl = document.getElementById('syncStatus');
+                    syncEl.classList.remove('bg-zinc-800', 'bg-red-500');
                     syncEl.classList.add('bg-emerald-500');
                     syncEl.title = "Online";
-                }
+
+                    if(docSnap.exists()) {
+                        this.data = { income: 0, fixed: [], loans: [], ...docSnap.data() };
+                        document.getElementById('inpIncome').value = this.data.income || '';
+                        this.renderFixedList();
+                        this.renderLoansList();
+                        this.calculateBalance();
+                    } else {
+                        // Crear el documento inicial si no existe
+                        setDoc(userDocRef, { income: 0, fixed: [], loans: [] }, { merge: true });
+                    }
+                }, err => console.error("Error al escuchar config:", err));
+
+                // 2. Escuchar Logs (Transacciones)
+                const q = query(logsCollectionRef, orderBy('date', 'desc'), limit(100));
+                
+                onSnapshot(q, (snapshot) => {
+                    this.logs = snapshot.docs.map(d => ({id: d.id, ...d.data(), date: d.data().date instanceof Date ? d.data().date.toISOString() : d.data().date}));
+                    this.renderTransactions();
+                    this.calculateBalance();
+                    this.updateChart();
+                }, err => console.error("Error al escuchar logs:", err));
             },
 
             calculateBalance() {
                 if(!this.currentPeriod) return;
 
                 // 1. Calcular Gastos Fijos que aplican a ESTE periodo
-                // Lógica: Si el periodo es 5-19, incluir pagos entre esos días.
-                // Si es 20-4, incluir pagos >=20 O <=4.
                 const pStartDay = this.currentPeriod.start.getDate();
                 const isFirstQ = pStartDay === 5; // Quincena 1 (5 al 19)
 
@@ -548,15 +617,21 @@
                 (this.data.fixed || []).forEach(f => {
                     const d = parseInt(f.day);
                     let applies = false;
+                    
                     if (isFirstQ) {
+                        // Aplica si el día de pago cae entre el 5 y el 19
                         if (d >= 5 && d <= 19) applies = true;
                     } else {
+                        // Aplica si el día de pago cae entre el 20 y el 4 (cruce de mes)
                         if (d >= 20 || d <= 4) applies = true;
                     }
                     if(applies) activeFixedTotal += (parseFloat(f.amount) || 0);
                 });
-
-                // 2. Sumar transacciones reales dentro del rango de fechas
+                
+                // 2. Sumar Deudas Pendientes (Para el resumen, es el total de lo que debes devolver)
+                const totalShortLoansPending = (this.data.loans || []).reduce((sum, loan) => sum + (parseFloat(loan.amount) || 0), 0);
+                
+                // 3. Sumar transacciones reales dentro del rango de fechas
                 let spentInPeriod = 0;
                 let extraIncomeInPeriod = 0;
                 
@@ -566,21 +641,24 @@
                 this.logs.forEach(log => {
                     const logTime = new Date(log.date).getTime();
                     if(logTime >= startTime && logTime <= endTime) {
+                        // Aquí el dinero del préstamo se contabiliza a través de la transacción 'income' generada en saveLoan.
                         if(log.type === 'income') extraIncomeInPeriod += log.amount;
                         else spentInPeriod += log.amount;
                     }
                 });
 
-                // 3. Totales
+                // 4. Totales
                 const baseIncome = parseFloat(this.data.income) || 0;
-                const totalAvailable = (baseIncome + extraIncomeInPeriod) - (activeFixedTotal + spentInPeriod);
+                const totalExpenses = activeFixedTotal + spentInPeriod;
                 
-                // Días restantes (incluyendo hoy como 1 día entero)
-                // Evitar división por cero
+                // Disponible = Ingreso Base + Ingresos Extra (incluyendo el préstamo registrado como income) - Gastos Fijos/Variables
+                const totalAvailable = (baseIncome + extraIncomeInPeriod) - totalExpenses;
+                
+                // Días restantes (incluyendo hoy)
                 const divisor = Math.max(1, this.currentPeriod.daysLeft);
                 const dailyAvailable = totalAvailable / divisor;
 
-                // 4. Render UI
+                // 5. Render UI
                 const elDaily = document.getElementById('dailyFree');
                 elDaily.textContent = UI.fmtMoney(dailyAvailable);
                 elDaily.className = `text-5xl font-black tracking-tighter mb-6 ${dailyAvailable < 0 ? 'text-red-500' : 'text-white'}`;
@@ -594,6 +672,10 @@
                     .reduce((sum, l) => sum + l.amount, 0);
                 
                 document.getElementById('todayTotal').textContent = `-${UI.fmtMoney(spentToday)}`;
+                
+                // Actualizar resumen de obligaciones
+                document.getElementById('summaryFixed').textContent = UI.fmtMoney(activeFixedTotal);
+                document.getElementById('summaryShortLoans').textContent = UI.fmtMoney(totalShortLoansPending);
             },
 
             // --- RENDERING ---
@@ -604,20 +686,21 @@
                 
                 if(this.logs.length === 0) {
                     list.innerHTML = `<div class="text-center text-zinc-700 py-4 text-xs">No hay movimientos recientes</div>`;
+                    document.getElementById('chartSection').classList.add('hidden');
                     return;
                 }
 
                 this.logs.slice(0, 20).forEach(log => {
                     const isInc = log.type === 'income';
                     const dateObj = new Date(log.date);
-                    // Buscar icono
-                    let iconClass = 'ph-money';
-                    let bgClass = isInc ? 'bg-emerald-500/10 text-emerald-500' : 'bg-zinc-800 text-zinc-400';
+                    // Usar un icono por defecto si no se encuentra la categoría
+                    const cat = Categories.find(c => c.id === log.category) || { icon: 'ph-question', color: 'text-gray-400' };
                     
-                    if(!isInc) {
-                        const cat = Categories.find(c => c.id === log.category) || { icon: 'ph-shopping-cart' };
-                        iconClass = cat.icon;
-                    }
+                    const iconClass = isInc ? 'ph-money' : cat.icon;
+                    const bgClass = isInc ? 'bg-emerald-500/10 text-emerald-500' : 'bg-zinc-800 text-zinc-400';
+                    // Si es un préstamo, podemos darle un título especial
+                    const isLoanIncome = isInc && log.category === 'Deuda/Reembolso';
+                    const name = log.desc || (isLoanIncome ? `Préstamo Recibido (${log.category})` : log.category) || (isInc ? 'Ingreso Extra' : 'Gasto');
 
                     list.innerHTML += `
                         <div onclick="app.openModal('${isInc ? 'extra' : 'expense'}', '${log.id}')" class="flex justify-between items-center p-3 bg-zinc-900/40 border border-zinc-800/50 rounded-2xl active:bg-zinc-800 transition-colors cursor-pointer">
@@ -626,8 +709,8 @@
                                     <i class="ph-fill ${iconClass}"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-zinc-200 text-xs">${log.desc || log.category}</h4>
-                                    <p class="text-[10px] text-zinc-500">${dateObj.toLocaleDateString()} ${dateObj.getHours()}:${dateObj.getMinutes() < 10 ? '0'+dateObj.getMinutes() : dateObj.getMinutes()}</p>
+                                    <h4 class="font-bold text-zinc-200 text-xs">${name}</h4>
+                                    <p class="text-[10px] text-zinc-500">${dateObj.toLocaleDateString()} ${dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                                 </div>
                             </div>
                             <span class="font-bold text-sm ${isInc ? 'text-emerald-500' : 'text-zinc-200'}">
@@ -641,7 +724,14 @@
             renderFixedList() {
                 const list = document.getElementById('fixedExpensesList');
                 list.innerHTML = '';
-                (this.data.fixed || []).sort((a,b) => a.day - b.day).forEach((f, idx) => {
+                const fixed = this.data.fixed || [];
+
+                if(fixed.length === 0) {
+                    list.innerHTML = `<div class="text-center py-4 text-zinc-700 text-xs">Aún no has agregado gastos fijos.</div>`;
+                    return;
+                }
+                
+                fixed.sort((a,b) => a.day - b.day).forEach((f, idx) => {
                     list.innerHTML += `
                         <div onclick="app.openModal('fixed', ${idx})" class="flex justify-between items-center p-4 bg-zinc-900 border border-zinc-800 rounded-xl cursor-pointer hover:border-zinc-600 transition-colors">
                             <div class="flex items-center gap-3">
@@ -653,10 +743,65 @@
                     `;
                 });
             },
+            
+            renderLoansList() {
+                const list = document.getElementById('loansList');
+                list.innerHTML = '';
+                const loans = this.data.loans || [];
+
+                if(loans.length === 0) {
+                    list.innerHTML = `<div class="text-center py-4 text-zinc-700 text-xs">No hay deudas cortas registradas.</div>`;
+                    return;
+                }
+                
+                loans.forEach((loan, idx) => {
+                    const dueDate = loan.dueDate ? new Date(loan.dueDate) : null;
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    let statusClass = 'text-orange-400';
+                    let statusText = 'Pendiente';
+
+                    if (dueDate) {
+                        const dueTime = new Date(dueDate);
+                        dueTime.setHours(0, 0, 0, 0); 
+                        
+                        if (dueTime.getTime() < today.getTime()) {
+                            statusClass = 'text-red-400';
+                            statusText = 'VENCIDO';
+                        } else if (dueTime.toDateString() === today.toDateString()) {
+                             statusClass = 'text-red-400';
+                            statusText = 'HOY ES EL LÍMITE';
+                        }
+                    }
+                    
+                    // Nota: Se usó un ícono de tacho de basura en el renderizado de la lista para simplificar la acción de "eliminar/pagar"
+                    list.innerHTML += `
+                        <div class="flex justify-between items-center p-4 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-600 transition-colors">
+                            <div onclick="app.openModal('loan', ${idx})" class="flex items-center gap-3 flex-1 cursor-pointer">
+                                <span class="text-xs font-bold ${statusClass} w-8 h-8 flex items-center justify-center rounded-lg"><i class="ph-bold ph-calendar-blank text-xl"></i></span>
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-sm text-zinc-300">${loan.name}</span>
+                                    <span class="text-[10px] text-zinc-500">Monto: ${UI.fmtMoney(loan.amount)}</span>
+                                </div>
+                            </div>
+                            <div class="text-right flex items-center gap-3">
+                                <div class="flex flex-col items-end">
+                                    <span class="block font-bold text-sm ${statusClass}">${statusText}</span>
+                                    <span class="text-[10px] ${statusClass}">${dueDate ? dueDate.toLocaleDateString() : 'N/A'}</span>
+                                </div>
+                                <button onclick="app.deleteLoanConfirm(${idx})" class="w-8 h-8 bg-red-600/10 text-red-400 rounded-full flex items-center justify-center hover:bg-red-600/20 shrink-0">
+                                    <i class="ph-bold ph-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            },
 
             updateChart() {
-                // Solo gastos de este periodo
                 if(!this.currentPeriod) return;
+
                 const startTime = this.currentPeriod.start.getTime();
                 const endTime = this.currentPeriod.end.getTime();
 
@@ -664,6 +809,8 @@
                 
                 if(periodExpenses.length === 0) {
                     document.getElementById('chartSection').classList.add('hidden');
+                    if(this.chartInstance) this.chartInstance.destroy();
+                    this.chartInstance = null;
                     return;
                 }
                 document.getElementById('chartSection').classList.remove('hidden');
@@ -678,11 +825,14 @@
                 const labels = Object.keys(groups);
                 const data = Object.values(groups);
                 const colors = labels.map(l => {
-                    const c = Categories.find(cat => cat.id === l);
-                    // Mapeo simple de colores tailwind a hex para chartjs
+                    // Mapeo simple de colores
                     if(l === 'Comida') return '#fb923c';
                     if(l === 'Transporte') return '#60a5fa';
                     if(l === 'Ocio') return '#c084fc';
+                    if(l === 'Servicios') return '#facc15';
+                    if(l === 'Compras') return '#ec4899';
+                    if(l === 'Salud') return '#f87171';
+                    if(l === 'Deuda/Reembolso') return '#818cf8'; // Indigo-400
                     return '#9ca3af';
                 });
 
@@ -704,6 +854,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        cutout: '70%',
                         plugins: {
                             legend: { position: 'right', labels: { color: '#999', font: { size: 10, family: 'Plus Jakarta Sans' }, boxWidth: 10 } }
                         }
@@ -711,31 +862,22 @@
                 });
             },
 
-            // --- ACCIONES DE USUARIO ---
+            // --- ACCIONES DE USUARIO Y MODAL ---
 
             switchView(viewName) {
+                // Lógica de cambio de vista y FAB mejorada
                 document.getElementById('view-balance').classList.add('hidden');
                 document.getElementById('view-plan').classList.add('hidden');
-                document.querySelectorAll('.nav-btn').forEach(b => {
-                    b.classList.remove('active'); 
-                    b.classList.replace('text-white', 'text-zinc-500');
-                });
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 
-                document.getElementById(`view-${viewName}`).classList.remove('hidden');
-                
-                // Activar boton correcto
-                const btnIndex = viewName === 'balance' ? 0 : 1;
-                const activeBtn = document.querySelectorAll('.nav-btn')[btnIndex];
-                activeBtn.classList.add('active');
-                activeBtn.classList.replace('text-zinc-500', 'text-white');
+                const activeBtn = document.querySelector(`.nav-btn:nth-child(${viewName === 'balance' ? 1 : 2})`);
+                if(activeBtn) activeBtn.classList.add('active');
 
-                // FIX: Toggle FAB
+                document.getElementById(`view-${viewName}`).classList.remove('hidden');
+
                 const fab = document.getElementById('fabContainer');
-                if(viewName === 'balance') {
-                    fab.classList.remove('opacity-0', 'pointer-events-none');
-                } else {
-                    fab.classList.add('opacity-0', 'pointer-events-none');
-                }
+                fab.classList.toggle('opacity-0', viewName !== 'balance');
+                fab.classList.toggle('pointer-events-none', viewName !== 'balance');
             },
 
             openModal(mode, id = null) {
@@ -749,8 +891,10 @@
                 // Reset UI
                 document.getElementById('formTransaction').classList.add('hidden');
                 document.getElementById('formFixed').classList.add('hidden');
+                document.getElementById('formLoan').classList.add('hidden'); // Nuevo form
                 document.getElementById('btnDeleteTx').classList.add('hidden');
                 document.getElementById('btnDeleteFix').classList.add('hidden');
+                document.getElementById('btnDeleteLoan').classList.add('hidden'); // Este botón no se usa en el nuevo flujo
                 document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
 
                 // Configurar contenido
@@ -767,10 +911,9 @@
                         document.getElementById('txAmount').value = log.amount;
                         document.getElementById('txDesc').value = log.desc || '';
                         document.getElementById('btnDeleteTx').classList.remove('hidden');
-                        // Seleccionar chip
                         if(log.category) {
                             const chips = document.querySelectorAll('.chip');
-                            chips.forEach(c => { if(c.innerText.includes(log.category)) c.classList.add('active'); });
+                            chips.forEach(c => { if(c.innerText.trim() === log.category) c.classList.add('active'); });
                         }
                     } else {
                         document.getElementById('txAmount').value = '';
@@ -793,10 +936,25 @@
                         document.getElementById('fixAmount').value = '';
                         document.getElementById('fixDay').value = '';
                     }
+                } else if (mode === 'loan') { // Nuevo modo Préstamo
+                    document.getElementById('formLoan').classList.remove('hidden');
+                    title.textContent = id !== null ? 'Editar Deuda Corta' : 'Nuevo Préstamo Recibido';
+                    
+                    if(id !== null) {
+                        const item = this.data.loans[id];
+                        document.getElementById('loanName').value = item.name;
+                        document.getElementById('loanAmount').value = item.amount;
+                        document.getElementById('loanDueDate').value = item.dueDate;
+                        // El botón de borrar se saca de la lista, no del modal
+                        document.getElementById('btnDeleteLoan').classList.add('hidden');
+                    } else {
+                        document.getElementById('loanName').value = '';
+                        document.getElementById('loanAmount').value = '';
+                        document.getElementById('loanDueDate').value = '';
+                    }
                 }
 
                 overlay.classList.remove('hidden');
-                // Animación entrada
                 requestAnimationFrame(() => {
                     overlay.classList.remove('opacity-0');
                     sheet.classList.remove('translate-y-full');
@@ -818,19 +976,18 @@
             selectCategory(catId, el) {
                 document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
                 el.classList.add('active');
-                // Guardar temporalmente la seleccion en el DOM o variable
-                el.dataset.selected = "true"; 
             },
 
-            // --- PERSISTENCIA ---
+            // --- PERSISTENCIA (Modular Firebase) ---
 
             async saveTransaction() {
+                if(!this.user) return UI.toast('Por favor, espera a que se conecte la cuenta.', 'error');
+
                 const amt = parseFloat(document.getElementById('txAmount').value);
                 if(!amt || amt <= 0) return UI.toast('Ingresa un monto válido', 'error');
 
                 const desc = document.getElementById('txDesc').value;
                 
-                // Obtener categoría seleccionada
                 let cat = 'Otro';
                 const activeChip = document.querySelector('.chip.active');
                 if(activeChip) cat = activeChip.innerText.trim();
@@ -840,46 +997,57 @@
                     desc: desc,
                     category: cat,
                     type: this.mode === 'extra' ? 'income' : 'expense',
+                    // Si se está editando, mantén la fecha original, sino usa la actual
                     date: this.editId ? this.logs.find(l=>l.id===this.editId).date : new Date().toISOString()
                 };
 
                 try {
+                    const logRef = collection(db, LOGS_COLLECTION(this.user.uid));
                     if(this.editId) {
-                        await db.collection(COLLECTION_PREFIX).doc(this.user.uid).collection('logs').doc(this.editId).update(payload);
+                        await updateDoc(doc(logRef, this.editId), payload);
                         UI.toast('Actualizado correctamente', 'success');
                     } else {
-                        await db.collection(COLLECTION_PREFIX).doc(this.user.uid).collection('logs').add(payload);
+                        await addDoc(logRef, payload);
                         UI.toast('Guardado', 'success');
                     }
                     this.closeModal();
-                } catch(e) { console.error(e); UI.toast('Error al guardar', 'error'); }
+                } catch(e) { console.error(e); UI.toast('Error al guardar: ' + e.message, 'error'); }
             },
 
-            async deleteTx() {
-                if(!confirm('¿Eliminar este registro?')) return;
+            async deleteTxConfirm() {
+                const confirmed = await UI.confirm('Confirmar Eliminación', 'Estás a punto de eliminar esta transacción. ¿Confirmar?');
+                if (!confirmed) return;
+                
                 try {
-                    await db.collection(COLLECTION_PREFIX).doc(this.user.uid).collection('logs').doc(this.editId).delete();
+                    const logRef = collection(db, LOGS_COLLECTION(this.user.uid));
+                    await deleteDoc(doc(logRef, this.editId));
                     UI.toast('Eliminado', 'info');
                     this.closeModal();
-                } catch(e) { UI.toast('Error', 'error'); }
+                } catch(e) { UI.toast('Error al eliminar', 'error'); }
             },
 
             async saveConfig() {
+                if(!this.user) return UI.toast('Por favor, espera a que se conecte la cuenta.', 'error');
+
                 const inc = parseFloat(document.getElementById('inpIncome').value);
-                if(isNaN(inc)) return;
+                // Si el campo está vacío, lo tratamos como 0, no como error
+                const newIncome = isNaN(inc) ? 0 : inc; 
                 
                 try {
-                    await db.collection(COLLECTION_PREFIX).doc(this.user.uid).set({ ...this.data, income: inc }, { merge: true });
+                    const userDocRef = doc(db, PRIVATE_DATA_PATH(this.user.uid));
+                    await setDoc(userDocRef, { income: newIncome }, { merge: true });
                     UI.toast('Ingreso actualizado', 'success');
                 } catch(e) { UI.toast('Error al guardar config', 'error'); }
             },
 
             async saveFixed() {
-                const name = document.getElementById('fixName').value;
+                if(!this.user) return UI.toast('Por favor, espera a que se conecte la cuenta.', 'error');
+
+                const name = document.getElementById('fixName').value.trim();
                 const amt = parseFloat(document.getElementById('fixAmount').value);
                 const day = parseInt(document.getElementById('fixDay').value);
 
-                if(!name || !amt || !day) return UI.toast('Completa todos los campos', 'error');
+                if(!name || !amt || isNaN(day) || day < 1 || day > 31) return UI.toast('Completa todos los campos con valores válidos (Día entre 1-31)', 'error');
 
                 const newFixed = [...this.data.fixed];
                 if(this.editId !== null) {
@@ -889,57 +1057,186 @@
                 }
 
                 try {
-                    await db.collection(COLLECTION_PREFIX).doc(this.user.uid).set({ ...this.data, fixed: newFixed }, { merge: true });
+                    const userDocRef = doc(db, PRIVATE_DATA_PATH(this.user.uid));
+                    await setDoc(userDocRef, { fixed: newFixed }, { merge: true });
                     UI.toast('Gasto fijo guardado', 'success');
                     this.closeModal();
-                } catch(e) { UI.toast('Error', 'error'); }
+                } catch(e) { UI.toast('Error al guardar fijo', 'error'); }
             },
 
-            async deleteFixed() {
-                 if(!confirm('¿Eliminar gasto fijo?')) return;
-                 const newFixed = this.data.fixed.filter((_, i) => i !== this.editId);
-                 await db.collection(COLLECTION_PREFIX).doc(this.user.uid).set({ ...this.data, fixed: newFixed }, { merge: true });
-                 this.closeModal();
+            async deleteFixedConfirm() {
+                const confirmed = await UI.confirm('Confirmar Eliminación', 'Estás a punto de eliminar este gasto fijo. ¿Confirmar?');
+                if (!confirmed) return;
+                
+                try {
+                    const newFixed = this.data.fixed.filter((_, i) => i !== this.editId);
+                    const userDocRef = doc(db, PRIVATE_DATA_PATH(this.user.uid));
+                    await setDoc(userDocRef, { fixed: newFixed }, { merge: true });
+                    UI.toast('Gasto fijo eliminado', 'info');
+                    this.closeModal();
+                } catch(e) { UI.toast('Error al eliminar fijo', 'error'); }
+            },
+            
+            async saveLoan() {
+                if(!this.user) return UI.toast('Por favor, espera a que se conecte la cuenta.', 'error');
+
+                const name = document.getElementById('loanName').value.trim();
+                const amount = parseFloat(document.getElementById('loanAmount').value);
+                const dueDate = document.getElementById('loanDueDate').value;
+                
+                if(!name || !amount || !dueDate) return UI.toast('Completa los campos de Concepto, Monto Prestado y Fecha Límite.', 'error');
+                
+                const loanPayload = { name, amount, dueDate, timestamp: new Date().toISOString() };
+                
+                const newLoans = [...this.data.loans];
+                
+                const batch = writeBatch(db);
+                const userDocRef = doc(db, PRIVATE_DATA_PATH(this.user.uid));
+                const logRef = collection(db, LOGS_COLLECTION(this.user.uid));
+
+                // 1. Guardar/Actualizar el registro de la Deuda (Recordatorio)
+                if(this.editId !== null) {
+                    // Si se está editando, solo actualizamos el recordatorio (no creamos nuevo Ingreso)
+                    newLoans[this.editId] = loanPayload;
+                    UI.toast(`Deuda actualizada: ${name}`, 'info');
+                } else {
+                    newLoans.push(loanPayload);
+                    
+                    // 2. CREAR AUTOMÁTICAMENTE LA TRANSACCIÓN DE INGRESO
+                    const incomeLog = {
+                        amount: amount,
+                        desc: `Préstamo recibido de: ${name}`,
+                        category: 'Deuda/Reembolso',
+                        type: 'income',
+                        date: new Date().toISOString()
+                    };
+                    batch.add(logRef, incomeLog);
+                    UI.toast(`Préstamo de ${UI.fmtMoney(amount)} recibido y sumado al balance.`, 'success');
+                }
+
+                // 3. Escribir la lista actualizada de préstamos en el documento del usuario
+                batch.set(userDocRef, { loans: newLoans }, { merge: true });
+
+                try {
+                    await batch.commit();
+                    this.closeModal();
+                } catch(e) { 
+                    console.error("Error al guardar préstamo y log:", e); 
+                    UI.toast('Error al guardar préstamo', 'error'); 
+                }
             },
 
-            async reset() {
-                if(!confirm('¡PELIGRO! Esto borrará todas tus transacciones y configuración. ¿Seguro?')) return;
-                // Borrar subcoleccion es dificil desde cliente, borramos doc padre y UI reset
-                // En app real se requiere Cloud Function para borrado recursivo eficiente
+            async deleteLoanConfirm(index) {
+                const loan = this.data.loans[index];
+
+                const confirmed = await UI.confirm('Marcar como Pagado', `Estás a punto de liquidar la deuda de ${loan.name} por ${UI.fmtMoney(loan.amount)}. Esta acción **automáticamente** creará la transacción de GASTO de pago. ¿Confirmar pago?`);
+                
+                if (!confirmed) return;
+                
+                // Si confirmó el pago, el proceso es 100% automático (eliminar recordatorio + crear gasto)
+                
+                const newLoans = this.data.loans.filter((_, i) => i !== index);
+                const batch = writeBatch(db);
+                const userDocRef = doc(db, PRIVATE_DATA_PATH(this.user.uid));
+                const logRef = collection(db, LOGS_COLLECTION(this.user.uid));
+
+                // 1. Escribir la lista actualizada de préstamos (eliminar recordatorio)
+                batch.set(userDocRef, { loans: newLoans }, { merge: true });
+
+                // 2. Crear automáticamente el GASTO de pago
+                const paymentLog = {
+                    amount: loan.amount,
+                    desc: `Pago de Préstamo liquidado a: ${loan.name}`,
+                    category: 'Deuda/Reembolso',
+                    type: 'expense',
+                    date: new Date().toISOString()
+                };
+                batch.add(logRef, paymentLog);
+
+                try {
+                    await batch.commit();
+                    UI.toast(`Deuda de ${UI.fmtMoney(loan.amount)} liquidada. El gasto se ha registrado automáticamente.`, 'success');
+                } catch(e) { 
+                    console.error("Error al liquidar deuda:", e); 
+                    UI.toast('Error al liquidar deuda', 'error'); 
+                }
+            },
+
+            async resetData() {
+                const confirmed = await UI.confirm('¡BORRADO DE DATOS!', 'Esto eliminará *toda* tu configuración y logs de transacciones. ¿Continuar?');
+                if (!confirmed) return;
+                
+                if(!this.user) return UI.toast('Error de autenticación.', 'error');
+
                 UI.toast('Reiniciando...', 'info');
-                // Truco simple: Sobreescribir config y recargar, los logs quedan huérfanos pero no se muestran
-                await db.collection(COLLECTION_PREFIX).doc(this.user.uid).set({ income: 0, fixed: [] });
-                location.reload();
+                
+                try {
+                    const userDocRef = doc(db, PRIVATE_DATA_PATH(this.user.uid));
+                    
+                    // Sobreescribir el documento de configuración
+                    await setDoc(userDocRef, { income: 0, fixed: [], loans: [] }); // Reset también el array de préstamos
+
+                    // Opcional: Borrar logs (solo los logs visibles - en una app real se necesitaría una Cloud Function para el borrado masivo)
+                    // Por simplicidad, solo borramos los logs cargados localmente (max 100)
+                    const batch = writeBatch(db);
+                    const logsRef = collection(db, LOGS_COLLECTION(this.user.uid));
+                    
+                    const q = query(logsRef, orderBy('date', 'desc'), limit(100));
+                    const snapshot = await getDocs(q);
+                    
+                    snapshot.docs.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+                    await batch.commit();
+
+                    UI.toast('Datos borrados. Recargando.', 'success');
+                    location.reload();
+                } catch(e) {
+                    console.error("Error al resetear:", e);
+                    UI.toast('Error al borrar datos: ' + e.message, 'error');
+                }
             },
 
-            // --- AUTH ---
+            // --- AUTH (Modular Firebase) ---
             login() { 
-                const p = new firebase.auth.GoogleAuthProvider(); 
-                auth.signInWithPopup(p).catch(e => UI.toast(e.message, 'error')); 
+                const provider = new GoogleAuthProvider(); 
+                signInWithPopup(auth, provider).catch(e => UI.toast(e.message, 'error')); 
             },
-            logout() { auth.signOut(); location.reload(); },
+            
+            logout() { 
+                signOut(auth).then(() => {
+                    location.reload(); 
+                }).catch(e => UI.toast('Error al cerrar sesión', 'error'));
+            },
             
             updateUserUI() {
                 const u = this.user;
                 if(u && !u.isAnonymous) {
-                    document.getElementById('userName').textContent = u.displayName.split(' ')[0];
+                    document.getElementById('userName').textContent = u.displayName ? u.displayName.split(' ')[0] : 'Usuario';
                     document.getElementById('userStatusText').textContent = 'Cuenta Google Conectada';
                     document.getElementById('userStatusText').className = 'text-[10px] text-emerald-500 font-bold';
                     document.getElementById('btnLogin').classList.add('hidden');
                     document.getElementById('btnLogout').classList.remove('hidden');
                 } else {
                     document.getElementById('userName').textContent = 'Invitado';
+                    document.getElementById('userStatusText').textContent = u ? 'Anónimo Conectado' : 'Sin conexión';
+                    document.getElementById('userStatusText').className = u ? 'text-[10px] text-zinc-500' : 'text-[10px] text-red-500 font-bold';
+                    document.getElementById('btnLogin').classList.remove('hidden');
+                    document.getElementById('btnLogout').classList.add('hidden');
                 }
             },
             
             scrollToChart() {
-                document.getElementById('chartSection').scrollIntoView({ behavior: 'smooth' });
+                const chartSection = document.getElementById('chartSection');
+                if (chartSection.classList.contains('hidden')) {
+                     UI.toast('Agrega gastos para ver el análisis.', 'info');
+                }
+                chartSection.scrollIntoView({ behavior: 'smooth' });
             }
         };
 
         // Iniciar
         document.addEventListener('DOMContentLoaded', () => app.init());
-
     </script>
 </body>
 </html>
