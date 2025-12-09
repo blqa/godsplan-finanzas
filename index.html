@@ -89,6 +89,43 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             max-width: 320px;
         }
+
+        /* --- ESTILOS DE IMPRESIÓN (ESTADO DE CUENTA) --- */
+        @media print {
+            @page { margin: 10mm; size: auto; }
+            body { 
+                background-color: white !important; 
+                color: black !important; 
+                overflow: visible !important; 
+                font-family: sans-serif;
+            }
+            /* Ocultar elementos de la app */
+            #global-nav, #fabContainer, .glass-nav, #app-content, #toast-container, #modalOverlay, #confirmDialog { 
+                display: none !important; 
+            }
+            /* Mostrar solo el área de impresión */
+            #print-area { 
+                display: block !important; 
+                position: absolute; 
+                top: 0; 
+                left: 0; 
+                width: 100%; 
+                height: auto; 
+                z-index: 9999; 
+                background: white;
+                padding: 20px;
+            }
+            /* Estilos básicos para la tabla de impresión */
+            .print-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+            .print-table th, .print-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            .print-table th { background-color: #f2f2f2; font-weight: bold; }
+            .print-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+            .print-section { margin-bottom: 25px; }
+            .print-title { font-size: 16px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+            .print-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+            .print-summary-item { border: 1px solid #eee; padding: 10px; border-radius: 4px; }
+        }
+        #print-area { display: none; }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden text-sm sm:text-base bg-[#050505] text-[#e5e5e5]">
@@ -160,6 +197,11 @@
                     <i class="ph-bold ph-chart-pie"></i> VER ANÁLISIS
                 </button>
             </div>
+            
+            <!-- BOTÓN ESTADO DE CUENTA -->
+            <button onclick="app.generateReport()" class="w-full mt-3 bg-zinc-900 border border-zinc-800 hover:bg-white hover:text-black text-zinc-400 py-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition-all">
+                <i class="ph-bold ph-file-text"></i> GENERAR ESTADO DE CUENTA (PDF)
+            </button>
 
             <!-- LISTA MOVIMIENTOS -->
             <div class="mt-8">
@@ -254,6 +296,9 @@
         </section>
 
     </main>
+    
+    <!-- ÁREA DE IMPRESIÓN (OCULTA HASTA QUE SE LLAMA) -->
+    <div id="print-area"></div>
     
     <!-- FAB (NUEVO GASTO) -->
     <div id="fabContainer" class="fixed bottom-[100px] left-1/2 -translate-x-1/2 z-40 transition-all duration-300">
@@ -943,6 +988,138 @@
                         }
                     }
                 });
+            },
+
+            // --- REPORTE (ESTADO DE CUENTA) ---
+            generateReport() {
+                if (!this.currentPeriod) return UI.toast('Cargando periodo...', 'error');
+                
+                // 1. Recopilar datos
+                const pStart = this.currentPeriod.start;
+                const pEnd = this.currentPeriod.end;
+                const pStartStr = pStart.toLocaleDateString('es-ES');
+                const pEndStr = pEnd.toLocaleDateString('es-ES');
+                
+                // Transacciones del periodo
+                const periodLogs = this.logs.filter(l => {
+                    const d = new Date(l.date).getTime();
+                    return d >= pStart.getTime() && d <= pEnd.getTime();
+                }).sort((a,b) => new Date(b.date) - new Date(a.date));
+
+                // Totales
+                const incomeLogs = periodLogs.filter(l => l.type === 'income');
+                const expenseLogs = periodLogs.filter(l => l.type === 'expense');
+                
+                const totalIncomeExtra = incomeLogs.reduce((acc, l) => acc + l.amount, 0);
+                const totalExpenseVar = expenseLogs.reduce((acc, l) => acc + l.amount, 0);
+                
+                // Fijos aplicados
+                let fixedTotal = 0;
+                let fixedDetails = [];
+                const pStartDay = pStart.getDate();
+                const isFirstQ = pStartDay === 5;
+                
+                (this.data.fixed || []).forEach(f => {
+                    const d = parseInt(f.day);
+                    let applies = false;
+                    if (isFirstQ) { if (d >= 5 && d <= 19) applies = true; }
+                    else { if (d >= 20 || d <= 4) applies = true; }
+                    
+                    if(applies) {
+                        fixedTotal += parseFloat(f.amount) || 0;
+                        fixedDetails.push(f);
+                    }
+                });
+
+                const baseIncome = parseFloat(this.data.income) || 0;
+                
+                // Total disponible final calculo
+                // (Nota: los préstamos recibidos ya están en incomeLogs si se crearon con la nueva lógica, 
+                // pero si hay loans antiguos sin log, no se suman aquí. Asumimos la lógica nueva).
+                // Reviando lógica calculateBalance: totalAvailable = (base + extra + loanMoney) - (fixed + expenses)
+                // En la lógica nueva, loanMoney entra como incomeLog. Entonces:
+                const totalIngresos = baseIncome + totalIncomeExtra;
+                const totalEgresos = fixedTotal + totalExpenseVar;
+                const saldoFinal = totalIngresos - totalEgresos;
+
+                // 2. Construir HTML
+                let html = `
+                    <div class="print-header">
+                        <h1 style="font-size: 24px; font-weight: 800; margin: 0;">ESTADO DE CUENTA</h1>
+                        <p style="margin: 5px 0 0 0; color: #666;">God's Plan Finanzas</p>
+                        <p style="margin: 5px 0 0 0; font-size: 14px;"><strong>Periodo:</strong> ${pStartStr} al ${pEndStr}</p>
+                        <p style="margin: 0; font-size: 12px; color: #999;">Generado el: ${new Date().toLocaleString()}</p>
+                    </div>
+
+                    <div class="print-section">
+                        <div class="print-title">RESUMEN FINANCIERO</div>
+                        <div class="print-summary-grid">
+                            <div class="print-summary-item">
+                                <div style="font-size: 10px; color: #666; text-transform: uppercase;">Total Ingresos</div>
+                                <div style="font-size: 18px; font-weight: bold; color: #059669;">${UI.fmtMoney(totalIngresos)}</div>
+                                <div style="font-size: 10px; color: #888;">Base: ${UI.fmtMoney(baseIncome)} + Extra: ${UI.fmtMoney(totalIncomeExtra)}</div>
+                            </div>
+                            <div class="print-summary-item">
+                                <div style="font-size: 10px; color: #666; text-transform: uppercase;">Total Egresos</div>
+                                <div style="font-size: 18px; font-weight: bold; color: #dc2626;">${UI.fmtMoney(totalEgresos)}</div>
+                                <div style="font-size: 10px; color: #888;">Fijos: ${UI.fmtMoney(fixedTotal)} + Var: ${UI.fmtMoney(totalExpenseVar)}</div>
+                            </div>
+                        </div>
+                        <div style="background: #f9fafb; border: 1px solid #e5e7eb; padding: 15px; text-align: center; border-radius: 8px;">
+                            <span style="display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Saldo Disponible / Ahorro</span>
+                            <span style="display: block; font-size: 28px; font-weight: 900;">${UI.fmtMoney(saldoFinal)}</span>
+                        </div>
+                    </div>
+
+                    <div class="print-section">
+                        <div class="print-title">GASTOS FIJOS DEL PERIODO</div>
+                        ${fixedDetails.length > 0 ? `
+                        <table class="print-table">
+                            <thead><tr><th>Día Pago</th><th>Concepto</th><th style="text-align: right;">Monto</th></tr></thead>
+                            <tbody>
+                                ${fixedDetails.map(f => `<tr><td>${f.day}</td><td>${f.name}</td><td style="text-align: right;">${UI.fmtMoney(f.amount)}</td></tr>`).join('')}
+                            </tbody>
+                        </table>` : '<p style="font-size: 12px; font-style: italic;">Sin gastos fijos este periodo.</p>'}
+                    </div>
+
+                    <div class="print-section">
+                        <div class="print-title">DEUDAS CORTAS PENDIENTES</div>
+                        ${(this.data.loans && this.data.loans.length > 0) ? `
+                        <table class="print-table">
+                            <thead><tr><th>Vence</th><th>Concepto</th><th style="text-align: right;">Monto</th></tr></thead>
+                            <tbody>
+                                ${this.data.loans.map(l => `<tr><td>${l.dueDate}</td><td>${l.name}</td><td style="text-align: right; color: #d97706;">${UI.fmtMoney(l.amount)}</td></tr>`).join('')}
+                            </tbody>
+                        </table>` : '<p style="font-size: 12px; font-style: italic;">No hay deudas registradas.</p>'}
+                    </div>
+
+                    <div class="print-section">
+                        <div class="print-title">DETALLE DE MOVIMIENTOS</div>
+                        ${periodLogs.length > 0 ? `
+                        <table class="print-table">
+                            <thead><tr><th>Fecha</th><th>Categoría</th><th>Descripción</th><th style="text-align: right;">Monto</th></tr></thead>
+                            <tbody>
+                                ${periodLogs.map(l => {
+                                    const date = new Date(l.date).toLocaleDateString() + ' ' + new Date(l.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                                    const color = l.type === 'income' ? '#059669' : '#000';
+                                    const sign = l.type === 'income' ? '+' : '-';
+                                    return `<tr>
+                                        <td>${date}</td>
+                                        <td>${l.category || '-'}</td>
+                                        <td>${l.desc || ''}</td>
+                                        <td style="text-align: right; color: ${color}; font-weight: 500;">${sign}${UI.fmtMoney(l.amount)}</td>
+                                    </tr>`;
+                                }).join('')}
+                            </tbody>
+                        </table>` : '<p style="font-size: 12px; font-style: italic;">Sin movimientos registrados.</p>'}
+                    </div>
+                `;
+
+                const printArea = document.getElementById('print-area');
+                if (printArea) {
+                    printArea.innerHTML = html;
+                    window.print();
+                }
             },
 
             // --- ACCIONES DE USUARIO Y MODAL ---
