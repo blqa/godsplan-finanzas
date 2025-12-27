@@ -10,8 +10,6 @@
     
     <!-- Iconos Phosphor -->
     <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 
     <style>
         /* Estilos base mínimos */
@@ -100,11 +98,8 @@
             <button onclick="switchTab('settings')" class="text-xs font-bold text-neutral-400 hover:text-white">Ajustes</button>
         </div>
 
-        <div class="flex items-center gap-2">
-             <button onclick="changeMonth(-1)" class="w-7 h-7 rounded hover:bg-neutral-800 flex items-center justify-center text-neutral-400"><i class="ph-bold ph-caret-left"></i></button>
-             <button onclick="goToCurrentMonth()" class="text-[10px] font-bold text-neutral-300 px-2 uppercase border border-neutral-700 rounded py-1">Hoy</button>
-             <button onclick="changeMonth(1)" class="w-7 h-7 rounded hover:bg-neutral-800 flex items-center justify-center text-neutral-400"><i class="ph-bold ph-caret-right"></i></button>
-        </div>
+        <!-- Sin navegación de meses -->
+        <div class="w-8"></div>
     </nav>
 
     <!-- Contenido Principal -->
@@ -193,14 +188,6 @@
                     </div>
                     <div id="recent-list" class="space-y-2">
                         <!-- Items se inyectan aquí -->
-                    </div>
-                </div>
-
-                <!-- Gráfico (Simple) -->
-                <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4 hidden md:block">
-                    <h3 class="text-xs font-bold text-neutral-500 uppercase mb-4">Resumen Visual</h3>
-                    <div class="h-48 relative">
-                        <canvas id="financeChart"></canvas>
                     </div>
                 </div>
 
@@ -876,7 +863,6 @@
 
     <script>
         let currentViewDate = new Date();
-        let chartInstance = null;
         
         const COMMON_HOLIDAYS = ['01-01', '02-05', '03-21', '05-01', '09-16', '11-20', '12-25'];
 
@@ -905,17 +891,6 @@
         function updateDateHeader() {
             const str = currentViewDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
             document.getElementById('current-date-header').textContent = str.charAt(0).toUpperCase() + str.slice(1);
-        }
-
-        function changeMonth(dir) {
-            currentViewDate.setMonth(currentViewDate.getMonth() + dir);
-            updateDateHeader();
-            renderDashboard();
-        }
-        function goToCurrentMonth() {
-            currentViewDate = new Date();
-            updateDateHeader();
-            renderDashboard();
         }
 
         function isFixedPaidThisMonth(fixedId) {
@@ -990,7 +965,6 @@
             }
             
             updatePaydayInfo(totalBalanceReal);
-            updateChart(displayTx);
         }
 
         function createTxHTML(t) {
@@ -1313,44 +1287,6 @@
             document.getElementById('formula-days-left').textContent = `Fijos pend: -${formatCurrency(pendingFixedSum)}`;
         }
 
-        function updateChart(txs) {
-            const ctx = document.getElementById('financeChart');
-            if(!ctx) return;
-            
-            const cats = {};
-            txs.filter(t => t.type === 'expense').forEach(t => {
-                const currentValCents = Math.round((cats[t.category] || 0) * 100);
-                const addValCents = Math.round(t.amount * 100);
-                cats[t.category] = (currentValCents + addValCents) / 100;
-            });
-
-            const labels = Object.keys(cats);
-            const data = Object.values(cats);
-
-            if(chartInstance) chartInstance.destroy();
-
-            chartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: '#ef4444',
-                        borderRadius: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { display: false },
-                        y: { display: false }
-                    }
-                }
-            });
-        }
-
         function switchTab(id) {
             document.querySelectorAll('section[id^="view-"]').forEach(el => el.classList.add('hidden'));
             document.getElementById(`view-${id}`).classList.remove('hidden');
@@ -1457,8 +1393,6 @@
 
         // Exponer funciones globales para onclick HTML
         window.switchTab = switchTab;
-        window.changeMonth = changeMonth;
-        window.goToCurrentMonth = goToCurrentMonth;
         window.filterHistory = filterHistory;
         window.openModal = openModal;
         window.closeModal = closeModal;
