@@ -217,7 +217,13 @@
                         </button>
                     </div>
                     <div class="bg-blue-900/20 border border-blue-900 p-3 rounded text-xs text-blue-200">
-                        Marca con check los servicios ya pagados este mes.
+                        <div class="flex items-start gap-2">
+                            <i class="ph-fill ph-info mt-0.5"></i>
+                            <div>
+                                Marca con <i class="ph-bold ph-check"></i> los pagados este mes.<br>
+                                Usa <i class="ph-bold ph-eye"></i> para incluir/excluir del plan diario.
+                            </div>
+                        </div>
                     </div>
                     <div id="fixed-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
                 </div>
@@ -442,6 +448,10 @@
                         <select id="f-day" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white"></select>
                       </div>
                  </div>
+                 <label class="flex items-center gap-2 cursor-pointer pt-2">
+                    <input type="checkbox" id="f-include" class="accent-white w-4 h-4" checked>
+                    <span class="text-xs text-neutral-400 font-bold">Considerar en Plan Diario</span>
+                 </label>
                  <button type="submit" class="w-full bg-white text-black py-3 rounded font-bold text-xs hover:bg-neutral-200">GUARDAR</button>
              </form>
         </div>
@@ -715,7 +725,11 @@
             const title = document.getElementById('f-title').value;
             const amount = parseFloat(document.getElementById('f-amount').value);
             const day = document.getElementById('f-day').value;
-            await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'fixed'), { title, amount, day });
+            const include = document.getElementById('f-include').checked;
+            
+            await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'fixed'), { 
+                title, amount, day, ignoreBudget: !include 
+            });
             closeModal('fixed-modal');
             showToast('Guardado');
         };
@@ -730,6 +744,10 @@
 
         window.deleteFixed = async function(id) {
             if(confirm('¿Borrar?')) await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'fixed', id));
+        };
+        
+        window.toggleFixedIgnore = async function(id, current) {
+            await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'fixed', id), { ignoreBudget: !current });
         };
 
         window.openLoanModal = function() {
@@ -1062,8 +1080,13 @@
 
             const fixedHTML = window.appData.fixed.map(f => {
                 const isPaid = isFixedPaidThisMonth(f.id);
+                const isIgnored = f.ignoreBudget;
+                
                 const bgClass = isPaid ? "bg-green-900/10 border-green-900" : "bg-neutral-900 border-neutral-800";
-                const textClass = isPaid ? "text-green-500" : "text-neutral-200";
+                const textClass = isPaid ? "text-green-500" : (isIgnored ? "text-neutral-500 line-through" : "text-neutral-200");
+                
+                const eyeIcon = isIgnored ? 'ph-eye-slash' : 'ph-eye';
+                const eyeColor = isIgnored ? 'text-neutral-600' : 'text-blue-500';
                 
                 const actionBtn = isPaid 
                     ? `<div class="w-8 h-8 rounded flex items-center justify-center text-green-500"><i class="ph-bold ph-check"></i></div>`
@@ -1076,6 +1099,7 @@
                         <p class="text-[10px] text-neutral-500 font-bold uppercase">Día ${f.day} • ${formatCurrency(f.amount)}</p>
                     </div>
                     <div class="flex gap-2">
+                        <button onclick="toggleFixedIgnore('${f.id}', ${!!isIgnored})" class="w-8 h-8 rounded flex items-center justify-center ${eyeColor} hover:bg-neutral-800"><i class="ph-bold ${eyeIcon}"></i></button>
                         ${actionBtn}
                         <button onclick="deleteFixed('${f.id}')" class="w-8 h-8 rounded flex items-center justify-center text-neutral-600 hover:text-red-500"><i class="ph-bold ph-trash"></i></button>
                     </div>
@@ -1238,6 +1262,7 @@
             const todayDay = todayDate.getDate();
 
             window.appData.fixed.forEach(f => {
+                if (f.ignoreBudget) return; // SKIP IF IGNORED
                 const fDay = parseInt(f.day);
                 if (isFixedPaidThisMonth(f.id)) return;
 
@@ -1378,6 +1403,7 @@
         window.openModal = openModal;
         window.closeModal = closeModal;
         window.togglePaydayInput = togglePaydayInput;
+        window.toggleFixedIgnore = toggleFixedIgnore;
     </script>
 </body>
 </html>
