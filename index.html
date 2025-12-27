@@ -93,8 +93,7 @@
         <div class="hidden md:flex gap-6">
             <button onclick="switchTab('dashboard')" class="text-xs font-bold text-white hover:text-neutral-300">Panel</button>
             <button onclick="switchTab('history')" class="text-xs font-bold text-neutral-400 hover:text-white">Historial</button>
-            <button onclick="switchTab('fixed')" class="text-xs font-bold text-neutral-400 hover:text-white">Fijos</button>
-            <button onclick="switchTab('loans')" class="text-xs font-bold text-neutral-400 hover:text-white">Préstamos</button>
+            <button onclick="switchTab('payments')" class="text-xs font-bold text-neutral-400 hover:text-white">Pagos</button>
             <button onclick="switchTab('settings')" class="text-xs font-bold text-neutral-400 hover:text-white">Ajustes</button>
         </div>
 
@@ -206,41 +205,48 @@
                 <div id="full-history-list" class="space-y-4"></div>
             </section>
 
-            <!-- FIJOS -->
-            <section id="view-fixed" class="hidden space-y-4">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-bold text-white">Pagos Fijos</h2>
-                    <button onclick="openModal('fixed-modal')" class="bg-white text-black px-3 py-1.5 rounded font-bold text-xs flex items-center gap-2">
-                        <i class="ph-bold ph-plus"></i> Nuevo
-                    </button>
-                </div>
-                <div class="bg-blue-900/20 border border-blue-900 p-3 rounded text-xs text-blue-200">
-                    Marca con check los servicios ya pagados este mes.
-                </div>
-                <div id="fixed-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-            </section>
-
-            <!-- PRÉSTAMOS -->
-            <section id="view-loans" class="hidden space-y-4">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-bold text-white">Préstamos</h2>
-                    <button onclick="openLoanModal()" class="bg-white text-black px-3 py-1.5 rounded font-bold text-xs flex items-center gap-2">
-                        <i class="ph-bold ph-plus"></i> Nuevo
-                    </button>
-                </div>
+            <!-- PAGOS Y DEUDAS (Fusionado) -->
+            <section id="view-payments" class="hidden space-y-8">
                 
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-lg">
-                        <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Me deben</p>
-                        <p class="text-lg font-bold text-green-500" id="loans-owed-to-me">$0.00</p>
+                <!-- Sección Fijos -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-bold text-white">Pagos Fijos</h2>
+                        <button onclick="openModal('fixed-modal')" class="bg-white text-black px-3 py-1.5 rounded font-bold text-xs flex items-center gap-2">
+                            <i class="ph-bold ph-plus"></i> Nuevo
+                        </button>
                     </div>
-                    <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-lg">
-                        <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Debo</p>
-                        <p class="text-lg font-bold text-red-500" id="loans-i-owe">$0.00</p>
+                    <div class="bg-blue-900/20 border border-blue-900 p-3 rounded text-xs text-blue-200">
+                        Marca con check los servicios ya pagados este mes.
                     </div>
+                    <div id="fixed-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
                 </div>
 
-                <div id="loans-list" class="space-y-2"></div>
+                <!-- Separador -->
+                <div class="border-t border-neutral-800"></div>
+
+                <!-- Sección Préstamos -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-bold text-white">Préstamos</h2>
+                        <button onclick="openLoanModal()" class="bg-white text-black px-3 py-1.5 rounded font-bold text-xs flex items-center gap-2">
+                            <i class="ph-bold ph-plus"></i> Nuevo
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-lg">
+                            <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Me deben</p>
+                            <p class="text-lg font-bold text-green-500" id="loans-owed-to-me">$0.00</p>
+                        </div>
+                        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-lg">
+                            <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Debo</p>
+                            <p class="text-lg font-bold text-red-500" id="loans-i-owe">$0.00</p>
+                        </div>
+                    </div>
+
+                    <div id="loans-list" class="space-y-2"></div>
+                </div>
             </section>
 
             <!-- AJUSTES -->
@@ -306,10 +312,6 @@
                         <span class="text-sm text-neutral-300">Modo "Ahorro Forzoso" (-10%)</span>
                         <input type="checkbox" id="toggle-forced-savings" class="accent-purple-500 w-5 h-5" onchange="saveSettings()">
                     </label>
-                    <div>
-                         <label class="text-sm text-neutral-300 block mb-1">Mínimo Vital Diario ($)</label>
-                         <input type="number" id="input-min-vital" class="w-full bg-neutral-950 border border-neutral-800 p-2 rounded text-sm text-white" placeholder="0">
-                    </div>
                  </div>
 
                 <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-xl">
@@ -341,8 +343,8 @@
             </button>
         </div>
 
-        <button onclick="switchTab('loans')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white" id="nav-loans">
-            <i class="ph-fill ph-hand-coins text-xl mb-1"></i>
+        <button onclick="switchTab('payments')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white" id="nav-payments">
+            <i class="ph-fill ph-receipt text-xl mb-1"></i>
         </button>
         <button onclick="switchTab('settings')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white" id="nav-settings">
             <i class="ph-fill ph-gear text-xl mb-1"></i>
@@ -509,7 +511,7 @@
             transactions: [],
             fixed: [],
             loans: [], 
-            settings: { frequency: 'biweekly', payday: null, forcedSavings: false, minVital: 0 }
+            settings: { frequency: 'biweekly', payday: null, forcedSavings: false }
         };
 
         // --- AUTH ---
@@ -781,10 +783,9 @@
             const payday1 = document.getElementById('payday-1-select').value;
             const payday2 = document.getElementById('payday-2-select').value;
             const forcedSavings = document.getElementById('toggle-forced-savings').checked;
-            const minVital = parseFloat(document.getElementById('input-min-vital').value) || 0;
             
             await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'config'), { 
-                frequency: freq, payday, payday1, payday2, forcedSavings, minVital
+                frequency: freq, payday, payday1, payday2, forcedSavings
             }, { merge: true });
             showToast('Guardado');
         };
@@ -1247,36 +1248,20 @@
                 }
             });
 
-            const minVital = window.appData.settings.minVital || 0;
-            
             const startOfDayBalance = currentBalance + spentToday;
             const effectiveStartBalance = startOfDayBalance - pendingFixedSum;
             const divisor = daysLeft <= 0 ? 1 : daysLeft;
             
             let budgetForToday = effectiveStartBalance / divisor;
-            let survivalMode = false;
-            let deficit = 0;
-
-            if (minVital > 0 && budgetForToday < minVital) {
-                survivalMode = true;
-                deficit = (minVital * divisor) - effectiveStartBalance;
-                budgetForToday = minVital;
-            }
 
             const remainingToday = budgetForToday - spentToday;
             
             const titleEl = document.getElementById('formula-title');
             const explEl = document.getElementById('formula-explanation');
 
-            if (survivalMode) {
-                titleEl.textContent = "MODO SUPERVIVENCIA";
-                titleEl.className = "text-xs font-bold text-red-500 uppercase animate-pulse";
-                explEl.innerHTML = `Prioridad: Comida/Bus. Déficit proyectado: <strong class="text-red-400">-${formatCurrency(deficit)}</strong>.`;
-            } else {
-                titleEl.textContent = "PLAN DEL DÍA";
-                titleEl.className = "text-xs font-bold text-blue-400 uppercase";
-                explEl.innerHTML = `Presupuesto diario: <strong class="text-white">${formatCurrency(budgetForToday)}</strong>. Gastado hoy: <strong class="text-white">${formatCurrency(spentToday)}</strong>.`;
-            }
+            titleEl.textContent = "PLAN DEL DÍA";
+            titleEl.className = "text-xs font-bold text-blue-400 uppercase";
+            explEl.innerHTML = `Presupuesto diario: <strong class="text-white">${formatCurrency(budgetForToday)}</strong>. Gastado hoy: <strong class="text-white">${formatCurrency(spentToday)}</strong>.`;
             
             const remainingEl = document.getElementById('formula-daily');
             remainingEl.textContent = formatCurrency(remainingToday);
@@ -1302,8 +1287,7 @@
 
             if(id === 'dashboard') renderDashboard();
             if(id === 'history') renderHistory();
-            if(id === 'fixed') renderFixed();
-            if(id === 'loans') renderLoans();
+            if(id === 'payments') { renderFixed(); renderLoans(); }
         }
 
         function filterHistory(type) {
@@ -1346,9 +1330,6 @@
             
             const toggle = document.getElementById('toggle-forced-savings');
             if(toggle && s.forcedSavings !== undefined) toggle.checked = s.forcedSavings;
-            
-            const minVitalInput = document.getElementById('input-min-vital');
-            if(minVitalInput && s.minVital) minVitalInput.value = s.minVital;
 
             togglePaydayInput();
         }
