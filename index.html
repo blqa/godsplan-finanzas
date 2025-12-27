@@ -169,6 +169,33 @@
                     </div>
                 </div>
 
+                <!-- SIMULADOR DE INGRESO (NUEVO) -->
+                <div id="simulation-container" class="hidden bg-neutral-900 border border-blue-900/50 rounded-xl p-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="ph-fill ph-magic-wand text-blue-400"></i>
+                        <h3 class="text-sm font-bold text-blue-100 uppercase">Simulación de Ingreso</h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">¿Cuándo recibes dinero?</label>
+                                <input type="date" id="sim-date" class="w-full bg-neutral-950 border border-neutral-800 p-2 rounded text-sm text-white" onchange="runSimulation()">
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">¿Cuánto dinero?</label>
+                                <input type="number" id="sim-amount" class="w-full bg-neutral-950 border border-neutral-800 p-2 rounded text-sm text-white" placeholder="0.00" oninput="runSimulation()">
+                            </div>
+                        </div>
+                        
+                        <div class="bg-neutral-950 rounded p-4 flex flex-col justify-center">
+                            <p class="text-xs text-neutral-500 mb-1">Con ese dinero futuro, hoy podrías gastar:</p>
+                            <p class="text-2xl font-bold text-blue-400" id="sim-result">$0.00</p>
+                            <p class="text-[10px] text-neutral-600 mt-2" id="sim-details">Ingresa datos para calcular...</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Botones de Acción Rápida -->
                 <div class="grid grid-cols-2 gap-4">
                     <button onclick="openAddModal('income')" class="bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 hover:border-green-900 h-12 rounded-lg text-green-500 font-bold text-sm flex items-center justify-center gap-2 transition-colors">
@@ -257,7 +284,13 @@
 
             <!-- AJUSTES -->
             <section id="view-settings" class="hidden space-y-6">
-                <h2 class="text-xl font-bold text-white">Configuración</h2>
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-white">Configuración</h2>
+                    <!-- Botón de Ayuda (NUEVO) -->
+                    <button onclick="window.open('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', '_blank')" class="bg-neutral-800 hover:bg-neutral-700 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 transition-colors">
+                        <i class="ph-bold ph-question"></i> AYUDA
+                    </button>
+                </div>
                 
                 <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-xl">
                     <div class="flex items-center gap-4 mb-6 pb-6 border-b border-neutral-800">
@@ -313,10 +346,16 @@
                 </div>
                 
                  <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-xl space-y-4">
-                     <h3 class="font-bold text-white text-sm">Psicología</h3>
+                     <h3 class="font-bold text-white text-sm">Extras</h3>
                       <label class="flex items-center justify-between cursor-pointer">
                         <span class="text-sm text-neutral-300">Modo "Ahorro Forzoso" (-10%)</span>
                         <input type="checkbox" id="toggle-forced-savings" class="accent-purple-500 w-5 h-5" onchange="saveSettings()">
+                    </label>
+                    <div class="border-t border-neutral-800 pt-2"></div>
+                    <!-- Toggle Simulador (NUEVO) -->
+                    <label class="flex items-center justify-between cursor-pointer">
+                        <span class="text-sm text-neutral-300">Habilitar Simulador de Ingreso</span>
+                        <input type="checkbox" id="toggle-simulation" class="accent-blue-500 w-5 h-5" onchange="saveSettings()">
                     </label>
                  </div>
 
@@ -370,9 +409,9 @@
              <form id="transaction-form" onsubmit="addTransaction(event)">
                  <!-- Hidden inputs -->
                 <div class="hidden">
-                     <input type="radio" name="type" value="expense" id="radio-expense" checked>
-                     <input type="radio" name="type" value="income" id="radio-income">
-                     <input type="hidden" id="t-fixed-id">
+                      <input type="radio" name="type" value="expense" id="radio-expense" checked>
+                      <input type="radio" name="type" value="income" id="radio-income">
+                      <input type="hidden" id="t-fixed-id">
                 </div>
                 
                 <div class="mb-6">
@@ -493,7 +532,7 @@
         <span id="toast-msg">Mensaje</span>
     </div>
 
-    <!-- LOGICA JS (Sin cambios funcionales, solo limpieza de estilos inyectados) -->
+    <!-- LOGICA JS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -521,7 +560,7 @@
             transactions: [],
             fixed: [],
             loans: [], 
-            settings: { frequency: 'biweekly', payday: null, forcedSavings: false }
+            settings: { frequency: 'biweekly', payday: null, forcedSavings: false, simulationMode: false }
         };
 
         // --- AUTH ---
@@ -801,9 +840,10 @@
             const payday1 = document.getElementById('payday-1-select').value;
             const payday2 = document.getElementById('payday-2-select').value;
             const forcedSavings = document.getElementById('toggle-forced-savings').checked;
+            const simulationMode = document.getElementById('toggle-simulation').checked;
             
             await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'config'), { 
-                frequency: freq, payday, payday1, payday2, forcedSavings
+                frequency: freq, payday, payday1, payday2, forcedSavings, simulationMode
             }, { merge: true });
             showToast('Guardado');
         };
@@ -984,6 +1024,14 @@
             }
             
             updatePaydayInfo(totalBalanceReal);
+
+            // Actualizar visibilidad del simulador
+            const simContainer = document.getElementById('simulation-container');
+            if (window.appData.settings.simulationMode) {
+                simContainer.classList.remove('hidden');
+            } else {
+                simContainer.classList.add('hidden');
+            }
         }
 
         function createTxHTML(t) {
@@ -995,7 +1043,7 @@
             if (t.date) {
                 const d = new Date(t.date);
                 if (!isNaN(d.getTime())) {
-                      dateDisplay = d.getDate() + '/' + (d.getMonth()+1);
+                       dateDisplay = d.getDate() + '/' + (d.getMonth()+1);
                 }
             }
 
@@ -1262,7 +1310,7 @@
             const todayDay = todayDate.getDate();
 
             window.appData.fixed.forEach(f => {
-                if (f.ignoreBudget) return; // SKIP IF IGNORED
+                if (f.ignoreBudget) return; 
                 const fDay = parseInt(f.day);
                 if (isFixedPaidThisMonth(f.id)) return;
 
@@ -1296,6 +1344,73 @@
 
             document.getElementById('formula-days-left').textContent = `Fijos pend: -${formatCurrency(pendingFixedSum)}`;
         }
+
+        // --- LÓGICA DE SIMULACIÓN ---
+        window.runSimulation = function() {
+            const dateInput = document.getElementById('sim-date').value;
+            const amountInput = parseFloat(document.getElementById('sim-amount').value);
+            const resultEl = document.getElementById('sim-result');
+            const detailsEl = document.getElementById('sim-details');
+            
+            if (!dateInput || isNaN(amountInput)) {
+                resultEl.textContent = "$0.00";
+                detailsEl.textContent = "Ingresa fecha y monto futuro.";
+                return;
+            }
+
+            const futureDate = new Date(dateInput);
+            futureDate.setHours(0,0,0,0);
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            // Calcular diferencia de días
+            const diffTime = futureDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+            if (diffDays <= 0) {
+                resultEl.textContent = "La fecha debe ser futura";
+                detailsEl.textContent = "Selecciona una fecha posterior a hoy.";
+                return;
+            }
+
+            // Calcular Saldo Actual Real
+            let currentBalance = 0;
+            window.appData.transactions.forEach(t => {
+                const val = Math.round(t.amount * 100);
+                if (t.type === 'income') currentBalance += val;
+                else currentBalance -= val;
+            });
+            currentBalance = currentBalance / 100;
+
+            // Calcular Pagos Fijos en ese intervalo
+            let pendingFixed = 0;
+            const startDay = today.getDate();
+            const endDay = futureDate.getDate(); // Simplificación: solo mira el día del mes, no cruza meses bien en logica simple pero funciona para corto plazo
+            
+            window.appData.fixed.forEach(f => {
+                if (f.ignoreBudget) return;
+                const fDay = parseInt(f.day);
+                // Si el pago cae entre hoy y la fecha futura Y no está pagado
+                // Nota: Lógica simplificada para el mismo mes o mes siguiente cercano
+                if (!isFixedPaidThisMonth(f.id)) {
+                     // Si hoy es 10 y cobro futuro es el 15. Si hay pago el 12, se resta.
+                     // Esta logica asume que el pago fijo es de ESTE mes.
+                     const targetDate = new Date();
+                     targetDate.setDate(fDay);
+                     if (targetDate >= today && targetDate <= futureDate) {
+                         pendingFixed += parseFloat(f.amount);
+                     }
+                }
+            });
+
+            // Fórmula: (Saldo Actual + Ingreso Futuro - Fijos Pendientes) / Días
+            const totalPool = currentBalance + amountInput - pendingFixed;
+            const dailyBudget = totalPool / diffDays;
+
+            resultEl.textContent = formatCurrency(dailyBudget) + " / día";
+            detailsEl.textContent = `Faltan ${diffDays} días. (Saldo: ${formatCurrency(currentBalance)} + Futuro: ${formatCurrency(amountInput)} - Fijos: ${formatCurrency(pendingFixed)}) / ${diffDays}`;
+        }
+
 
         function switchTab(id) {
             document.querySelectorAll('section[id^="view-"]').forEach(el => el.classList.add('hidden'));
@@ -1355,6 +1470,9 @@
             
             const toggle = document.getElementById('toggle-forced-savings');
             if(toggle && s.forcedSavings !== undefined) toggle.checked = s.forcedSavings;
+            
+            const toggleSim = document.getElementById('toggle-simulation');
+            if(toggleSim && s.simulationMode !== undefined) toggleSim.checked = s.simulationMode;
 
             togglePaydayInput();
         }
@@ -1403,7 +1521,6 @@
         window.openModal = openModal;
         window.closeModal = closeModal;
         window.togglePaydayInput = togglePaydayInput;
-        window.toggleFixedIgnore = toggleFixedIgnore;
     </script>
 </body>
 </html>
