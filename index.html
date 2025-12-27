@@ -1,1 +1,1468 @@
-hola mundo
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>God's Plan | Básico</title>
+    
+    <!-- Tailwind CSS (Versión estándar) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Iconos Phosphor -->
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+
+    <style>
+        /* Estilos base mínimos */
+        body { background-color: #0a0a0a; color: #e5e5e5; font-family: system-ui, -apple-system, sans-serif; }
+        
+        /* Ocultar scrollbar */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Utilidad para inputs */
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #3b82f6; }
+        
+        /* Modales simples */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.is-open { display: flex; }
+        .modal-content { background: #171717; width: 100%; max-width: 400px; border-radius: 12px; border: 1px solid #262626; padding: 24px; max-height: 90vh; overflow-y: auto; }
+
+        /* Chips de filtros */
+        .chip { border: 1px solid #262626; background: #171717; color: #a3a3a3; padding: 6px 12px; border-radius: 999px; font-size: 0.75rem; cursor: pointer; }
+        .chip.active { background: #e5e5e5; color: #0a0a0a; border-color: #e5e5e5; font-weight: bold; }
+        
+        /* Toast Notification */
+        #toast { transition: transform 0.3s ease, opacity 0.3s ease; }
+    </style>
+</head>
+<body class="flex flex-col h-[100dvh] overflow-hidden">
+
+    <!-- Loading Simple -->
+    <div id="loading-screen" class="fixed inset-0 bg-[#0a0a0a] z-[100] flex items-center justify-center">
+        <p class="text-neutral-500 font-mono text-sm">Cargando datos...</p>
+    </div>
+
+    <!-- Login View Simple -->
+    <div id="login-view" class="fixed inset-0 z-[90] bg-[#0a0a0a] flex flex-col items-center justify-center p-6 hidden">
+        <div class="w-full max-w-sm bg-neutral-900 border border-neutral-800 rounded-xl p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold text-white mb-2">GOD'S PLAN</h1>
+                <p class="text-neutral-500 text-xs uppercase tracking-wider">Control Financiero</p>
+            </div>
+
+            <div class="flex bg-neutral-800 p-1 rounded-lg mb-6">
+                <button onclick="window.authApp.toggleAuth('login')" id="tab-login" class="flex-1 py-2 text-xs font-bold rounded bg-neutral-700 text-white">INGRESAR</button>
+                <button onclick="window.authApp.toggleAuth('register')" id="tab-register" class="flex-1 py-2 text-xs font-bold text-neutral-400">REGISTRO</button>
+            </div>
+
+            <form onsubmit="event.preventDefault(); window.authApp.handleAuthSubmit();" class="space-y-4">
+                <div id="field-name" class="hidden">
+                    <input type="text" id="input-name" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white placeholder-neutral-600 focus:border-neutral-500 transition-colors" placeholder="Tu Nombre">
+                </div>
+                <div>
+                    <input type="text" id="input-id" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white placeholder-neutral-600 focus:border-neutral-500 transition-colors" placeholder="Usuario o Email" required>
+                </div>
+                <div>
+                    <input type="password" id="input-pass" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white placeholder-neutral-600 focus:border-neutral-500 transition-colors" placeholder="Contraseña" required>
+                </div>
+
+                <div id="auth-error-msg" class="hidden text-red-500 text-xs font-bold text-center py-2">
+                    <span id="auth-error-txt">Error</span>
+                </div>
+
+                <button type="submit" id="btn-submit" class="w-full bg-white text-black py-3 rounded-lg font-bold text-sm hover:bg-neutral-200 transition-colors">
+                    <span id="btn-text">INICIAR SESIÓN</span>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Navbar Superior Simple -->
+    <nav id="global-nav" class="h-14 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between px-4 shrink-0 hidden">
+        <div class="flex items-center gap-3">
+             <div class="w-8 h-8 bg-neutral-800 rounded flex items-center justify-center text-white">
+                <i class="ph-bold ph-wallet"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-bold text-sm">Finanzas</h1>
+                <p class="text-[10px] text-neutral-500" id="current-date-header">...</p>
+            </div>
+        </div>
+        
+        <!-- Menú Desktop -->
+        <div class="hidden md:flex gap-6">
+            <button onclick="switchTab('dashboard')" class="text-xs font-bold text-white hover:text-neutral-300">Panel</button>
+            <button onclick="switchTab('history')" class="text-xs font-bold text-neutral-400 hover:text-white">Historial</button>
+            <button onclick="switchTab('fixed')" class="text-xs font-bold text-neutral-400 hover:text-white">Fijos</button>
+            <button onclick="switchTab('loans')" class="text-xs font-bold text-neutral-400 hover:text-white">Préstamos</button>
+            <button onclick="switchTab('settings')" class="text-xs font-bold text-neutral-400 hover:text-white">Ajustes</button>
+        </div>
+
+        <div class="flex items-center gap-2">
+             <button onclick="changeMonth(-1)" class="w-7 h-7 rounded hover:bg-neutral-800 flex items-center justify-center text-neutral-400"><i class="ph-bold ph-caret-left"></i></button>
+             <button onclick="goToCurrentMonth()" class="text-[10px] font-bold text-neutral-300 px-2 uppercase border border-neutral-700 rounded py-1">Hoy</button>
+             <button onclick="changeMonth(1)" class="w-7 h-7 rounded hover:bg-neutral-800 flex items-center justify-center text-neutral-400"><i class="ph-bold ph-caret-right"></i></button>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main id="main-container" class="flex-1 overflow-y-auto p-4 md:p-6 pb-24 relative hidden">
+        <div class="max-w-4xl mx-auto">
+
+            <!-- DASHBOARD -->
+            <section id="view-dashboard" class="space-y-6">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Tarjeta de Balance -->
+                    <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-xs font-bold text-neutral-500 uppercase">Disponible</span>
+                            <button onclick="openAdjustModal()" class="text-blue-500 hover:text-blue-400 text-xs font-bold">Ajustar</button>
+                        </div>
+                        
+                        <div class="text-4xl font-bold text-white mb-6" id="total-balance">$0.00</div>
+                        
+                        <div class="mb-4">
+                             <div class="flex justify-between text-[10px] font-bold text-neutral-500 mb-1 uppercase">
+                                <span>Presupuesto usado</span>
+                                <span id="progress-percent">0%</span>
+                            </div>
+                            <div class="h-2 bg-neutral-800 rounded-full w-full overflow-hidden">
+                                <div id="balance-progress" class="h-full bg-white w-0 transition-all duration-500"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 border-t border-neutral-800 pt-4">
+                            <div>
+                                <span class="block text-[10px] text-neutral-500 uppercase font-bold mb-1">Ingresos</span>
+                                <span class="text-lg font-bold text-green-500" id="total-income">$0.00</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="block text-[10px] text-neutral-500 uppercase font-bold mb-1">Gastos</span>
+                                <span class="text-lg font-bold text-red-500" id="total-expense">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fórmula del Día -->
+                    <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-6 flex flex-col justify-between relative overflow-hidden" id="formula-card">
+                         <!-- Mantenemos IDs para que JS funcione, pero sin estilos complejos -->
+                        <div id="formula-bg" class="hidden"></div>
+                        <div id="formula-blob" class="hidden"></div>
+
+                        <div>
+                             <div class="flex justify-between items-start mb-2">
+                                <p class="text-xs font-bold text-blue-400 uppercase" id="formula-title">PLAN DEL DÍA</p>
+                                <span id="payday-badge" class="text-[10px] bg-neutral-800 text-neutral-400 px-2 py-1 rounded border border-neutral-700">...</span>
+                            </div>
+                            <p class="text-sm text-neutral-300 leading-relaxed mb-4" id="formula-explanation">Analizando...</p>
+                        </div>
+                        
+                        <div class="pt-4 border-t border-neutral-800">
+                            <div class="flex justify-between items-end">
+                                <div>
+                                    <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Límite Diario</p>
+                                    <span class="font-bold text-3xl text-white" id="formula-daily">$0.00</span>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[10px] text-neutral-500 font-bold uppercase">Meta</p>
+                                    <p id="formula-days-left" class="text-xs font-mono text-neutral-400">...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción Rápida -->
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="openAddModal('income')" class="bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 hover:border-green-900 h-12 rounded-lg text-green-500 font-bold text-sm flex items-center justify-center gap-2 transition-colors">
+                        <i class="ph-bold ph-arrow-down-left"></i> INGRESO
+                    </button>
+                    <button onclick="openAddModal('expense')" class="bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 hover:border-red-900 h-12 rounded-lg text-red-500 font-bold text-sm flex items-center justify-center gap-2 transition-colors">
+                        <i class="ph-bold ph-minus"></i> GASTO
+                    </button>
+                </div>
+
+                <!-- Lista Reciente -->
+                <div>
+                     <div class="flex justify-between items-center mb-4">
+                         <h3 class="text-xs font-bold text-neutral-500 uppercase tracking-widest">Actividad Reciente</h3>
+                         <button onclick="switchTab('history')" class="text-xs font-bold text-blue-500 hover:underline">Ver Todo</button>
+                    </div>
+                    <div id="recent-list" class="space-y-2">
+                        <!-- Items se inyectan aquí -->
+                    </div>
+                </div>
+
+                <!-- Gráfico (Simple) -->
+                <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4 hidden md:block">
+                    <h3 class="text-xs font-bold text-neutral-500 uppercase mb-4">Resumen Visual</h3>
+                    <div class="h-48 relative">
+                        <canvas id="financeChart"></canvas>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- HISTORIAL -->
+            <section id="view-history" class="hidden space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-white">Historial</h2>
+                     <div class="flex gap-2">
+                        <button onclick="filterHistory('all')" class="filter-btn active chip" data-filter="all">Todos</button>
+                        <button onclick="filterHistory('income')" class="filter-btn chip" data-filter="income">Ingresos</button>
+                        <button onclick="filterHistory('expense')" class="filter-btn chip" data-filter="expense">Gastos</button>
+                    </div>
+                </div>
+                <div id="full-history-list" class="space-y-4"></div>
+            </section>
+
+            <!-- FIJOS -->
+            <section id="view-fixed" class="hidden space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-white">Pagos Fijos</h2>
+                    <button onclick="openModal('fixed-modal')" class="bg-white text-black px-3 py-1.5 rounded font-bold text-xs flex items-center gap-2">
+                        <i class="ph-bold ph-plus"></i> Nuevo
+                    </button>
+                </div>
+                <div class="bg-blue-900/20 border border-blue-900 p-3 rounded text-xs text-blue-200">
+                    Marca con check los servicios ya pagados este mes.
+                </div>
+                <div id="fixed-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+            </section>
+
+            <!-- PRÉSTAMOS -->
+            <section id="view-loans" class="hidden space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-white">Préstamos</h2>
+                    <button onclick="openLoanModal()" class="bg-white text-black px-3 py-1.5 rounded font-bold text-xs flex items-center gap-2">
+                        <i class="ph-bold ph-plus"></i> Nuevo
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-lg">
+                        <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Me deben</p>
+                        <p class="text-lg font-bold text-green-500" id="loans-owed-to-me">$0.00</p>
+                    </div>
+                    <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-lg">
+                        <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Debo</p>
+                        <p class="text-lg font-bold text-red-500" id="loans-i-owe">$0.00</p>
+                    </div>
+                </div>
+
+                <div id="loans-list" class="space-y-2"></div>
+            </section>
+
+            <!-- AJUSTES -->
+            <section id="view-settings" class="hidden space-y-6">
+                <h2 class="text-xl font-bold text-white">Configuración</h2>
+                
+                <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-xl">
+                    <div class="flex items-center gap-4 mb-6 pb-6 border-b border-neutral-800">
+                        <div class="w-10 h-10 bg-neutral-800 rounded-full flex items-center justify-center text-white">
+                            <i class="ph-bold ph-user"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white" id="user-display-name">Usuario</h3>
+                            <p class="text-xs text-neutral-500 font-mono" id="user-display-email">ID</p>
+                        </div>
+                    </div>
+                    
+                    <button onclick="window.authApp.logout()" class="w-full py-2 border border-red-900 text-red-500 text-xs font-bold rounded hover:bg-red-900/10">
+                        CERRAR SESIÓN
+                    </button>
+                </div>
+
+                <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-xl space-y-4">
+                    <h3 class="font-bold text-white text-sm">Frecuencia de Cobro</h3>
+                    
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-3 p-3 bg-neutral-950 border border-neutral-800 rounded cursor-pointer">
+                            <input type="radio" name="pay-freq" value="biweekly" class="accent-white" onchange="togglePaydayInput()">
+                            <span class="text-sm text-neutral-300">Quincenal (15 y 30)</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-neutral-950 border border-neutral-800 rounded cursor-pointer">
+                            <input type="radio" name="pay-freq" value="biweekly-custom" class="accent-white" onchange="togglePaydayInput()">
+                            <span class="text-sm text-neutral-300">Quincenal (Personalizado)</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-neutral-950 border border-neutral-800 rounded cursor-pointer">
+                            <input type="radio" name="pay-freq" value="monthly" class="accent-white" onchange="togglePaydayInput()">
+                            <span class="text-sm text-neutral-300">Mensual</span>
+                        </label>
+                    </div>
+
+                    <div id="monthly-select-container" class="hidden">
+                        <label class="text-[10px] text-neutral-500 font-bold uppercase block mb-1">Día de pago</label>
+                        <select id="payday-select" class="w-full bg-neutral-950 border border-neutral-800 p-2 rounded text-sm text-white"></select>
+                    </div>
+
+                    <div id="biweekly-custom-container" class="hidden grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[10px] text-neutral-500 font-bold uppercase block mb-1">Día 1</label>
+                            <select id="payday-1-select" class="w-full bg-neutral-950 border border-neutral-800 p-2 rounded text-sm text-white"></select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-neutral-500 font-bold uppercase block mb-1">Día 2</label>
+                            <select id="payday-2-select" class="w-full bg-neutral-950 border border-neutral-800 p-2 rounded text-sm text-white"></select>
+                        </div>
+                    </div>
+                    
+                    <button onclick="saveSettings()" class="w-full bg-white text-black py-2 rounded font-bold text-xs hover:bg-neutral-200 mt-2">GUARDAR CAMBIOS</button>
+                </div>
+                
+                 <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-xl space-y-4">
+                     <h3 class="font-bold text-white text-sm">Psicología</h3>
+                      <label class="flex items-center justify-between cursor-pointer">
+                        <span class="text-sm text-neutral-300">Modo "Ahorro Forzoso" (-10%)</span>
+                        <input type="checkbox" id="toggle-forced-savings" class="accent-purple-500 w-5 h-5" onchange="saveSettings()">
+                    </label>
+                    <div>
+                         <label class="text-sm text-neutral-300 block mb-1">Mínimo Vital Diario ($)</label>
+                         <input type="number" id="input-min-vital" class="w-full bg-neutral-950 border border-neutral-800 p-2 rounded text-sm text-white" placeholder="0">
+                    </div>
+                 </div>
+
+                <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-xl">
+                    <h3 class="font-bold text-white text-sm mb-4">Datos</h3>
+                    <div class="flex gap-2">
+                        <button onclick="exportData()" class="flex-1 bg-neutral-950 border border-neutral-800 py-3 rounded text-xs font-bold text-neutral-400 hover:text-white">Backup JSON</button>
+                        <button onclick="document.getElementById('import-file').click()" class="flex-1 bg-neutral-950 border border-neutral-800 py-3 rounded text-xs font-bold text-neutral-400 hover:text-white">Restaurar</button>
+                        <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
+                    </div>
+                    <button onclick="resetApp()" class="w-full mt-4 text-red-500 text-[10px] font-bold uppercase hover:underline">Eliminar todo</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Barra Inferior Móvil (Simple) -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-neutral-900 border-t border-neutral-800 h-16 grid grid-cols-5 z-40" id="bottom-nav">
+        <button onclick="switchTab('dashboard')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white" id="nav-dashboard">
+            <i class="ph-fill ph-squares-four text-xl mb-1"></i>
+        </button>
+        <button onclick="switchTab('history')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white" id="nav-history">
+            <i class="ph-fill ph-list-dashes text-xl mb-1"></i>
+        </button>
+        
+        <!-- Botón Central Flotante (Más simple) -->
+        <div class="relative -top-5 flex justify-center pointer-events-none">
+            <button onclick="openAddModal('expense')" class="pointer-events-auto w-12 h-12 bg-white rounded-full flex items-center justify-center text-black shadow-lg">
+                <i class="ph-bold ph-plus text-xl"></i>
+            </button>
+        </div>
+
+        <button onclick="switchTab('loans')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white" id="nav-loans">
+            <i class="ph-fill ph-hand-coins text-xl mb-1"></i>
+        </button>
+        <button onclick="switchTab('settings')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white" id="nav-settings">
+            <i class="ph-fill ph-gear text-xl mb-1"></i>
+        </button>
+    </nav>
+
+    <!-- MODALES (Limpios) -->
+    
+    <!-- Transacción -->
+    <div id="transaction-modal" class="modal-overlay">
+        <div class="modal-content">
+             <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-white" id="modal-tx-title">Nuevo Movimiento</h3>
+                <button onclick="closeModal('transaction-modal')" class="text-neutral-500 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+             </div>
+             
+             <form id="transaction-form" onsubmit="addTransaction(event)">
+                 <!-- Hidden inputs -->
+                <div class="hidden">
+                     <input type="radio" name="type" value="expense" id="radio-expense" checked>
+                     <input type="radio" name="type" value="income" id="radio-income">
+                     <input type="hidden" id="t-fixed-id">
+                </div>
+                
+                <div class="mb-6">
+                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Monto</label>
+                    <input type="number" id="t-amount" step="0.01" class="w-full bg-transparent border-b border-neutral-700 text-3xl font-bold text-white py-2 placeholder-neutral-700 text-center focus:border-white transition-colors" placeholder="0.00" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-2">Categoría</label>
+                    <div class="flex flex-wrap gap-2" id="category-chips"></div>
+                    <input type="hidden" id="t-category" required>
+                </div>
+                
+                <div class="space-y-3 mb-6">
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Concepto</label>
+                        <input type="text" id="t-title" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white" placeholder="Descripción">
+                    </div>
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Fecha</label>
+                        <input type="datetime-local" id="t-date" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" id="btn-delete-tx" onclick="deleteCurrentTransaction()" class="hidden py-3 border border-red-900 text-red-500 font-bold text-xs rounded hover:bg-red-900/10">ELIMINAR</button>
+                    <button type="submit" id="btn-save-tx" class="col-span-2 py-3 bg-white text-black font-bold text-xs rounded hover:bg-neutral-200">GUARDAR</button>
+                </div>
+             </form>
+        </div>
+    </div>
+
+    <!-- Ajustar Saldo -->
+    <div id="adjust-modal" class="modal-overlay">
+        <div class="modal-content">
+             <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-white">Ajustar Saldo Real</h3>
+                <button onclick="closeModal('adjust-modal')" class="text-neutral-500 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+             </div>
+             <div class="bg-neutral-900 p-3 rounded mb-4 text-center">
+                 <p class="text-xs text-neutral-500 uppercase">Sistema dice:</p>
+                 <p class="text-xl font-bold text-white" id="adjust-current-display">$0.00</p>
+             </div>
+             <form onsubmit="submitAdjustment(event)">
+                <div class="mb-6">
+                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">¿Cuánto tienes realmente?</label>
+                    <input type="number" id="adjust-amount" step="0.01" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-xl font-bold text-white text-center" placeholder="0.00" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded font-bold text-xs hover:bg-blue-500">CORREGIR</button>
+             </form>
+        </div>
+    </div>
+
+    <!-- Modal Fijo -->
+    <div id="fixed-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-white">Nuevo Pago Fijo</h3>
+                <button onclick="closeModal('fixed-modal')" class="text-neutral-500 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+             </div>
+             <form id="fixed-form" onsubmit="addFixed(event)" class="space-y-4">
+                 <div>
+                      <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Nombre</label>
+                      <input type="text" id="f-title" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white" required>
+                 </div>
+                 <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Monto</label>
+                        <input type="number" id="f-amount" step="0.01" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white" required>
+                      </div>
+                      <div>
+                        <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Día del mes</label>
+                        <select id="f-day" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white"></select>
+                      </div>
+                 </div>
+                 <button type="submit" class="w-full bg-white text-black py-3 rounded font-bold text-xs hover:bg-neutral-200">GUARDAR</button>
+             </form>
+        </div>
+    </div>
+
+    <!-- Modal Préstamos -->
+    <div id="loans-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-white">Nuevo Préstamo</h3>
+                <button onclick="closeModal('loans-modal')" class="text-neutral-500 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+            </div>
+            <form onsubmit="saveLoan(event)" class="space-y-4">
+                <div class="flex bg-neutral-900 rounded p-1">
+                    <button type="button" onclick="setLoanType('lent')" id="btn-lent" class="flex-1 py-2 text-xs font-bold rounded bg-neutral-800 text-green-500">ME DEBEN</button>
+                    <button type="button" onclick="setLoanType('borrowed')" id="btn-borrowed" class="flex-1 py-2 text-xs font-bold text-neutral-500">DEBO</button>
+                </div>
+                <input type="hidden" id="loan-type" value="lent">
+                
+                <div>
+                      <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Persona</label>
+                      <input type="text" id="loan-person" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white" required>
+                 </div>
+                 <div>
+                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Monto</label>
+                    <input type="number" id="loan-amount" step="0.01" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white" required>
+                 </div>
+                 <div>
+                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Fecha Límite/Registro</label>
+                    <input type="date" id="loan-date" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white" required>
+                </div>
+                <button type="submit" class="w-full bg-white text-black py-3 rounded font-bold text-xs hover:bg-neutral-200">GUARDAR</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-white text-black px-4 py-2 rounded shadow-xl z-[200] opacity-0 pointer-events-none font-bold text-xs">
+        <span id="toast-msg">Mensaje</span>
+    </div>
+
+    <!-- LOGICA JS (Sin cambios funcionales, solo limpieza de estilos inyectados) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-cUzYmh5G9y_W2RXbO1Uma4DlKKmnnss",
+            authDomain: "odsplan-adherencia.firebaseapp.com",
+            projectId: "godsplan-adherencia",
+            storageBucket: "godsplan-adherencia.firebasestorage.app",
+            messagingSenderId: "660801277434",
+            appId: "1:660801277434:web:3a37ece56538dc2b22a843"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let listeners = [];
+        let editingTransactionId = null;
+
+        window.appData = {
+            transactions: [],
+            fixed: [],
+            loans: [], 
+            settings: { frequency: 'biweekly', payday: null, forcedSavings: false, minVital: 0 }
+        };
+
+        // --- AUTH ---
+        window.authApp = {
+            isRegistering: false,
+            toggleAuth(mode) {
+                this.isRegistering = (mode === 'register');
+                const nameField = document.getElementById('field-name');
+                const btnLogin = document.getElementById('tab-login');
+                const btnReg = document.getElementById('tab-register');
+                
+                document.getElementById('auth-error-msg').classList.add('hidden');
+                document.getElementById('btn-text').textContent = this.isRegistering ? "CREAR CUENTA" : "INICIAR SESIÓN";
+                
+                if (this.isRegistering) {
+                    nameField.classList.remove('hidden');
+                    btnReg.className = "flex-1 py-2 text-xs font-bold rounded bg-neutral-700 text-white";
+                    btnLogin.className = "flex-1 py-2 text-xs font-bold text-neutral-400";
+                } else {
+                    nameField.classList.add('hidden');
+                    btnLogin.className = "flex-1 py-2 text-xs font-bold rounded bg-neutral-700 text-white";
+                    btnReg.className = "flex-1 py-2 text-xs font-bold text-neutral-400";
+                }
+            },
+            async handleAuthSubmit() {
+                const btn = document.getElementById('btn-submit');
+                const id = document.getElementById('input-id').value.trim();
+                const pass = document.getElementById('input-pass').value;
+                const name = document.getElementById('input-name').value.trim();
+                
+                if (!id || !pass) return this.showError("Faltan datos");
+                if (this.isRegistering && !name) return this.showError("Nombre requerido");
+                
+                const finalId = id.includes('@') ? id : `${id}@godsplan.site`;
+                btn.disabled = true;
+                btn.innerHTML = '...';
+
+                try {
+                    if (this.isRegistering) {
+                        const cred = await createUserWithEmailAndPassword(auth, finalId, pass);
+                        await updateProfile(cred.user, { displayName: name });
+                    } else {
+                        await signInWithEmailAndPassword(auth, finalId, pass);
+                    }
+                } catch (error) {
+                    this.showError("Credenciales inválidas");
+                    btn.disabled = false;
+                    btn.innerHTML = '<span id="btn-text">REINTENTAR</span>';
+                }
+            },
+            showError(msg) {
+                document.getElementById('auth-error-txt').textContent = msg;
+                document.getElementById('auth-error-msg').classList.remove('hidden');
+            },
+            logout() {
+                if(confirm('¿Cerrar sesión?')) signOut(auth);
+            }
+        };
+
+        async function initAuth() {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                try { await signInWithCustomToken(auth, __initial_auth_token); } catch (e) {}
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('main-container').classList.remove('hidden');
+                document.getElementById('global-nav').classList.remove('hidden');
+                document.getElementById('bottom-nav').classList.remove('hidden');
+                
+                document.getElementById('user-display-name').textContent = user.displayName || 'Usuario';
+                document.getElementById('user-display-email').textContent = user.email;
+
+                document.getElementById('loading-screen').classList.add('hidden');
+                setupListeners(user.uid);
+            } else {
+                currentUser = null;
+                document.getElementById('main-container').classList.add('hidden');
+                document.getElementById('global-nav').classList.add('hidden');
+                document.getElementById('bottom-nav').classList.add('hidden');
+                document.getElementById('login-view').classList.remove('hidden');
+                document.getElementById('loading-screen').classList.add('hidden');
+            }
+        });
+
+        function setupListeners(userId) {
+            listeners.forEach(u => u()); listeners = [];
+            
+            listeners.push(onSnapshot(collection(db, 'artifacts', appId, 'users', userId, 'transactions'), (snap) => {
+                window.appData.transactions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderDashboard(); renderHistory(); renderFixed();
+            }));
+
+            listeners.push(onSnapshot(collection(db, 'artifacts', appId, 'users', userId, 'fixed'), (snap) => {
+                window.appData.fixed = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderFixed(); renderDashboard();
+            }));
+
+            listeners.push(onSnapshot(collection(db, 'artifacts', appId, 'users', userId, 'loans'), (snap) => {
+                window.appData.loans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderLoans();
+            }));
+
+            listeners.push(onSnapshot(doc(db, 'artifacts', appId, 'users', userId, 'settings', 'config'), (snap) => {
+                if(snap.exists()) window.appData.settings = { ...window.appData.settings, ...snap.data() };
+                setupSettingsUI(); renderDashboard();
+            }));
+        }
+
+        // --- FUNCIONES GLOBAL ---
+        window.openAddModal = function(type, fixedId = null) {
+            editingTransactionId = null;
+            document.getElementById('modal-tx-title').textContent = type === 'expense' ? "Nuevo Gasto" : "Nuevo Ingreso";
+            document.getElementById('btn-save-tx').textContent = "GUARDAR";
+            document.getElementById('btn-delete-tx').classList.add('hidden');
+            document.getElementById('btn-save-tx').classList.add('col-span-2');
+            document.getElementById('transaction-form').reset();
+            
+            const now = new Date();
+            const localIso = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+            document.getElementById('t-date').value = localIso;
+            
+            document.getElementById(type === 'expense' ? 'radio-expense' : 'radio-income').checked = true;
+            document.getElementById('t-fixed-id').value = fixedId || ''; 
+            
+            renderCategoryChips(type);
+            openModal('transaction-modal');
+        };
+
+        window.addTransaction = async function(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+            
+            const type = document.querySelector('input[name="type"]:checked').value;
+            const amount = parseFloat(document.getElementById('t-amount').value);
+            const title = document.getElementById('t-title').value || (type === 'expense' ? 'Gasto' : 'Ingreso');
+            const category = document.getElementById('t-category').value || 'General';
+            const date = document.getElementById('t-date').value; 
+            const fixedPaymentId = document.getElementById('t-fixed-id').value;
+
+            const txData = { type, amount, title, category, date, createdAt: new Date().toISOString() };
+            if(fixedPaymentId) txData.fixedPaymentId = fixedPaymentId;
+
+            try {
+                if (editingTransactionId) {
+                    await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', editingTransactionId), txData);
+                    showToast('Actualizado');
+                } else {
+                    await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), txData);
+                    showToast('Guardado');
+                }
+                closeModal('transaction-modal');
+            } catch(e) { console.error(e); }
+        };
+
+        window.deleteTransaction = async function(id) {
+            if(confirm('¿Eliminar?')) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', id));
+                showToast('Eliminado');
+            }
+        };
+        
+        window.deleteCurrentTransaction = async function() {
+            if(!editingTransactionId) return;
+            if(confirm('¿Eliminar permanentemente?')) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', editingTransactionId));
+                showToast('Eliminado');
+                closeModal('transaction-modal');
+            }
+        }
+
+        window.editTransaction = function(id) {
+            const tx = window.appData.transactions.find(t => t.id === id);
+            if(!tx) return;
+            editingTransactionId = id;
+            document.getElementById('modal-tx-title').textContent = "Editar Movimiento";
+            document.getElementById('btn-save-tx').textContent = "ACTUALIZAR";
+            document.getElementById('btn-delete-tx').classList.remove('hidden');
+            document.getElementById('btn-save-tx').classList.remove('col-span-2');
+            
+            document.getElementById('t-amount').value = tx.amount;
+            document.getElementById('t-title').value = tx.title;
+            
+            let dateVal = tx.date;
+            if (dateVal && dateVal.length === 10) dateVal += "T12:00";
+            document.getElementById('t-date').value = dateVal;
+            
+            document.getElementById(tx.type === 'expense' ? 'radio-expense' : 'radio-income').checked = true;
+            document.getElementById('t-fixed-id').value = tx.fixedPaymentId || '';
+            
+            renderCategoryChips(tx.type);
+            selectChip(tx.category);
+            openModal('transaction-modal');
+        };
+
+        window.addFixed = async function(e) {
+            e.preventDefault();
+            const title = document.getElementById('f-title').value;
+            const amount = parseFloat(document.getElementById('f-amount').value);
+            const day = document.getElementById('f-day').value;
+            await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'fixed'), { title, amount, day });
+            closeModal('fixed-modal');
+            showToast('Guardado');
+        };
+
+        window.payFixed = function(id) {
+            const f = window.appData.fixed.find(x => x.id === id);
+            window.openAddModal('expense', id); 
+            document.getElementById('t-amount').value = f.amount;
+            document.getElementById('t-title').value = f.title;
+            selectChip('Servicios');
+        };
+
+        window.deleteFixed = async function(id) {
+            if(confirm('¿Borrar?')) await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'fixed', id));
+        };
+
+        window.openLoanModal = function() {
+            document.getElementById('loan-person').value = '';
+            document.getElementById('loan-amount').value = '';
+            document.getElementById('loan-date').value = new Date().toISOString().split('T')[0];
+            setLoanType('lent');
+            openModal('loans-modal');
+        };
+
+        window.setLoanType = function(type) {
+            const btnLent = document.getElementById('btn-lent');
+            const btnBorrowed = document.getElementById('btn-borrowed');
+            document.getElementById('loan-type').value = type;
+
+            if (type === 'lent') {
+                btnLent.className = "flex-1 py-2 text-xs font-bold rounded bg-neutral-800 text-green-500 transition-colors";
+                btnBorrowed.className = "flex-1 py-2 text-xs font-bold text-neutral-500 transition-colors";
+            } else {
+                btnBorrowed.className = "flex-1 py-2 text-xs font-bold rounded bg-neutral-800 text-red-500 transition-colors";
+                btnLent.className = "flex-1 py-2 text-xs font-bold text-neutral-500 transition-colors";
+            }
+        };
+
+        window.saveLoan = async function(e) {
+            e.preventDefault();
+            const type = document.getElementById('loan-type').value;
+            const person = document.getElementById('loan-person').value;
+            const amount = parseFloat(document.getElementById('loan-amount').value);
+            const date = document.getElementById('loan-date').value;
+
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'loans'), {
+                    type, person, amount, date, createdAt: new Date().toISOString()
+                });
+                closeModal('loans-modal');
+                showToast('Guardado');
+            } catch(e) { console.error(e); }
+        };
+
+        window.deleteLoan = async function(id) {
+             if(confirm('¿Borrar?')) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'loans', id));
+                showToast('Eliminado');
+             }
+        };
+
+        window.saveSettings = async function() {
+            const freq = document.querySelector('input[name="pay-freq"]:checked').value;
+            const payday = document.getElementById('payday-select').value;
+            const payday1 = document.getElementById('payday-1-select').value;
+            const payday2 = document.getElementById('payday-2-select').value;
+            const forcedSavings = document.getElementById('toggle-forced-savings').checked;
+            const minVital = parseFloat(document.getElementById('input-min-vital').value) || 0;
+            
+            await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'config'), { 
+                frequency: freq, payday, payday1, payday2, forcedSavings, minVital
+            }, { merge: true });
+            showToast('Guardado');
+        };
+
+        window.resetApp = async function() {
+            if(confirm('¿BORRAR TODO?')) {
+                const txs = window.appData.transactions;
+                const fxs = window.appData.fixed;
+                const loans = window.appData.loans;
+                
+                txs.forEach(t => deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id)));
+                fxs.forEach(f => deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'fixed', f.id)));
+                loans.forEach(l => deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'loans', l.id)));
+                
+                showToast('Reseteado');
+            }
+        };
+        
+        window.openAdjustModal = function() {
+            let balCents = 0;
+            window.appData.transactions.forEach(t => {
+                const amountCents = Math.round(t.amount * 100);
+                if (t.type === 'income') balCents += amountCents;
+                else balCents -= amountCents;
+            });
+            const bal = balCents / 100;
+            document.getElementById('adjust-current-display').textContent = formatCurrency(bal);
+            document.getElementById('adjust-current-display').dataset.raw = bal;
+            document.getElementById('adjust-amount').value = '';
+            openModal('adjust-modal');
+        }
+
+        window.submitAdjustment = async function(e) {
+            e.preventDefault();
+            const real = parseFloat(document.getElementById('adjust-amount').value);
+            const sys = parseFloat(document.getElementById('adjust-current-display').dataset.raw);
+            const diff = (Math.round(real * 100) - Math.round(sys * 100)) / 100;
+            
+            if(Math.abs(diff) < 0.01) return closeModal('adjust-modal');
+            
+            await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), {
+                type: diff > 0 ? 'income' : 'expense',
+                amount: Math.abs(diff),
+                title: 'Ajuste de Saldo',
+                category: 'Ajuste',
+                date: new Date().toISOString().split('T')[0],
+                createdAt: new Date().toISOString()
+            });
+            closeModal('adjust-modal');
+            showToast('Ajustado');
+        }
+
+        window.exportData = function() {
+            const data = { transactions: window.appData.transactions, fixed: window.appData.fixed, loans: window.appData.loans, settings: window.appData.settings };
+            const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = "backup.json"; a.click();
+        }
+
+        window.importData = function(input) {
+            const file = input.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const json = JSON.parse(e.target.result);
+                if(json.transactions) json.transactions.forEach(t => addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), t));
+                if(json.fixed) json.fixed.forEach(f => addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'fixed'), f));
+                if(json.loans) json.loans.forEach(l => addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'loans'), l));
+                showToast('Importado');
+            };
+            reader.readAsText(file);
+        }
+
+        initAuth();
+    </script>
+
+    <script>
+        let currentViewDate = new Date();
+        let chartInstance = null;
+        
+        const COMMON_HOLIDAYS = ['01-01', '02-05', '03-21', '05-01', '09-16', '11-20', '12-25'];
+
+        const CATEGORIES = {
+            expense: [
+                { id: 'Comida', icon: 'ph-hamburger' },
+                { id: 'Transporte', icon: 'ph-car' },
+                { id: 'Hogar', icon: 'ph-house' },
+                { id: 'Ocio', icon: 'ph-film-strip' },
+                { id: 'Salud', icon: 'ph-heartbeat' },
+                { id: 'Servicios', icon: 'ph-lightning' },
+                { id: 'Otros', icon: 'ph-dots-three-circle' },
+                { id: 'Ajuste', icon: 'ph-scales' }
+            ],
+            income: [
+                { id: 'Nómina', icon: 'ph-money' },
+                { id: 'Venta', icon: 'ph-tag' },
+                { id: 'Regalo', icon: 'ph-gift' },
+                { id: 'Ajuste', icon: 'ph-scales' },
+                { id: 'Otro', icon: 'ph-dots-three-circle' }
+            ]
+        };
+
+        const formatCurrency = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
+        
+        function updateDateHeader() {
+            const str = currentViewDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+            document.getElementById('current-date-header').textContent = str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function changeMonth(dir) {
+            currentViewDate.setMonth(currentViewDate.getMonth() + dir);
+            updateDateHeader();
+            renderDashboard();
+        }
+        function goToCurrentMonth() {
+            currentViewDate = new Date();
+            updateDateHeader();
+            renderDashboard();
+        }
+
+        function isFixedPaidThisMonth(fixedId) {
+            const now = new Date();
+            const m = now.getMonth();
+            const y = now.getFullYear();
+            return window.appData.transactions.some(t => {
+                if (!t.date) return false;
+                const d = new Date(t.date);
+                if (isNaN(d.getTime())) return false; 
+                return t.fixedPaymentId === fixedId && d.getMonth() === m && d.getFullYear() === y;
+            });
+        }
+
+        function renderDashboard() {
+            if (!window.appData || !window.appData.transactions) return;
+            
+            const m = currentViewDate.getMonth();
+            const y = currentViewDate.getFullYear();
+            
+            const monthlyTx = window.appData.transactions.filter(t => {
+                if (!t.date) return false;
+                const d = new Date(t.date);
+                if(isNaN(d.getTime())) return false;
+                return d.getMonth() === m && d.getFullYear() === y;
+            });
+
+            let incMCents = 0, expMCents = 0;
+            monthlyTx.forEach(t => {
+                const val = Math.round(t.amount * 100);
+                if (t.type === 'income') incMCents += val;
+                else expMCents += val;
+            });
+            const incM = incMCents / 100;
+            const expM = expMCents / 100;
+            
+            let incTCents = 0, expTCents = 0;
+            window.appData.transactions.forEach(t => {
+                 const val = Math.round(t.amount * 100);
+                 if (t.type === 'income') incTCents += val;
+                 else expTCents += val;
+            });
+            
+            const totalBalanceReal = (incTCents - expTCents) / 100;
+
+            const showInc = incM;
+            const showExp = expM;
+            let bal = showInc - showExp;
+
+            if (window.appData.settings.forcedSavings) {
+                bal = bal * 0.90; 
+            }
+
+            document.getElementById('total-balance').textContent = formatCurrency(bal);
+            document.getElementById('total-income').textContent = formatCurrency(showInc);
+            document.getElementById('total-expense').textContent = formatCurrency(showExp);
+
+            const percent = showInc > 0 ? Math.min((showExp / showInc) * 100, 100) : (showExp > 0 ? 100 : 0);
+            document.getElementById('balance-progress').style.width = `${percent}%`;
+            document.getElementById('progress-percent').textContent = `${Math.round(percent)}%`;
+
+            const listEl = document.getElementById('recent-list');
+            const displayTx = monthlyTx;
+            
+            displayTx.sort((a,b) => new Date(b.date) - new Date(a.date));
+            
+            if(displayTx.length === 0) {
+                listEl.innerHTML = '<div class="text-center text-neutral-600 text-xs py-4">Sin movimientos</div>';
+            } else {
+                const listHTML = displayTx.slice(0, 5).map(t => createTxHTML(t)).join('');
+                listEl.innerHTML = listHTML;
+            }
+            
+            updatePaydayInfo(totalBalanceReal);
+            updateChart(displayTx);
+        }
+
+        function createTxHTML(t) {
+            const isInc = t.type === 'income';
+            const catObj = [...CATEGORIES.expense, ...CATEGORIES.income].find(c => c.id === t.category);
+            const icon = catObj ? catObj.icon : 'ph-circle';
+            
+            let dateDisplay = '';
+            if (t.date) {
+                const d = new Date(t.date);
+                if (!isNaN(d.getTime())) {
+                      dateDisplay = d.getDate() + '/' + (d.getMonth()+1);
+                }
+            }
+
+            return `
+            <div class="flex justify-between items-center p-3 rounded-lg bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 cursor-pointer" onclick="editTransaction('${t.id}')">
+                <div class="flex items-center gap-3 overflow-hidden flex-1">
+                    <div class="w-8 h-8 rounded bg-neutral-800 flex items-center justify-center text-neutral-400">
+                        <i class="ph-fill ${icon}"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-neutral-300 text-xs truncate">${t.title}</h4>
+                        <p class="text-[10px] text-neutral-500 uppercase font-bold">
+                            ${t.category} • ${dateDisplay}
+                        </p>
+                    </div>
+                </div>
+                <span class="font-bold text-sm ${isInc ? 'text-green-500' : 'text-neutral-200'}">
+                    ${isInc ? '+' : '-'}${formatCurrency(t.amount)}
+                </span>
+            </div>
+            `;
+        }
+
+        function renderHistory() {
+            const activeBtn = document.querySelector('.filter-btn.active');
+            const filter = activeBtn ? activeBtn.dataset.filter : 'all';
+            
+            const list = document.getElementById('full-history-list');
+            list.innerHTML = '';
+            
+            let txs = [...window.appData.transactions].sort((a,b) => new Date(b.date) - new Date(a.date));
+            if(filter !== 'all') txs = txs.filter(t => t.type === filter);
+            
+            if(txs.length === 0) {
+                list.innerHTML = '<div class="text-center text-neutral-600 py-4 text-xs">Sin registros</div>';
+                return;
+            }
+
+            const grouped = {};
+            txs.forEach(t => {
+                if(!t.date) return;
+                const dateKey = t.date.substring(0, 10);
+                if(!grouped[dateKey]) grouped[dateKey] = [];
+                grouped[dateKey].push(t);
+            });
+
+            Object.keys(grouped).sort((a,b) => new Date(b) - new Date(a)).forEach(date => {
+                const groupDiv = document.createElement('div');
+                const dateObj = new Date(date + 'T00:00:00');
+                
+                const today = new Date(); today.setHours(0,0,0,0);
+                const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1); yesterday.setHours(0,0,0,0);
+                
+                let label = dateObj.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+                if(dateObj.getTime() === today.getTime()) label = "Hoy";
+                else if(dateObj.getTime() === yesterday.getTime()) label = "Ayer";
+
+                const txItemsHTML = grouped[date].map(t => createTxHTML(t)).join('');
+                
+                groupDiv.innerHTML = `
+                    <h3 class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mt-4 mb-2 pl-1">${label}</h3>
+                    <div class="space-y-1">
+                        ${txItemsHTML}
+                    </div>
+                `;
+                list.appendChild(groupDiv);
+            });
+        }
+
+        function filterHistory(type) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.filter-btn[data-filter="${type}"]`).classList.add('active');
+            renderHistory();
+        }
+
+        function renderFixed() {
+            const list = document.getElementById('fixed-list');
+            if(window.appData.fixed.length === 0) {
+                list.innerHTML = '<div class="text-center text-neutral-600 py-4 col-span-full text-xs">Sin pagos fijos</div>';
+                return;
+            }
+
+            const fixedHTML = window.appData.fixed.map(f => {
+                const isPaid = isFixedPaidThisMonth(f.id);
+                const bgClass = isPaid ? "bg-green-900/10 border-green-900" : "bg-neutral-900 border-neutral-800";
+                const textClass = isPaid ? "text-green-500" : "text-neutral-200";
+                
+                const actionBtn = isPaid 
+                    ? `<div class="w-8 h-8 rounded flex items-center justify-center text-green-500"><i class="ph-bold ph-check"></i></div>`
+                    : `<button onclick="payFixed('${f.id}')" class="w-8 h-8 rounded bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white"><i class="ph-bold ph-check"></i></button>`;
+
+                return `
+                <div class="${bgClass} border p-3 rounded-lg flex justify-between items-center">
+                    <div>
+                        <p class="font-bold ${textClass} text-xs">${f.title}</p>
+                        <p class="text-[10px] text-neutral-500 font-bold uppercase">Día ${f.day} • ${formatCurrency(f.amount)}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        ${actionBtn}
+                        <button onclick="deleteFixed('${f.id}')" class="w-8 h-8 rounded flex items-center justify-center text-neutral-600 hover:text-red-500"><i class="ph-bold ph-trash"></i></button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            list.innerHTML = fixedHTML;
+        }
+
+        function renderLoans() {
+            const list = document.getElementById('loans-list');
+            const loans = window.appData.loans || [];
+
+            let owedToMe = 0;
+            let iOwe = 0;
+
+            loans.forEach(l => {
+                const val = parseFloat(l.amount) || 0;
+                if(l.type === 'lent') owedToMe += val;
+                else iOwe += val;
+            });
+
+            document.getElementById('loans-owed-to-me').textContent = formatCurrency(owedToMe);
+            document.getElementById('loans-i-owe').textContent = formatCurrency(iOwe);
+
+            if(loans.length === 0) {
+                list.innerHTML = '<div class="text-center text-neutral-600 py-4 col-span-full text-xs">Sin préstamos</div>';
+                return;
+            }
+
+            const html = loans.map(l => {
+                const isLent = l.type === 'lent'; 
+                const icon = isLent ? 'ph-arrow-up-right' : 'ph-arrow-down-left';
+                const color = isLent ? 'text-green-500' : 'text-red-500';
+
+                return `
+                <div class="bg-neutral-900 border border-neutral-800 p-3 rounded-lg flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded bg-neutral-800 flex items-center justify-center ${color}">
+                            <i class="ph-bold ${icon}"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-neutral-300 text-xs">${l.person}</p>
+                            <p class="text-[10px] text-neutral-500 font-bold uppercase">${l.date}</p>
+                        </div>
+                    </div>
+                     <div class="flex items-center gap-3">
+                        <p class="font-bold ${color} text-xs">${formatCurrency(l.amount)}</p>
+                        <button onclick="deleteLoan('${l.id}')" class="text-neutral-600 hover:text-red-500"><i class="ph-bold ph-trash"></i></button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            list.innerHTML = html;
+        }
+
+        function updatePaydayInfo(totalBalance) {
+            const set = window.appData.settings;
+            const badge = document.getElementById('payday-badge');
+            
+            const daysLabel = document.getElementById('formula-days-left');
+            const dailyLabel = document.getElementById('formula-daily');
+            const explanation = document.getElementById('formula-explanation');
+            
+            if(!set || (set.frequency === 'monthly' && !set.payday)) {
+                badge.textContent = "Sin Config";
+                daysLabel.textContent = "-";
+                dailyLabel.textContent = "$0.00";
+                explanation.textContent = "Ve a Ajustes para configurar tus fechas de cobro.";
+                return;
+            }
+            
+            const nextDate = getNextPayday();
+            if (!nextDate) return;
+
+            const today = new Date(); today.setHours(0,0,0,0);
+            const diff = Math.ceil((nextDate - today) / (1000 * 60 * 60 * 24));
+            
+            badge.textContent = diff <= 0 ? "Hoy Cobras" : `${diff} Días`;
+            
+            updateDailyFormula(totalBalance, diff, nextDate);
+        }
+
+        function getNextPayday() {
+            const today = new Date(); today.setHours(0,0,0,0);
+            let candidates = [];
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth();
+            const s = window.appData.settings;
+            
+            const getSafeDate = (year, month, day) => {
+                const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+                const safeDay = Math.min(day, lastDayOfMonth);
+                return new Date(year, month, safeDay);
+            };
+
+            if (s.frequency === 'biweekly') {
+                for(let m = 0; m <= 1; m++) {
+                    let monthIndex = currentMonth + m; let year = currentYear;
+                    if(monthIndex > 11) { monthIndex = 0; year++; }
+                    candidates.push(getSafeDate(year, monthIndex, 15));
+                    candidates.push(getSafeDate(year, monthIndex, 30)); 
+                }
+            } else if (s.frequency === 'biweekly-custom' && s.payday1 && s.payday2) {
+                const p1 = parseInt(s.payday1); const p2 = parseInt(s.payday2);
+                for(let m = 0; m <= 1; m++) {
+                    let monthIndex = currentMonth + m; let year = currentYear;
+                    if(monthIndex > 11) { monthIndex = 0; year++; }
+                    candidates.push(getSafeDate(year, monthIndex, p1));
+                    candidates.push(getSafeDate(year, monthIndex, p2));
+                }
+            } else if (s.frequency === 'monthly' && s.payday) {
+                const day = parseInt(s.payday);
+                for(let m = 0; m <= 1; m++) {
+                    let monthIndex = currentMonth + m; let year = currentYear;
+                    if(monthIndex > 11) { monthIndex = 0; year++; }
+                    candidates.push(getSafeDate(year, monthIndex, day));
+                }
+            }
+            
+            let adjustedCandidates = candidates.map(d => getNextBusinessDay(d));
+            adjustedCandidates.sort((a,b) => a - b);
+            
+            for (let d of adjustedCandidates) {
+                d.setHours(0,0,0,0);
+                if (d >= today) return d;
+            }
+            return adjustedCandidates[0];
+        }
+
+        function getNextBusinessDay(date) {
+            let d = new Date(date);
+            const fmt = (x) => `${(x.getMonth()+1).toString().padStart(2,'0')}-${x.getDate().toString().padStart(2,'0')}`;
+
+            while (d.getDay() === 0 || d.getDay() === 6 || COMMON_HOLIDAYS.includes(fmt(d))) {
+                d.setDate(d.getDate() + 1);
+            }
+            return d;
+        }
+
+        function updateDailyFormula(currentBalance, daysLeft, nextPaydayDate) {
+            let spentToday = 0;
+            const todayDate = new Date();
+            todayDate.setHours(0,0,0,0);
+            
+            window.appData.transactions.forEach(t => {
+                if(t.type === 'expense' && t.date) {
+                      const tDate = new Date(t.date);
+                      tDate.setHours(0,0,0,0);
+                      if(tDate.getTime() === todayDate.getTime()) {
+                          spentToday += parseFloat(t.amount);
+                      }
+                }
+            });
+
+            let pendingFixedSum = 0;
+            const nextPaydayDay = nextPaydayDate.getDate();
+            const todayDay = todayDate.getDate();
+
+            window.appData.fixed.forEach(f => {
+                const fDay = parseInt(f.day);
+                if (isFixedPaidThisMonth(f.id)) return;
+
+                if (fDay < todayDay) {
+                    pendingFixedSum += parseFloat(f.amount);
+                } else if (fDay >= todayDay && fDay <= nextPaydayDay) {
+                      pendingFixedSum += parseFloat(f.amount);
+                }
+            });
+
+            const minVital = window.appData.settings.minVital || 0;
+            
+            const startOfDayBalance = currentBalance + spentToday;
+            const effectiveStartBalance = startOfDayBalance - pendingFixedSum;
+            const divisor = daysLeft <= 0 ? 1 : daysLeft;
+            
+            let budgetForToday = effectiveStartBalance / divisor;
+            let survivalMode = false;
+            let deficit = 0;
+
+            if (minVital > 0 && budgetForToday < minVital) {
+                survivalMode = true;
+                deficit = (minVital * divisor) - effectiveStartBalance;
+                budgetForToday = minVital;
+            }
+
+            const remainingToday = budgetForToday - spentToday;
+            
+            const titleEl = document.getElementById('formula-title');
+            const explEl = document.getElementById('formula-explanation');
+
+            if (survivalMode) {
+                titleEl.textContent = "MODO SUPERVIVENCIA";
+                titleEl.className = "text-xs font-bold text-red-500 uppercase animate-pulse";
+                explEl.innerHTML = `Prioridad: Comida/Bus. Déficit proyectado: <strong class="text-red-400">-${formatCurrency(deficit)}</strong>.`;
+            } else {
+                titleEl.textContent = "PLAN DEL DÍA";
+                titleEl.className = "text-xs font-bold text-blue-400 uppercase";
+                explEl.innerHTML = `Presupuesto diario: <strong class="text-white">${formatCurrency(budgetForToday)}</strong>. Gastado hoy: <strong class="text-white">${formatCurrency(spentToday)}</strong>.`;
+            }
+            
+            const remainingEl = document.getElementById('formula-daily');
+            remainingEl.textContent = formatCurrency(remainingToday);
+            
+            if(remainingToday < 0) remainingEl.classList.add('text-red-500');
+            else remainingEl.classList.remove('text-red-500');
+
+            document.getElementById('formula-days-left').textContent = `Fijos pend: -${formatCurrency(pendingFixedSum)}`;
+        }
+
+        function updateChart(txs) {
+            const ctx = document.getElementById('financeChart');
+            if(!ctx) return;
+            
+            const cats = {};
+            txs.filter(t => t.type === 'expense').forEach(t => {
+                const currentValCents = Math.round((cats[t.category] || 0) * 100);
+                const addValCents = Math.round(t.amount * 100);
+                cats[t.category] = (currentValCents + addValCents) / 100;
+            });
+
+            const labels = Object.keys(cats);
+            const data = Object.values(cats);
+
+            if(chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: '#ef4444',
+                        borderRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
+        function switchTab(id) {
+            document.querySelectorAll('section[id^="view-"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${id}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('text-white'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.add('text-neutral-500'));
+            
+            const mobBtn = document.getElementById(`nav-${id}`);
+            if(mobBtn) {
+                mobBtn.classList.remove('text-neutral-500');
+                mobBtn.classList.add('text-white');
+            }
+
+            if(id === 'dashboard') renderDashboard();
+            if(id === 'history') renderHistory();
+            if(id === 'fixed') renderFixed();
+            if(id === 'loans') renderLoans();
+        }
+
+        function filterHistory(type) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.filter-btn[data-filter="${type}"]`).classList.add('active');
+            renderHistory();
+        }
+
+        function renderCategoryChips(type) {
+            const container = document.getElementById('category-chips');
+            container.innerHTML = '';
+            const list = type === 'expense' ? CATEGORIES.expense : CATEGORIES.income;
+            
+            list.forEach(c => {
+                const div = document.createElement('div');
+                div.className = "chip";
+                div.innerHTML = `<i class="ph-fill ${c.icon}"></i> ${c.id}`;
+                div.onclick = () => selectChip(c.id);
+                div.dataset.id = c.id;
+                container.appendChild(div);
+            });
+        }
+
+        function selectChip(catId) {
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            const selected = document.querySelector(`.chip[data-id="${catId}"]`);
+            if(selected) selected.classList.add('active');
+            document.getElementById('t-category').value = catId;
+        }
+
+        function setupSettingsUI() {
+            if(!window.appData.settings) return;
+            const s = window.appData.settings;
+            const radios = document.getElementsByName('pay-freq');
+            for(let r of radios) { if(r.value === s.frequency) r.checked = true; }
+            
+            const selPayday = document.getElementById('payday-select'); if(selPayday && s.payday) selPayday.value = s.payday;
+            const selP1 = document.getElementById('payday-1-select'); if(selP1 && s.payday1) selP1.value = s.payday1;
+            const selP2 = document.getElementById('payday-2-select'); if(selP2 && s.payday2) selP2.value = s.payday2;
+            
+            const toggle = document.getElementById('toggle-forced-savings');
+            if(toggle && s.forcedSavings !== undefined) toggle.checked = s.forcedSavings;
+            
+            const minVitalInput = document.getElementById('input-min-vital');
+            if(minVitalInput && s.minVital) minVitalInput.value = s.minVital;
+
+            togglePaydayInput();
+        }
+
+        function togglePaydayInput() {
+            const freq = document.querySelector('input[name="pay-freq"]:checked')?.value || 'biweekly';
+            const mCont = document.getElementById('monthly-select-container');
+            const bCont = document.getElementById('biweekly-custom-container');
+            
+            if (mCont) mCont.classList.add('hidden');
+            if (bCont) bCont.classList.add('hidden');
+            
+            if (freq === 'monthly' && mCont) mCont.classList.remove('hidden');
+            if (freq === 'biweekly-custom' && bCont) bCont.classList.remove('hidden');
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('is-open');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('is-open');
+        }
+        
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            t.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                 t.classList.add('opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const sels = [document.getElementById('f-day'), document.getElementById('payday-select'), document.getElementById('payday-1-select'), document.getElementById('payday-2-select')];
+            sels.forEach(s => {
+                if(s) {
+                    for(let i=1; i<=31; i++) s.innerHTML += `<option value="${i}">${i}</option>`;
+                }
+            });
+            updateDateHeader();
+        });
+
+        // Exponer funciones globales para onclick HTML
+        window.switchTab = switchTab;
+        window.changeMonth = changeMonth;
+        window.goToCurrentMonth = goToCurrentMonth;
+        window.filterHistory = filterHistory;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.togglePaydayInput = togglePaydayInput;
+    </script>
+</body>
+</html>
