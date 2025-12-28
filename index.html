@@ -138,9 +138,6 @@
         .chip.active { background: var(--text); color: var(--bg); border-color: var(--text); transform: scale(1.05); }
 
         #toast { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease; }
-        
-        .nav-btn.active i { color: white; }
-        .nav-btn.active span { color: white; }
     </style>
 </head>
 <body class="bg-bg text-text font-sans selection:bg-brand selection:text-white flex flex-col h-[100dvh] overflow-hidden">
@@ -210,7 +207,8 @@
     </div>
     
     <!-- HEADER APP -->
-    <nav id="global-nav" class="bg-card border-b border-border fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 py-3 shadow-sm transition-all h-[64px] hidden">
+    <!-- CORRECCIÓN: Z-INDEX 50, FIXED, FONDO SOLIDO/BLUR PARA QUE NO SE VEA TRANSPARENTE AL SCROLLEAR -->
+    <nav id="global-nav" class="bg-black/80 backdrop-blur-xl border-b border-border fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 py-3 shadow-sm transition-all h-[64px] hidden">
         <div class="flex items-center gap-3">
              <div class="w-9 h-9 bg-input-bg rounded-lg flex items-center justify-center text-brand border border-border">
                 <i class="ph-fill ph-wallet text-xl"></i>
@@ -233,46 +231,13 @@
     </nav>
 
     <!-- Contenido Principal -->
-    <main id="main-container" class="flex-1 overflow-y-auto p-4 md:p-6 pb-28 pt-20 relative hidden scroll-smooth no-scrollbar w-full max-w-[900px] mx-auto">
+    <!-- CORRECCIÓN: pt-24 para asegurar que el contenido no quede debajo del header -->
+    <main id="main-container" class="flex-1 overflow-y-auto p-4 md:p-6 pb-28 pt-24 relative hidden scroll-smooth no-scrollbar w-full max-w-[900px] mx-auto">
         
         <!-- DASHBOARD -->
         <section id="view-dashboard" class="space-y-6 animate-fade-in">
-            
-            <!-- Tarjeta de Balance -->
-            <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group border border-border">
-                <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
-                    <i class="ph-fill ph-wallet text-9xl text-white"></i>
-                </div>
 
-                <div class="flex justify-between items-start mb-4 relative z-10">
-                    <span class="text-xs font-black text-text-mute uppercase tracking-widest flex items-center gap-2"><i class="ph-bold ph-coins"></i> Disponible Real</span>
-                    <button onclick="openAdjustModal()" class="text-text-mute hover:text-white text-[0.65rem] font-bold bg-bg/50 px-2 py-1 rounded border border-border transition-colors uppercase tracking-wider">Ajustar</button>
-                </div>
-                
-                <div class="text-[clamp(2.5rem,5vw,3.5rem)] font-black text-text mb-6 relative z-10 tracking-tight leading-none" id="total-balance">$0.00</div>
-                
-                <div class="mb-6 relative z-10">
-                    <div class="flex justify-between text-[10px] font-bold text-text-mute mb-2 uppercase tracking-wide">
-                        <span>Presupuesto usado</span>
-                        <span id="progress-percent">0%</span>
-                    </div>
-                    <div class="h-2 bg-black/50 rounded-full w-full overflow-hidden border border-white/5">
-                        <div id="balance-progress" class="h-full bg-white w-0 transition-all duration-700 ease-out shadow-[0_0_15px_rgba(255,255,255,0.5)]"></div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 border-t border-white/5 pt-4 relative z-10">
-                    <div>
-                        <span class="block text-[10px] text-text-mute uppercase font-black mb-1 flex items-center gap-1"><i class="ph-bold ph-arrow-down-left text-money"></i> Ingresos</span>
-                        <span class="text-xl font-bold text-money tracking-tight" id="total-income">$0.00</span>
-                    </div>
-                    <div class="text-right">
-                        <span class="block text-[10px] text-text-mute uppercase font-black mb-1 flex items-center justify-end gap-1">Gastos <i class="ph-bold ph-arrow-up-right text-brand"></i></span>
-                        <span class="text-xl font-bold text-brand tracking-tight" id="total-expense">$0.00</span>
-                    </div>
-                </div>
-            </div>
-
+            <!-- CORRECCIÓN: PLAN DEL DÍA MOVIDO AL PRINCIPIO -->
             <!-- Fórmula del Día -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-card border border-border rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden h-full shadow-sm">
@@ -316,6 +281,41 @@
                         </div>
                         <span class="tracking-wide">REGISTRAR GASTO</span>
                     </button>
+                </div>
+            </div>
+            
+            <!-- Tarjeta de Balance (Ahora en segundo lugar) -->
+            <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group border border-border">
+                <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+                    <i class="ph-fill ph-wallet text-9xl text-white"></i>
+                </div>
+
+                <div class="flex justify-between items-start mb-4 relative z-10">
+                    <span class="text-xs font-black text-text-mute uppercase tracking-widest flex items-center gap-2"><i class="ph-bold ph-coins"></i> Disponible Real</span>
+                    <button onclick="openAdjustModal()" class="text-text-mute hover:text-white text-[0.65rem] font-bold bg-bg/50 px-2 py-1 rounded border border-border transition-colors uppercase tracking-wider">Ajustar</button>
+                </div>
+                
+                <div class="text-[clamp(2.5rem,5vw,3.5rem)] font-black text-text mb-6 relative z-10 tracking-tight leading-none" id="total-balance">$0.00</div>
+                
+                <div class="mb-6 relative z-10">
+                    <div class="flex justify-between text-[10px] font-bold text-text-mute mb-2 uppercase tracking-wide">
+                        <span>Presupuesto usado</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="h-2 bg-black/50 rounded-full w-full overflow-hidden border border-white/5">
+                        <div id="balance-progress" class="h-full bg-white w-0 transition-all duration-700 ease-out shadow-[0_0_15px_rgba(255,255,255,0.5)]"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 border-t border-white/5 pt-4 relative z-10">
+                    <div>
+                        <span class="block text-[10px] text-text-mute uppercase font-black mb-1 flex items-center gap-1"><i class="ph-bold ph-arrow-down-left text-money"></i> Ingresos</span>
+                        <span class="text-xl font-bold text-money tracking-tight" id="total-income">$0.00</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="block text-[10px] text-text-mute uppercase font-black mb-1 flex items-center justify-end gap-1">Gastos <i class="ph-bold ph-arrow-up-right text-brand"></i></span>
+                        <span class="text-xl font-bold text-brand tracking-tight" id="total-expense">$0.00</span>
+                    </div>
                 </div>
             </div>
 
@@ -510,7 +510,7 @@
 
     <!-- Barra Inferior Móvil (Estilo Adherencia) -->
     <nav class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] bg-card/90 backdrop-blur-xl border border-border rounded-2xl h-16 grid grid-cols-5 z-40 shadow-2xl items-center px-2" id="bottom-nav">
-        <button onclick="switchTab('dashboard')" class="nav-btn flex flex-col items-center justify-center text-text-mute hover:text-white transition-colors gap-1" id="nav-dashboard">
+        <button onclick="switchTab('dashboard')" class="nav-btn flex flex-col items-center justify-center text-white transition-colors gap-1" id="nav-dashboard">
             <i class="ph-fill ph-squares-four text-2xl"></i>
         </button>
         <button onclick="switchTab('history')" class="nav-btn flex flex-col items-center justify-center text-text-mute hover:text-white transition-colors gap-1" id="nav-history">
@@ -1509,7 +1509,7 @@
             document.getElementById('formula-days-left').textContent = `Fijos: -${formatCurrency(pendingFixedSum)}`;
         }
 
-        window.runSimulation = function() {
+        function runSimulation() {
             const dateInput = document.getElementById('sim-date').value;
             const amountInput = parseFloat(document.getElementById('sim-amount').value);
             const resultEl = document.getElementById('sim-result');
@@ -1553,18 +1553,30 @@
         }
 
         function switchTab(id) {
+            // Ocultar todas las secciones
             document.querySelectorAll('section[id^="view-"]').forEach(el => el.classList.add('hidden'));
             document.getElementById(`view-${id}`).classList.remove('hidden');
             
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.nav-btn i').forEach(i => i.classList.remove('text-white'));
-            document.querySelectorAll('.nav-btn span').forEach(s => s.classList.remove('text-white'));
+            // RESETEAR COLORES DE TODOS LOS BOTONES DE NAVEGACIÓN
+            // Primero, poner todos en GRIS (text-text-mute)
+            const navIds = ['nav-dashboard', 'nav-history', 'nav-payments', 'nav-settings'];
+            navIds.forEach(navId => {
+                const btn = document.getElementById(navId);
+                if(btn) {
+                    btn.classList.remove('text-white'); // Quitar blanco
+                    btn.classList.add('text-text-mute'); // Poner gris
+                }
+            });
 
-            const mobBtn = document.getElementById(`nav-${id}`);
-            if(mobBtn) {
-                mobBtn.classList.add('active');
+            // ACTIVAR EL BOTÓN SELECCIONADO
+            // Poner el actual en BLANCO (text-white)
+            const activeBtn = document.getElementById(`nav-${id}`);
+            if(activeBtn) {
+                activeBtn.classList.remove('text-text-mute'); // Quitar gris
+                activeBtn.classList.add('text-white'); // Poner blanco
             }
 
+            // Renderizar contenido específico
             if(id === 'dashboard') renderDashboard();
             if(id === 'history') renderHistory();
             if(id === 'payments') { renderFixed(); renderLoans(); }
