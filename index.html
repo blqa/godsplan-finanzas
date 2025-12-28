@@ -3,60 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>God's Plan | Básico</title>
+    <title>God's Plan | Fórmula Corregida</title>
     
-    <!-- Tailwind CSS (Versión estándar) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Iconos Phosphor -->
     <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
 
     <style>
-        /* Estilos base mínimos */
+        /* Estilos base */
         body { background-color: #0a0a0a; color: #e5e5e5; font-family: system-ui, -apple-system, sans-serif; }
-        
-        /* Ocultar scrollbar */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Utilidad para inputs */
         input:focus, select:focus, textarea:focus { outline: none; border-color: #3b82f6; }
         
-        /* Modales simples */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; align-items: center; justify-content: center; padding: 20px; }
+        /* Modales */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
         .modal-overlay.is-open { display: flex; }
-        .modal-content { background: #171717; width: 100%; max-width: 400px; border-radius: 12px; border: 1px solid #262626; padding: 24px; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: #171717; width: 100%; max-width: 400px; border-radius: 16px; border: 1px solid #262626; padding: 24px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
 
-        /* Chips de filtros */
-        .chip { border: 1px solid #262626; background: #171717; color: #a3a3a3; padding: 6px 12px; border-radius: 999px; font-size: 0.75rem; cursor: pointer; }
-        .chip.active { background: #e5e5e5; color: #0a0a0a; border-color: #e5e5e5; font-weight: bold; }
+        /* Chips */
+        .chip { border: 1px solid #262626; background: #171717; color: #a3a3a3; padding: 6px 12px; border-radius: 999px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
+        .chip.active { background: #e5e5e5; color: #0a0a0a; border-color: #e5e5e5; font-weight: bold; transform: scale(1.05); }
         
-        /* Toast Notification */
-        #toast { transition: transform 0.3s ease, opacity 0.3s ease; }
+        /* Toast */
+        #toast { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease; }
     </style>
 </head>
 <body class="flex flex-col h-[100dvh] overflow-hidden">
 
-    <!-- Loading Simple -->
+    <!-- Loading -->
     <div id="loading-screen" class="fixed inset-0 bg-[#0a0a0a] z-[100] flex items-center justify-center">
-        <p class="text-neutral-500 font-mono text-sm">Cargando datos...</p>
+        <div class="text-center">
+            <i class="ph-bold ph-spinner animate-spin text-3xl text-neutral-500 mb-2"></i>
+            <p class="text-neutral-500 font-mono text-sm">Sincronizando...</p>
+        </div>
     </div>
 
-    <!-- Login View Simple -->
+    <!-- Login View -->
     <div id="login-view" class="fixed inset-0 z-[90] bg-[#0a0a0a] flex flex-col items-center justify-center p-6 hidden">
-        <div class="w-full max-w-sm bg-neutral-900 border border-neutral-800 rounded-xl p-8">
+        <div class="w-full max-w-sm bg-neutral-900 border border-neutral-800 rounded-xl p-8 shadow-2xl">
             <div class="text-center mb-8">
+                <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center mx-auto mb-4 text-black">
+                     <i class="ph-bold ph-wallet text-2xl"></i>
+                </div>
                 <h1 class="text-2xl font-bold text-white mb-2">GOD'S PLAN</h1>
-                <p class="text-neutral-500 text-xs uppercase tracking-wider">Control Financiero</p>
+                <p class="text-neutral-500 text-xs uppercase tracking-wider">Control Financiero Estricto</p>
             </div>
 
             <div class="flex bg-neutral-800 p-1 rounded-lg mb-6">
-                <button onclick="window.authApp.toggleAuth('login')" id="tab-login" class="flex-1 py-2 text-xs font-bold rounded bg-neutral-700 text-white">INGRESAR</button>
-                <button onclick="window.authApp.toggleAuth('register')" id="tab-register" class="flex-1 py-2 text-xs font-bold text-neutral-400">REGISTRO</button>
+                <button onclick="window.authApp.toggleAuth('login')" id="tab-login" class="flex-1 py-2 text-xs font-bold rounded bg-neutral-700 text-white transition-all">INGRESAR</button>
+                <button onclick="window.authApp.toggleAuth('register')" id="tab-register" class="flex-1 py-2 text-xs font-bold text-neutral-400 transition-all">REGISTRO</button>
             </div>
 
             <form onsubmit="event.preventDefault(); window.authApp.handleAuthSubmit();" class="space-y-4">
-                <div id="field-name" class="hidden">
+                <div id="field-name" class="hidden animate-fade-in">
                     <input type="text" id="input-name" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white placeholder-neutral-600 focus:border-neutral-500 transition-colors" placeholder="Tu Nombre">
                 </div>
                 <div>
@@ -66,99 +68,100 @@
                     <input type="password" id="input-pass" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white placeholder-neutral-600 focus:border-neutral-500 transition-colors" placeholder="Contraseña" required>
                 </div>
 
-                <div id="auth-error-msg" class="hidden text-red-500 text-xs font-bold text-center py-2">
+                <div id="auth-error-msg" class="hidden text-red-400 text-xs font-bold text-center py-2 bg-red-900/10 rounded border border-red-900/50">
                     <span id="auth-error-txt">Error</span>
                 </div>
 
-                <button type="submit" id="btn-submit" class="w-full bg-white text-black py-3 rounded-lg font-bold text-sm hover:bg-neutral-200 transition-colors">
+                <button type="submit" id="btn-submit" class="w-full bg-white text-black py-3 rounded-lg font-bold text-sm hover:bg-neutral-200 transition-colors shadow-lg shadow-white/10">
                     <span id="btn-text">INICIAR SESIÓN</span>
                 </button>
             </form>
         </div>
     </div>
     
-    <!-- Navbar Superior Simple -->
-    <nav id="global-nav" class="h-14 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between px-4 shrink-0 hidden">
+    <!-- Navbar Superior -->
+    <nav id="global-nav" class="h-16 bg-neutral-900/80 backdrop-blur-md border-b border-neutral-800 flex items-center justify-between px-4 shrink-0 hidden sticky top-0 z-30">
         <div class="flex items-center gap-3">
-             <div class="w-8 h-8 bg-neutral-800 rounded flex items-center justify-center text-white">
+             <div class="w-9 h-9 bg-neutral-800 rounded-lg flex items-center justify-center text-white border border-neutral-700">
                 <i class="ph-bold ph-wallet"></i>
             </div>
             <div>
-                <h1 class="text-white font-bold text-sm">Finanzas</h1>
-                <p class="text-[10px] text-neutral-500" id="current-date-header">...</p>
+                <h1 class="text-white font-bold text-sm leading-tight">Finanzas</h1>
+                <p class="text-[10px] text-neutral-500 font-mono" id="current-date-header">...</p>
             </div>
         </div>
         
         <!-- Menú Desktop -->
-        <div class="hidden md:flex gap-6">
-            <button onclick="switchTab('dashboard')" class="text-xs font-bold text-white hover:text-neutral-300">Panel</button>
-            <button onclick="switchTab('history')" class="text-xs font-bold text-neutral-400 hover:text-white">Historial</button>
-            <button onclick="switchTab('payments')" class="text-xs font-bold text-neutral-400 hover:text-white">Pagos</button>
-            <button onclick="switchTab('settings')" class="text-xs font-bold text-neutral-400 hover:text-white">Ajustes</button>
+        <div class="hidden md:flex gap-1 bg-neutral-900 p-1 rounded-lg border border-neutral-800">
+            <button onclick="switchTab('dashboard')" class="px-4 py-1.5 rounded text-xs font-bold text-white bg-neutral-800">Panel</button>
+            <button onclick="switchTab('history')" class="px-4 py-1.5 rounded text-xs font-bold text-neutral-400 hover:text-white transition-colors">Historial</button>
+            <button onclick="switchTab('payments')" class="px-4 py-1.5 rounded text-xs font-bold text-neutral-400 hover:text-white transition-colors">Pagos</button>
+            <button onclick="switchTab('settings')" class="px-4 py-1.5 rounded text-xs font-bold text-neutral-400 hover:text-white transition-colors">Ajustes</button>
         </div>
 
-        <!-- Sin navegación de meses -->
-        <div class="w-8"></div>
+        <div class="w-8 md:hidden"></div> <!-- Spacer móvil -->
     </nav>
 
     <!-- Contenido Principal -->
-    <main id="main-container" class="flex-1 overflow-y-auto p-4 md:p-6 pb-24 relative hidden">
-        <div class="max-w-4xl mx-auto">
+    <main id="main-container" class="flex-1 overflow-y-auto p-4 md:p-6 pb-24 relative hidden scroll-smooth">
+        <div class="max-w-3xl mx-auto space-y-6">
 
             <!-- DASHBOARD -->
-            <section id="view-dashboard" class="space-y-6">
+            <section id="view-dashboard" class="space-y-6 animate-fade-in">
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Tarjeta de Balance -->
-                    <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-6">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="text-xs font-bold text-neutral-500 uppercase">Disponible</span>
-                            <button onclick="openAdjustModal()" class="text-blue-500 hover:text-blue-400 text-xs font-bold">Ajustar</button>
-                        </div>
-                        
-                        <div class="text-4xl font-bold text-white mb-6" id="total-balance">$0.00</div>
-                        
-                        <div class="mb-4">
-                             <div class="flex justify-between text-[10px] font-bold text-neutral-500 mb-1 uppercase">
-                                <span>Presupuesto usado</span>
-                                <span id="progress-percent">0%</span>
-                            </div>
-                            <div class="h-2 bg-neutral-800 rounded-full w-full overflow-hidden">
-                                <div id="balance-progress" class="h-full bg-white w-0 transition-all duration-500"></div>
-                            </div>
-                        </div>
+                <!-- Tarjeta de Balance -->
+                <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="ph-fill ph-wallet text-9xl"></i>
+                    </div>
 
-                        <div class="grid grid-cols-2 gap-4 border-t border-neutral-800 pt-4">
-                            <div>
-                                <span class="block text-[10px] text-neutral-500 uppercase font-bold mb-1">Ingresos</span>
-                                <span class="text-lg font-bold text-green-500" id="total-income">$0.00</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="block text-[10px] text-neutral-500 uppercase font-bold mb-1">Gastos</span>
-                                <span class="text-lg font-bold text-red-500" id="total-expense">$0.00</span>
-                            </div>
+                    <div class="flex justify-between items-start mb-2 relative z-10">
+                        <span class="text-xs font-bold text-neutral-500 uppercase tracking-widest">Disponible Real</span>
+                        <button onclick="openAdjustModal()" class="text-blue-400 hover:text-blue-300 text-xs font-bold bg-blue-900/20 px-2 py-1 rounded border border-blue-900/30 transition-colors">Ajustar</button>
+                    </div>
+                    
+                    <div class="text-5xl md:text-6xl font-bold text-white mb-6 relative z-10 tracking-tight" id="total-balance">$0.00</div>
+                    
+                    <div class="mb-6 relative z-10">
+                        <div class="flex justify-between text-[10px] font-bold text-neutral-500 mb-2 uppercase">
+                            <span>Presupuesto usado</span>
+                            <span id="progress-percent">0%</span>
+                        </div>
+                        <div class="h-3 bg-neutral-800 rounded-full w-full overflow-hidden border border-neutral-800">
+                            <div id="balance-progress" class="h-full bg-white w-0 transition-all duration-700 ease-out shadow-[0_0_10px_rgba(255,255,255,0.5)]"></div>
                         </div>
                     </div>
 
-                    <!-- Fórmula del Día -->
-                    <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-6 flex flex-col justify-between relative overflow-hidden" id="formula-card">
-                         <!-- Mantenemos IDs para que JS funcione, pero sin estilos complejos -->
-                        <div id="formula-bg" class="hidden"></div>
-                        <div id="formula-blob" class="hidden"></div>
-
+                    <div class="grid grid-cols-2 gap-4 border-t border-neutral-800 pt-4 relative z-10">
                         <div>
-                             <div class="flex justify-between items-start mb-2">
-                                <p class="text-xs font-bold text-blue-400 uppercase" id="formula-title">PLAN DEL DÍA</p>
-                                <span id="payday-badge" class="text-[10px] bg-neutral-800 text-neutral-400 px-2 py-1 rounded border border-neutral-700">...</span>
+                            <span class="block text-[10px] text-neutral-500 uppercase font-bold mb-1 flex items-center gap-1"><i class="ph-bold ph-arrow-down-left text-green-500"></i> Ingresos</span>
+                            <span class="text-lg font-bold text-green-400" id="total-income">$0.00</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="block text-[10px] text-neutral-500 uppercase font-bold mb-1 flex items-center justify-end gap-1">Gastos <i class="ph-bold ph-arrow-up-right text-red-500"></i></span>
+                            <span class="text-lg font-bold text-red-400" id="total-expense">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Fórmula del Día -->
+                    <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden h-full">
+                        <div>
+                             <div class="flex justify-between items-start mb-3">
+                                <p class="text-xs font-bold text-purple-400 uppercase tracking-widest flex items-center gap-2">
+                                    <i class="ph-fill ph-calculator"></i> PLAN DEL DÍA
+                                </p>
+                                <span id="payday-badge" class="text-[10px] bg-neutral-800 text-neutral-400 px-2 py-1 rounded border border-neutral-700 font-mono">...</span>
                             </div>
-                            <p class="text-sm text-neutral-300 leading-relaxed mb-4" id="formula-explanation">Analizando...</p>
+                            <p class="text-sm text-neutral-300 leading-relaxed mb-4 font-light" id="formula-explanation">Analizando tus finanzas...</p>
                         </div>
                         
-                        <div class="pt-4 border-t border-neutral-800">
+                        <div class="pt-4 border-t border-neutral-800 mt-auto">
                             <div class="flex justify-between items-end">
                                 <div>
-                                    <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Límite Diario</p>
-                                    <span class="font-bold text-3xl text-white" id="formula-daily">$0.00</span>
+                                    <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Límite Diario Seguro</p>
+                                    <span class="font-bold text-3xl text-white tracking-tight" id="formula-daily">$0.00</span>
                                 </div>
                                 <div class="text-right">
                                     <p class="text-[10px] text-neutral-500 font-bold uppercase">Meta</p>
@@ -167,52 +170,71 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="grid grid-rows-2 gap-4 h-full">
+                        <button onclick="openAddModal('income')" class="bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 hover:border-green-900/50 rounded-2xl text-green-500 font-bold text-sm flex items-center justify-center gap-3 transition-all group">
+                            <div class="w-8 h-8 rounded-full bg-green-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <i class="ph-bold ph-arrow-down-left"></i>
+                            </div>
+                            REGISTRAR INGRESO
+                        </button>
+                        <button onclick="openAddModal('expense')" class="bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 hover:border-red-900/50 rounded-2xl text-red-500 font-bold text-sm flex items-center justify-center gap-3 transition-all group">
+                            <div class="w-8 h-8 rounded-full bg-red-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <i class="ph-bold ph-minus"></i>
+                            </div>
+                            REGISTRAR GASTO
+                        </button>
+                    </div>
                 </div>
 
-                <!-- SIMULADOR DE INGRESO (NUEVO) -->
-                <div id="simulation-container" class="hidden bg-neutral-900 border border-blue-900/50 rounded-xl p-6">
-                    <div class="flex items-center gap-2 mb-4">
-                        <i class="ph-fill ph-magic-wand text-blue-400"></i>
-                        <h3 class="text-sm font-bold text-blue-100 uppercase">Simulación de Ingreso</h3>
+                <!-- SIMULADOR DE INGRESO (MEJORADO) -->
+                <div id="simulation-container" class="hidden bg-gradient-to-r from-blue-950/40 to-neutral-900 border border-blue-900/50 rounded-2xl p-6 relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-blue-900/20 z-0">
+                         <i class="ph-fill ph-crystal-ball text-9xl"></i>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-3">
-                            <div>
-                                <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">¿Cuándo recibes dinero?</label>
-                                <input type="date" id="sim-date" class="w-full bg-neutral-950 border border-neutral-800 p-2 rounded text-sm text-white" onchange="runSimulation()">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="bg-blue-500/20 p-1.5 rounded-lg">
+                                <i class="ph-fill ph-magic-wand text-blue-400"></i>
                             </div>
-                            <div>
-                                <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">¿Cuánto dinero?</label>
-                                <input type="number" id="sim-amount" class="w-full bg-neutral-950 border border-neutral-800 p-2 rounded text-sm text-white" placeholder="0.00" oninput="runSimulation()">
-                            </div>
+                            <h3 class="text-sm font-bold text-blue-100 uppercase tracking-wide">Simulador de Futuro</h3>
                         </div>
                         
-                        <div class="bg-neutral-950 rounded p-4 flex flex-col justify-center">
-                            <p class="text-xs text-neutral-500 mb-1">Con ese dinero futuro, hoy podrías gastar:</p>
-                            <p class="text-2xl font-bold text-blue-400" id="sim-result">$0.00</p>
-                            <p class="text-[10px] text-neutral-600 mt-2" id="sim-details">Ingresa datos para calcular...</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-[10px] uppercase font-bold text-blue-300/70 block mb-1">Fecha Futura</label>
+                                        <input type="date" id="sim-date" class="w-full bg-neutral-950/50 border border-blue-900/30 p-2.5 rounded-lg text-sm text-white focus:border-blue-500 transition-colors" onchange="runSimulation()">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] uppercase font-bold text-blue-300/70 block mb-1">Monto a Recibir</label>
+                                        <input type="number" id="sim-amount" class="w-full bg-neutral-950/50 border border-blue-900/30 p-2.5 rounded-lg text-sm text-white focus:border-blue-500 transition-colors" placeholder="0.00" oninput="runSimulation()">
+                                    </div>
+                                </div>
+                                <p class="text-[10px] text-blue-300/50 leading-tight">
+                                    * Este cálculo simula los gastos fijos día a día hasta la fecha seleccionada para darte un presupuesto real.
+                                </p>
+                            </div>
+                            
+                            <div class="bg-neutral-950/80 rounded-xl p-4 flex flex-col justify-center border border-blue-900/30">
+                                <p class="text-xs text-blue-300/70 mb-1">Nuevo límite diario proyectado:</p>
+                                <p class="text-3xl font-bold text-blue-400 tracking-tight" id="sim-result">$0.00</p>
+                                <p class="text-[10px] text-neutral-400 mt-2 font-mono" id="sim-details">Esperando datos...</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Botones de Acción Rápida -->
-                <div class="grid grid-cols-2 gap-4">
-                    <button onclick="openAddModal('income')" class="bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 hover:border-green-900 h-12 rounded-lg text-green-500 font-bold text-sm flex items-center justify-center gap-2 transition-colors">
-                        <i class="ph-bold ph-arrow-down-left"></i> INGRESO
-                    </button>
-                    <button onclick="openAddModal('expense')" class="bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 hover:border-red-900 h-12 rounded-lg text-red-500 font-bold text-sm flex items-center justify-center gap-2 transition-colors">
-                        <i class="ph-bold ph-minus"></i> GASTO
-                    </button>
                 </div>
 
                 <!-- Lista Reciente -->
                 <div>
-                     <div class="flex justify-between items-center mb-4">
+                     <div class="flex justify-between items-center mb-4 px-1">
                          <h3 class="text-xs font-bold text-neutral-500 uppercase tracking-widest">Actividad Reciente</h3>
-                         <button onclick="switchTab('history')" class="text-xs font-bold text-blue-500 hover:underline">Ver Todo</button>
+                         <button onclick="switchTab('history')" class="text-xs font-bold text-white hover:text-neutral-300 transition-colors">Ver Todo <i class="ph-bold ph-arrow-right"></i></button>
                     </div>
-                    <div id="recent-list" class="space-y-2">
+                    <div id="recent-list" class="space-y-3">
                         <!-- Items se inyectan aquí -->
                     </div>
                 </div>
@@ -220,8 +242,8 @@
             </section>
 
             <!-- HISTORIAL -->
-            <section id="view-history" class="hidden space-y-4">
-                <div class="flex items-center justify-between">
+            <section id="view-history" class="hidden space-y-4 animate-fade-in">
+                <div class="flex items-center justify-between sticky top-0 bg-[#0a0a0a] z-20 py-2 border-b border-neutral-800">
                     <h2 class="text-xl font-bold text-white">Historial</h2>
                      <div class="flex gap-2">
                         <button onclick="filterHistory('all')" class="filter-btn active chip" data-filter="all">Todos</button>
@@ -229,50 +251,46 @@
                         <button onclick="filterHistory('expense')" class="filter-btn chip" data-filter="expense">Gastos</button>
                     </div>
                 </div>
-                <div id="full-history-list" class="space-y-4"></div>
+                <div id="full-history-list" class="space-y-6 pb-6"></div>
             </section>
 
-            <!-- PAGOS Y DEUDAS (Fusionado) -->
-            <section id="view-payments" class="hidden space-y-8">
+            <!-- PAGOS Y DEUDAS -->
+            <section id="view-payments" class="hidden space-y-8 animate-fade-in">
                 
                 <!-- Sección Fijos -->
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-xl font-bold text-white">Pagos Fijos</h2>
-                        <button onclick="openModal('fixed-modal')" class="bg-white text-black px-3 py-1.5 rounded font-bold text-xs flex items-center gap-2">
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="ph-bold ph-calendar-check"></i> Pagos Fijos</h2>
+                        <button onclick="openModal('fixed-modal')" class="bg-white hover:bg-neutral-200 text-black px-4 py-2 rounded-full font-bold text-xs flex items-center gap-2 transition-colors">
                             <i class="ph-bold ph-plus"></i> Nuevo
                         </button>
                     </div>
-                    <div class="bg-blue-900/20 border border-blue-900 p-3 rounded text-xs text-blue-200">
-                        <div class="flex items-start gap-2">
-                            <i class="ph-fill ph-info mt-0.5"></i>
-                            <div>
-                                Marca con <i class="ph-bold ph-check"></i> los pagados este mes.<br>
-                                Usa <i class="ph-bold ph-eye"></i> para incluir/excluir del plan diario.
-                            </div>
+                    <div class="bg-purple-900/20 border border-purple-900/50 p-4 rounded-xl text-xs text-purple-200 flex gap-3">
+                        <i class="ph-fill ph-info text-lg shrink-0"></i>
+                        <div>
+                            Estos pagos se restan automáticamente de tu "Plan del Día" conforme se acerca la fecha de pago, asegurando que no gastes ese dinero.
                         </div>
                     </div>
                     <div id="fixed-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
                 </div>
 
-                <!-- Separador -->
                 <div class="border-t border-neutral-800"></div>
 
                 <!-- Sección Préstamos -->
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-xl font-bold text-white">Préstamos</h2>
-                        <button onclick="openLoanModal()" class="bg-white text-black px-3 py-1.5 rounded font-bold text-xs flex items-center gap-2">
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="ph-bold ph-handshake"></i> Préstamos</h2>
+                        <button onclick="openLoanModal()" class="bg-white hover:bg-neutral-200 text-black px-4 py-2 rounded-full font-bold text-xs flex items-center gap-2 transition-colors">
                             <i class="ph-bold ph-plus"></i> Nuevo
                         </button>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-lg">
+                        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-xl">
                             <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Me deben</p>
                             <p class="text-lg font-bold text-green-500" id="loans-owed-to-me">$0.00</p>
                         </div>
-                        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-lg">
+                        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-xl">
                             <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Debo</p>
                             <p class="text-lg font-bold text-red-500" id="loans-i-owe">$0.00</p>
                         </div>
@@ -283,162 +301,178 @@
             </section>
 
             <!-- AJUSTES -->
-            <section id="view-settings" class="hidden space-y-6">
+            <section id="view-settings" class="hidden space-y-6 animate-fade-in">
                 <div class="flex justify-between items-center">
                     <h2 class="text-xl font-bold text-white">Configuración</h2>
-                    <!-- Botón de Ayuda (NUEVO) -->
-                    <button onclick="window.open('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', '_blank')" class="bg-neutral-800 hover:bg-neutral-700 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 transition-colors">
-                        <i class="ph-bold ph-question"></i> AYUDA
-                    </button>
                 </div>
                 
-                <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-xl">
+                <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl">
                     <div class="flex items-center gap-4 mb-6 pb-6 border-b border-neutral-800">
-                        <div class="w-10 h-10 bg-neutral-800 rounded-full flex items-center justify-center text-white">
-                            <i class="ph-bold ph-user"></i>
+                        <div class="w-12 h-12 bg-neutral-800 rounded-full flex items-center justify-center text-white border border-neutral-700">
+                            <i class="ph-bold ph-user text-xl"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-white" id="user-display-name">Usuario</h3>
+                            <h3 class="font-bold text-white text-lg" id="user-display-name">Usuario</h3>
                             <p class="text-xs text-neutral-500 font-mono" id="user-display-email">ID</p>
                         </div>
                     </div>
                     
-                    <button onclick="window.authApp.logout()" class="w-full py-2 border border-red-900 text-red-500 text-xs font-bold rounded hover:bg-red-900/10">
+                    <button onclick="window.authApp.logout()" class="w-full py-3 border border-red-900/50 text-red-500 text-xs font-bold rounded-lg hover:bg-red-900/10 transition-colors">
                         CERRAR SESIÓN
                     </button>
                 </div>
 
-                <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-xl space-y-4">
-                    <h3 class="font-bold text-white text-sm">Frecuencia de Cobro</h3>
+                <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl space-y-5">
+                    <h3 class="font-bold text-white text-sm flex items-center gap-2"><i class="ph-bold ph-calendar"></i> Frecuencia de Cobro</h3>
+                    <p class="text-xs text-neutral-500">Esto ayuda a calcular los días restantes en tu Plan del Día.</p>
                     
                     <div class="space-y-2">
-                        <label class="flex items-center gap-3 p-3 bg-neutral-950 border border-neutral-800 rounded cursor-pointer">
-                            <input type="radio" name="pay-freq" value="biweekly" class="accent-white" onchange="togglePaydayInput()">
+                        <label class="flex items-center gap-3 p-3 bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer hover:border-neutral-700 transition-colors">
+                            <input type="radio" name="pay-freq" value="biweekly" class="accent-white w-4 h-4" onchange="togglePaydayInput()">
                             <span class="text-sm text-neutral-300">Quincenal (15 y 30)</span>
                         </label>
-                        <label class="flex items-center gap-3 p-3 bg-neutral-950 border border-neutral-800 rounded cursor-pointer">
-                            <input type="radio" name="pay-freq" value="biweekly-custom" class="accent-white" onchange="togglePaydayInput()">
+                        <label class="flex items-center gap-3 p-3 bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer hover:border-neutral-700 transition-colors">
+                            <input type="radio" name="pay-freq" value="biweekly-custom" class="accent-white w-4 h-4" onchange="togglePaydayInput()">
                             <span class="text-sm text-neutral-300">Quincenal (Personalizado)</span>
                         </label>
-                        <label class="flex items-center gap-3 p-3 bg-neutral-950 border border-neutral-800 rounded cursor-pointer">
-                            <input type="radio" name="pay-freq" value="monthly" class="accent-white" onchange="togglePaydayInput()">
+                        <label class="flex items-center gap-3 p-3 bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer hover:border-neutral-700 transition-colors">
+                            <input type="radio" name="pay-freq" value="monthly" class="accent-white w-4 h-4" onchange="togglePaydayInput()">
                             <span class="text-sm text-neutral-300">Mensual</span>
                         </label>
                     </div>
 
-                    <div id="monthly-select-container" class="hidden">
+                    <div id="monthly-select-container" class="hidden animate-fade-in">
                         <label class="text-[10px] text-neutral-500 font-bold uppercase block mb-1">Día de pago</label>
-                        <select id="payday-select" class="w-full bg-neutral-950 border border-neutral-800 p-2 rounded text-sm text-white"></select>
+                        <select id="payday-select" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors"></select>
                     </div>
 
-                    <div id="biweekly-custom-container" class="hidden grid grid-cols-2 gap-4">
+                    <div id="biweekly-custom-container" class="hidden grid grid-cols-2 gap-4 animate-fade-in">
                         <div>
                             <label class="text-[10px] text-neutral-500 font-bold uppercase block mb-1">Día 1</label>
-                            <select id="payday-1-select" class="w-full bg-neutral-950 border border-neutral-800 p-2 rounded text-sm text-white"></select>
+                            <select id="payday-1-select" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors"></select>
                         </div>
                         <div>
                             <label class="text-[10px] text-neutral-500 font-bold uppercase block mb-1">Día 2</label>
-                            <select id="payday-2-select" class="w-full bg-neutral-950 border border-neutral-800 p-2 rounded text-sm text-white"></select>
+                            <select id="payday-2-select" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors"></select>
                         </div>
                     </div>
                     
-                    <button onclick="saveSettings()" class="w-full bg-white text-black py-2 rounded font-bold text-xs hover:bg-neutral-200 mt-2">GUARDAR CAMBIOS</button>
+                    <button onclick="saveSettings()" class="w-full bg-white text-black py-3 rounded-lg font-bold text-xs hover:bg-neutral-200 mt-2 shadow-lg shadow-white/10 transition-colors">GUARDAR CONFIGURACIÓN</button>
                 </div>
                 
-                 <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-xl space-y-4">
-                     <h3 class="font-bold text-white text-sm">Extras</h3>
-                      <label class="flex items-center justify-between cursor-pointer">
-                        <span class="text-sm text-neutral-300">Modo "Ahorro Forzoso" (-10%)</span>
+                 <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl space-y-4">
+                      <h3 class="font-bold text-white text-sm flex items-center gap-2"><i class="ph-bold ph-faders"></i> Extras</h3>
+                      <label class="flex items-center justify-between cursor-pointer p-2 hover:bg-neutral-800 rounded-lg transition-colors">
+                        <div>
+                             <span class="text-sm text-neutral-300 font-bold">Modo "Ahorro Forzoso"</span>
+                             <p class="text-[10px] text-neutral-500">Oculta el 10% de tu saldo real.</p>
+                        </div>
                         <input type="checkbox" id="toggle-forced-savings" class="accent-purple-500 w-5 h-5" onchange="saveSettings()">
                     </label>
-                    <div class="border-t border-neutral-800 pt-2"></div>
-                    <!-- Toggle Simulador (NUEVO) -->
-                    <label class="flex items-center justify-between cursor-pointer">
-                        <span class="text-sm text-neutral-300">Habilitar Simulador de Ingreso</span>
+                    <div class="border-t border-neutral-800"></div>
+                    <label class="flex items-center justify-between cursor-pointer p-2 hover:bg-neutral-800 rounded-lg transition-colors">
+                        <div>
+                            <span class="text-sm text-neutral-300 font-bold">Habilitar Simulador</span>
+                            <p class="text-[10px] text-neutral-500">Calculadora para ingresos futuros.</p>
+                        </div>
                         <input type="checkbox" id="toggle-simulation" class="accent-blue-500 w-5 h-5" onchange="saveSettings()">
                     </label>
                  </div>
 
-                <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-xl">
-                    <h3 class="font-bold text-white text-sm mb-4">Datos</h3>
-                    <div class="flex gap-2">
-                        <button onclick="exportData()" class="flex-1 bg-neutral-950 border border-neutral-800 py-3 rounded text-xs font-bold text-neutral-400 hover:text-white">Backup JSON</button>
-                        <button onclick="document.getElementById('import-file').click()" class="flex-1 bg-neutral-950 border border-neutral-800 py-3 rounded text-xs font-bold text-neutral-400 hover:text-white">Restaurar</button>
+                <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl">
+                    <h3 class="font-bold text-white text-sm mb-4">Gestión de Datos</h3>
+                    <div class="flex gap-3">
+                        <button onclick="exportData()" class="flex-1 bg-neutral-950 border border-neutral-800 py-3 rounded-lg text-xs font-bold text-neutral-400 hover:text-white transition-colors border-dashed">Descargar JSON</button>
+                        <button onclick="document.getElementById('import-file').click()" class="flex-1 bg-neutral-950 border border-neutral-800 py-3 rounded-lg text-xs font-bold text-neutral-400 hover:text-white transition-colors border-dashed">Restaurar JSON</button>
                         <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
                     </div>
-                    <button onclick="resetApp()" class="w-full mt-4 text-red-500 text-[10px] font-bold uppercase hover:underline">Eliminar todo</button>
+                    <button onclick="resetApp()" class="w-full mt-6 text-red-500 text-[10px] font-bold uppercase hover:text-red-400 transition-colors">Eliminar todos los datos y empezar de cero</button>
                 </div>
             </section>
         </div>
     </main>
 
-    <!-- Barra Inferior Móvil (Simple) -->
-    <nav class="md:hidden fixed bottom-0 w-full bg-neutral-900 border-t border-neutral-800 h-16 grid grid-cols-5 z-40" id="bottom-nav">
-        <button onclick="switchTab('dashboard')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white" id="nav-dashboard">
-            <i class="ph-fill ph-squares-four text-xl mb-1"></i>
+    <!-- Barra Inferior Móvil -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-neutral-800 h-20 grid grid-cols-5 z-40 pb-4 px-2" id="bottom-nav">
+        <button onclick="switchTab('dashboard')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white transition-colors group" id="nav-dashboard">
+            <div class="p-1 rounded-full group-hover:bg-neutral-800 transition-colors mb-1">
+                <i class="ph-fill ph-squares-four text-xl"></i>
+            </div>
+            <span class="text-[9px] font-bold">Panel</span>
         </button>
-        <button onclick="switchTab('history')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white" id="nav-history">
-            <i class="ph-fill ph-list-dashes text-xl mb-1"></i>
+        <button onclick="switchTab('history')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white transition-colors group" id="nav-history">
+            <div class="p-1 rounded-full group-hover:bg-neutral-800 transition-colors mb-1">
+                 <i class="ph-fill ph-list-dashes text-xl"></i>
+            </div>
+            <span class="text-[9px] font-bold">Historial</span>
         </button>
         
-        <!-- Botón Central Flotante (Más simple) -->
-        <div class="relative -top-5 flex justify-center pointer-events-none">
-            <button onclick="openAddModal('expense')" class="pointer-events-auto w-12 h-12 bg-white rounded-full flex items-center justify-center text-black shadow-lg">
-                <i class="ph-bold ph-plus text-xl"></i>
+        <!-- Botón Central Flotante -->
+        <div class="relative -top-6 flex justify-center pointer-events-none">
+            <button onclick="openAddModal('expense')" class="pointer-events-auto w-14 h-14 bg-white rounded-full flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 transition-transform">
+                <i class="ph-bold ph-plus text-2xl"></i>
             </button>
         </div>
 
-        <button onclick="switchTab('payments')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white" id="nav-payments">
-            <i class="ph-fill ph-receipt text-xl mb-1"></i>
+        <button onclick="switchTab('payments')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white transition-colors group" id="nav-payments">
+             <div class="p-1 rounded-full group-hover:bg-neutral-800 transition-colors mb-1">
+                <i class="ph-fill ph-receipt text-xl"></i>
+            </div>
+            <span class="text-[9px] font-bold">Pagos</span>
         </button>
-        <button onclick="switchTab('settings')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white" id="nav-settings">
-            <i class="ph-fill ph-gear text-xl mb-1"></i>
+        <button onclick="switchTab('settings')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white transition-colors group" id="nav-settings">
+             <div class="p-1 rounded-full group-hover:bg-neutral-800 transition-colors mb-1">
+                <i class="ph-fill ph-gear text-xl"></i>
+            </div>
+            <span class="text-[9px] font-bold">Ajustes</span>
         </button>
     </nav>
 
-    <!-- MODALES (Limpios) -->
+    <!-- MODALES -->
     
     <!-- Transacción -->
     <div id="transaction-modal" class="modal-overlay">
-        <div class="modal-content">
-             <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-white" id="modal-tx-title">Nuevo Movimiento</h3>
-                <button onclick="closeModal('transaction-modal')" class="text-neutral-500 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+        <div class="modal-content animate-scale-in">
+             <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-white text-lg" id="modal-tx-title">Nuevo Movimiento</h3>
+                <button onclick="closeModal('transaction-modal')" class="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
              </div>
              
              <form id="transaction-form" onsubmit="addTransaction(event)">
-                 <!-- Hidden inputs -->
                 <div class="hidden">
                       <input type="radio" name="type" value="expense" id="radio-expense" checked>
                       <input type="radio" name="type" value="income" id="radio-income">
                       <input type="hidden" id="t-fixed-id">
                 </div>
                 
-                <div class="mb-6">
-                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Monto</label>
-                    <input type="number" id="t-amount" step="0.01" class="w-full bg-transparent border-b border-neutral-700 text-3xl font-bold text-white py-2 placeholder-neutral-700 text-center focus:border-white transition-colors" placeholder="0.00" required>
+                <div class="mb-8 text-center">
+                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-2">Monto</label>
+                    <div class="relative inline-block">
+                        <span class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl font-bold text-neutral-600">$</span>
+                        <input type="number" id="t-amount" step="0.01" class="w-full bg-transparent border-b-2 border-neutral-800 text-4xl font-bold text-white py-2 pl-6 pr-2 text-center focus:border-white transition-colors placeholder-neutral-800" placeholder="0.00" required>
+                    </div>
                 </div>
 
-                <div class="mb-4">
-                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-2">Categoría</label>
-                    <div class="flex flex-wrap gap-2" id="category-chips"></div>
+                <div class="mb-6">
+                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-3">Categoría</label>
+                    <div class="flex flex-wrap gap-2 justify-center" id="category-chips"></div>
                     <input type="hidden" id="t-category" required>
                 </div>
                 
-                <div class="space-y-3 mb-6">
+                <div class="space-y-4 mb-8 bg-neutral-900/50 p-4 rounded-xl border border-neutral-800">
                     <div>
                         <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Concepto</label>
-                        <input type="text" id="t-title" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white" placeholder="Descripción">
+                        <input type="text" id="t-title" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors" placeholder="Descripción corta...">
                     </div>
                     <div>
                         <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Fecha</label>
-                        <input type="datetime-local" id="t-date" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white" required>
+                        <input type="datetime-local" id="t-date" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors" required>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
-                    <button type="button" id="btn-delete-tx" onclick="deleteCurrentTransaction()" class="hidden py-3 border border-red-900 text-red-500 font-bold text-xs rounded hover:bg-red-900/10">ELIMINAR</button>
-                    <button type="submit" id="btn-save-tx" class="col-span-2 py-3 bg-white text-black font-bold text-xs rounded hover:bg-neutral-200">GUARDAR</button>
+                    <button type="button" id="btn-delete-tx" onclick="deleteCurrentTransaction()" class="hidden py-3 border border-red-900/50 text-red-500 font-bold text-xs rounded-lg hover:bg-red-900/20 transition-colors">ELIMINAR</button>
+                    <button type="submit" id="btn-save-tx" class="col-span-2 py-3 bg-white text-black font-bold text-xs rounded-lg hover:bg-neutral-200 shadow-lg shadow-white/10 transition-colors">GUARDAR</button>
                 </div>
              </form>
         </div>
@@ -446,89 +480,91 @@
 
     <!-- Ajustar Saldo -->
     <div id="adjust-modal" class="modal-overlay">
-        <div class="modal-content">
+        <div class="modal-content animate-scale-in">
              <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-white">Ajustar Saldo Real</h3>
-                <button onclick="closeModal('adjust-modal')" class="text-neutral-500 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+                <button onclick="closeModal('adjust-modal')" class="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
              </div>
-             <div class="bg-neutral-900 p-3 rounded mb-4 text-center">
-                 <p class="text-xs text-neutral-500 uppercase">Sistema dice:</p>
-                 <p class="text-xl font-bold text-white" id="adjust-current-display">$0.00</p>
+             <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-xl mb-6 text-center">
+                 <p class="text-xs text-neutral-500 uppercase font-bold mb-1">El sistema calcula:</p>
+                 <p class="text-2xl font-bold text-white tracking-tight" id="adjust-current-display">$0.00</p>
              </div>
              <form onsubmit="submitAdjustment(event)">
                 <div class="mb-6">
-                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">¿Cuánto tienes realmente?</label>
-                    <input type="number" id="adjust-amount" step="0.01" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-xl font-bold text-white text-center" placeholder="0.00" required>
+                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-2">¿Cuánto tienes realmente?</label>
+                    <input type="number" id="adjust-amount" step="0.01" class="w-full bg-neutral-950 border border-neutral-800 p-4 rounded-xl text-3xl font-bold text-white text-center focus:border-blue-500 transition-colors" placeholder="0.00" required>
+                    <p class="text-[10px] text-neutral-500 mt-2 text-center">Se creará un movimiento de "Ajuste" automáticamente.</p>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded font-bold text-xs hover:bg-blue-500">CORREGIR</button>
+                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold text-xs hover:bg-blue-500 shadow-lg shadow-blue-900/20 transition-colors">CORREGIR SALDO</button>
              </form>
         </div>
     </div>
 
     <!-- Modal Fijo -->
     <div id="fixed-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="flex justify-between items-center mb-4">
+        <div class="modal-content animate-scale-in">
+            <div class="flex justify-between items-center mb-6">
                 <h3 class="font-bold text-white">Nuevo Pago Fijo</h3>
-                <button onclick="closeModal('fixed-modal')" class="text-neutral-500 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+                <button onclick="closeModal('fixed-modal')" class="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
              </div>
-             <form id="fixed-form" onsubmit="addFixed(event)" class="space-y-4">
+             <form id="fixed-form" onsubmit="addFixed(event)" class="space-y-5">
                  <div>
-                      <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Nombre</label>
-                      <input type="text" id="f-title" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white" required>
+                      <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Nombre del Servicio</label>
+                      <input type="text" id="f-title" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors" placeholder="Ej. Netflix, Renta..." required>
                  </div>
                  <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Monto</label>
-                        <input type="number" id="f-amount" step="0.01" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white" required>
+                        <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Monto Mensual</label>
+                        <input type="number" id="f-amount" step="0.01" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors" placeholder="0.00" required>
                       </div>
                       <div>
                         <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Día del mes</label>
-                        <select id="f-day" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white"></select>
+                        <select id="f-day" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors"></select>
                       </div>
                  </div>
-                 <label class="flex items-center gap-2 cursor-pointer pt-2">
+                 <label class="flex items-center gap-3 cursor-pointer p-3 bg-neutral-900 border border-neutral-800 rounded-lg">
                     <input type="checkbox" id="f-include" class="accent-white w-4 h-4" checked>
-                    <span class="text-xs text-neutral-400 font-bold">Considerar en Plan Diario</span>
+                    <span class="text-xs text-neutral-300 font-bold">Descontar del Plan Diario</span>
                  </label>
-                 <button type="submit" class="w-full bg-white text-black py-3 rounded font-bold text-xs hover:bg-neutral-200">GUARDAR</button>
+                 <button type="submit" class="w-full bg-white text-black py-3 rounded-lg font-bold text-xs hover:bg-neutral-200 shadow-lg shadow-white/10 transition-colors">GUARDAR PAGO</button>
              </form>
         </div>
     </div>
 
     <!-- Modal Préstamos -->
     <div id="loans-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="flex justify-between items-center mb-4">
+        <div class="modal-content animate-scale-in">
+            <div class="flex justify-between items-center mb-6">
                 <h3 class="font-bold text-white">Nuevo Préstamo</h3>
-                <button onclick="closeModal('loans-modal')" class="text-neutral-500 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+                <button onclick="closeModal('loans-modal')" class="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
             </div>
             <form onsubmit="saveLoan(event)" class="space-y-4">
-                <div class="flex bg-neutral-900 rounded p-1">
-                    <button type="button" onclick="setLoanType('lent')" id="btn-lent" class="flex-1 py-2 text-xs font-bold rounded bg-neutral-800 text-green-500">ME DEBEN</button>
-                    <button type="button" onclick="setLoanType('borrowed')" id="btn-borrowed" class="flex-1 py-2 text-xs font-bold text-neutral-500">DEBO</button>
+                <div class="flex bg-neutral-900 rounded-lg p-1 border border-neutral-800">
+                    <button type="button" onclick="setLoanType('lent')" id="btn-lent" class="flex-1 py-2 text-xs font-bold rounded-md bg-neutral-800 text-green-500 transition-all">ME DEBEN</button>
+                    <button type="button" onclick="setLoanType('borrowed')" id="btn-borrowed" class="flex-1 py-2 text-xs font-bold text-neutral-500 transition-all">DEBO</button>
                 </div>
                 <input type="hidden" id="loan-type" value="lent">
                 
                 <div>
                       <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Persona</label>
-                      <input type="text" id="loan-person" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white" required>
+                      <input type="text" id="loan-person" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors" required>
                  </div>
                  <div>
                     <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Monto</label>
-                    <input type="number" id="loan-amount" step="0.01" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white" required>
+                    <input type="number" id="loan-amount" step="0.01" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors" required>
                  </div>
                  <div>
                     <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Fecha Límite/Registro</label>
-                    <input type="date" id="loan-date" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded text-sm text-white" required>
+                    <input type="date" id="loan-date" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors" required>
                 </div>
-                <button type="submit" class="w-full bg-white text-black py-3 rounded font-bold text-xs hover:bg-neutral-200">GUARDAR</button>
+                <button type="submit" class="w-full bg-white text-black py-3 rounded-lg font-bold text-xs hover:bg-neutral-200 shadow-lg shadow-white/10 transition-colors">GUARDAR</button>
             </form>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-white text-black px-4 py-2 rounded shadow-xl z-[200] opacity-0 pointer-events-none font-bold text-xs">
+    <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-white text-black px-6 py-3 rounded-full shadow-[0_10px_30px_rgba(255,255,255,0.2)] z-[200] opacity-0 pointer-events-none font-bold text-xs flex items-center gap-2">
+        <i class="ph-bold ph-check-circle text-lg text-green-600"></i>
         <span id="toast-msg">Mensaje</span>
     </div>
 
@@ -577,12 +613,12 @@
                 
                 if (this.isRegistering) {
                     nameField.classList.remove('hidden');
-                    btnReg.className = "flex-1 py-2 text-xs font-bold rounded bg-neutral-700 text-white";
-                    btnLogin.className = "flex-1 py-2 text-xs font-bold text-neutral-400";
+                    btnReg.className = "flex-1 py-2 text-xs font-bold rounded bg-neutral-700 text-white shadow-lg";
+                    btnLogin.className = "flex-1 py-2 text-xs font-bold text-neutral-400 hover:text-white";
                 } else {
                     nameField.classList.add('hidden');
-                    btnLogin.className = "flex-1 py-2 text-xs font-bold rounded bg-neutral-700 text-white";
-                    btnReg.className = "flex-1 py-2 text-xs font-bold text-neutral-400";
+                    btnLogin.className = "flex-1 py-2 text-xs font-bold rounded bg-neutral-700 text-white shadow-lg";
+                    btnReg.className = "flex-1 py-2 text-xs font-bold text-neutral-400 hover:text-white";
                 }
             },
             async handleAuthSubmit() {
@@ -596,7 +632,7 @@
                 
                 const finalId = id.includes('@') ? id : `${id}@godsplan.site`;
                 btn.disabled = true;
-                btn.innerHTML = '...';
+                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i>';
 
                 try {
                     if (this.isRegistering) {
@@ -719,13 +755,6 @@
             } catch(e) { console.error(e); }
         };
 
-        window.deleteTransaction = async function(id) {
-            if(confirm('¿Eliminar?')) {
-                await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', id));
-                showToast('Eliminado');
-            }
-        };
-        
         window.deleteCurrentTransaction = async function() {
             if(!editingTransactionId) return;
             if(confirm('¿Eliminar permanentemente?')) {
@@ -803,10 +832,10 @@
             document.getElementById('loan-type').value = type;
 
             if (type === 'lent') {
-                btnLent.className = "flex-1 py-2 text-xs font-bold rounded bg-neutral-800 text-green-500 transition-colors";
+                btnLent.className = "flex-1 py-2 text-xs font-bold rounded-md bg-neutral-800 text-green-500 transition-colors border border-green-900/30";
                 btnBorrowed.className = "flex-1 py-2 text-xs font-bold text-neutral-500 transition-colors";
             } else {
-                btnBorrowed.className = "flex-1 py-2 text-xs font-bold rounded bg-neutral-800 text-red-500 transition-colors";
+                btnBorrowed.className = "flex-1 py-2 text-xs font-bold rounded-md bg-neutral-800 text-red-500 transition-colors border border-red-900/30";
                 btnLent.className = "flex-1 py-2 text-xs font-bold text-neutral-500 transition-colors";
             }
         };
@@ -849,7 +878,7 @@
         };
 
         window.resetApp = async function() {
-            if(confirm('¿BORRAR TODO?')) {
+            if(confirm('¿ESTÁS SEGURO? ESTO BORRARÁ TODO PERMANENTEMENTE.')) {
                 const txs = window.appData.transactions;
                 const fxs = window.appData.fixed;
                 const loans = window.appData.loans;
@@ -887,7 +916,7 @@
             await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), {
                 type: diff > 0 ? 'income' : 'expense',
                 amount: Math.abs(diff),
-                title: 'Ajuste de Saldo',
+                title: 'Ajuste Manual de Saldo',
                 category: 'Ajuste',
                 date: new Date().toISOString().split('T')[0],
                 createdAt: new Date().toISOString()
@@ -900,7 +929,7 @@
             const data = { transactions: window.appData.transactions, fixed: window.appData.fixed, loans: window.appData.loans, settings: window.appData.settings };
             const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = "backup.json"; a.click();
+            const a = document.createElement('a'); a.href = url; a.download = "godsplan_backup.json"; a.click();
         }
 
         window.importData = function(input) {
@@ -912,7 +941,7 @@
                 if(json.transactions) json.transactions.forEach(t => addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), t));
                 if(json.fixed) json.fixed.forEach(f => addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'fixed'), f));
                 if(json.loans) json.loans.forEach(l => addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'loans'), l));
-                showToast('Importado');
+                showToast('Datos Importados');
             };
             reader.readAsText(file);
         }
@@ -933,6 +962,8 @@
                 { id: 'Ocio', icon: 'ph-film-strip' },
                 { id: 'Salud', icon: 'ph-heartbeat' },
                 { id: 'Servicios', icon: 'ph-lightning' },
+                { id: 'Educación', icon: 'ph-graduation-cap' },
+                { id: 'Ropa', icon: 'ph-t-shirt' },
                 { id: 'Otros', icon: 'ph-dots-three-circle' },
                 { id: 'Ajuste', icon: 'ph-scales' }
             ],
@@ -940,6 +971,7 @@
                 { id: 'Nómina', icon: 'ph-money' },
                 { id: 'Venta', icon: 'ph-tag' },
                 { id: 'Regalo', icon: 'ph-gift' },
+                { id: 'Freelance', icon: 'ph-laptop' },
                 { id: 'Ajuste', icon: 'ph-scales' },
                 { id: 'Otro', icon: 'ph-dots-three-circle' }
             ]
@@ -997,7 +1029,7 @@
 
             const showInc = incM;
             const showExp = expM;
-            let bal = showInc - showExp;
+            let bal = totalBalanceReal; 
 
             if (window.appData.settings.forcedSavings) {
                 bal = bal * 0.90; 
@@ -1007,9 +1039,24 @@
             document.getElementById('total-income').textContent = formatCurrency(showInc);
             document.getElementById('total-expense').textContent = formatCurrency(showExp);
 
-            const percent = showInc > 0 ? Math.min((showExp / showInc) * 100, 100) : (showExp > 0 ? 100 : 0);
+            // Progress bar calc using Total Monthly Income vs Expense
+            // Using logic: If Income is 0, bar is full if expense > 0.
+            const totalMonthlyIncome = incM;
+            const totalMonthlyExpense = expM;
+            
+            let percent = 0;
+            if (totalMonthlyIncome > 0) {
+                 percent = Math.min((totalMonthlyExpense / totalMonthlyIncome) * 100, 100);
+            } else if (totalMonthlyExpense > 0) {
+                percent = 100;
+            }
+            
             document.getElementById('balance-progress').style.width = `${percent}%`;
             document.getElementById('progress-percent').textContent = `${Math.round(percent)}%`;
+            
+            // Color logic for bar
+            const bar = document.getElementById('balance-progress');
+            bar.className = `h-full w-0 transition-all duration-700 ease-out shadow-[0_0_10px_rgba(255,255,255,0.5)] ${percent > 90 ? 'bg-red-500' : (percent > 60 ? 'bg-yellow-400' : 'bg-white')}`;
 
             const listEl = document.getElementById('recent-list');
             const displayTx = monthlyTx;
@@ -1017,7 +1064,7 @@
             displayTx.sort((a,b) => new Date(b.date) - new Date(a.date));
             
             if(displayTx.length === 0) {
-                listEl.innerHTML = '<div class="text-center text-neutral-600 text-xs py-4">Sin movimientos</div>';
+                listEl.innerHTML = '<div class="text-center text-neutral-600 text-xs py-4 italic">Sin movimientos este mes</div>';
             } else {
                 const listHTML = displayTx.slice(0, 5).map(t => createTxHTML(t)).join('');
                 listEl.innerHTML = listHTML;
@@ -1025,7 +1072,6 @@
             
             updatePaydayInfo(totalBalanceReal);
 
-            // Actualizar visibilidad del simulador
             const simContainer = document.getElementById('simulation-container');
             if (window.appData.settings.simulationMode) {
                 simContainer.classList.remove('hidden');
@@ -1048,19 +1094,19 @@
             }
 
             return `
-            <div class="flex justify-between items-center p-3 rounded-lg bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 cursor-pointer" onclick="editTransaction('${t.id}')">
+            <div class="flex justify-between items-center p-3 rounded-xl bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 hover:border-neutral-700 cursor-pointer transition-all group" onclick="editTransaction('${t.id}')">
                 <div class="flex items-center gap-3 overflow-hidden flex-1">
-                    <div class="w-8 h-8 rounded bg-neutral-800 flex items-center justify-center text-neutral-400">
-                        <i class="ph-fill ${icon}"></i>
+                    <div class="w-9 h-9 rounded-lg bg-neutral-800 flex items-center justify-center text-neutral-400 border border-neutral-700 group-hover:border-neutral-600 group-hover:text-white transition-colors shrink-0">
+                        <i class="ph-fill ${icon} text-lg"></i>
                     </div>
-                    <div>
-                        <h4 class="font-bold text-neutral-300 text-xs truncate">${t.title}</h4>
-                        <p class="text-[10px] text-neutral-500 uppercase font-bold">
+                    <div class="min-w-0">
+                        <h4 class="font-bold text-neutral-300 text-xs truncate group-hover:text-white transition-colors">${t.title}</h4>
+                        <p class="text-[10px] text-neutral-500 uppercase font-bold truncate">
                             ${t.category} • ${dateDisplay}
                         </p>
                     </div>
                 </div>
-                <span class="font-bold text-sm ${isInc ? 'text-green-500' : 'text-neutral-200'}">
+                <span class="font-bold text-sm ${isInc ? 'text-green-500' : 'text-neutral-200'} ml-2">
                     ${isInc ? '+' : '-'}${formatCurrency(t.amount)}
                 </span>
             </div>
@@ -1078,7 +1124,7 @@
             if(filter !== 'all') txs = txs.filter(t => t.type === filter);
             
             if(txs.length === 0) {
-                list.innerHTML = '<div class="text-center text-neutral-600 py-4 text-xs">Sin registros</div>';
+                list.innerHTML = '<div class="text-center text-neutral-600 py-8 text-xs flex flex-col items-center gap-2"><i class="ph-bold ph-ghost text-2xl"></i><span>Sin registros aún</span></div>';
                 return;
             }
 
@@ -1100,11 +1146,14 @@
                 let label = dateObj.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
                 if(dateObj.getTime() === today.getTime()) label = "Hoy";
                 else if(dateObj.getTime() === yesterday.getTime()) label = "Ayer";
+                label = label.charAt(0).toUpperCase() + label.slice(1);
 
                 const txItemsHTML = grouped[date].map(t => createTxHTML(t)).join('');
                 
                 groupDiv.innerHTML = `
-                    <h3 class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mt-4 mb-2 pl-1">${label}</h3>
+                    <div class="sticky top-12 bg-[#0a0a0a]/95 backdrop-blur-sm z-10 py-1 mb-2 border-b border-neutral-800/50">
+                        <h3 class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest pl-1">${label}</h3>
+                    </div>
                     <div class="space-y-1">
                         ${txItemsHTML}
                     </div>
@@ -1113,16 +1162,10 @@
             });
         }
 
-        function filterHistory(type) {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`.filter-btn[data-filter="${type}"]`).classList.add('active');
-            renderHistory();
-        }
-
         function renderFixed() {
             const list = document.getElementById('fixed-list');
             if(window.appData.fixed.length === 0) {
-                list.innerHTML = '<div class="text-center text-neutral-600 py-4 col-span-full text-xs">Sin pagos fijos</div>';
+                list.innerHTML = '<div class="text-center text-neutral-600 py-4 col-span-full text-xs italic">No has configurado pagos fijos</div>';
                 return;
             }
 
@@ -1130,26 +1173,28 @@
                 const isPaid = isFixedPaidThisMonth(f.id);
                 const isIgnored = f.ignoreBudget;
                 
-                const bgClass = isPaid ? "bg-green-900/10 border-green-900" : "bg-neutral-900 border-neutral-800";
+                const bgClass = isPaid ? "bg-green-900/10 border-green-900/30" : "bg-neutral-900 border-neutral-800";
                 const textClass = isPaid ? "text-green-500" : (isIgnored ? "text-neutral-500 line-through" : "text-neutral-200");
                 
                 const eyeIcon = isIgnored ? 'ph-eye-slash' : 'ph-eye';
                 const eyeColor = isIgnored ? 'text-neutral-600' : 'text-blue-500';
                 
                 const actionBtn = isPaid 
-                    ? `<div class="w-8 h-8 rounded flex items-center justify-center text-green-500"><i class="ph-bold ph-check"></i></div>`
-                    : `<button onclick="payFixed('${f.id}')" class="w-8 h-8 rounded bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white"><i class="ph-bold ph-check"></i></button>`;
+                    ? `<div class="w-8 h-8 rounded-lg flex items-center justify-center text-green-500"><i class="ph-bold ph-check-circle text-xl"></i></div>`
+                    : `<button onclick="payFixed('${f.id}')" class="w-8 h-8 rounded-lg bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-700 transition-all"><i class="ph-bold ph-check"></i></button>`;
 
                 return `
-                <div class="${bgClass} border p-3 rounded-lg flex justify-between items-center">
+                <div class="${bgClass} border p-3 rounded-xl flex justify-between items-center transition-all">
                     <div>
-                        <p class="font-bold ${textClass} text-xs">${f.title}</p>
-                        <p class="text-[10px] text-neutral-500 font-bold uppercase">Día ${f.day} • ${formatCurrency(f.amount)}</p>
+                        <p class="font-bold ${textClass} text-xs mb-0.5">${f.title}</p>
+                        <p class="text-[10px] text-neutral-500 font-bold uppercase flex items-center gap-1">
+                             <i class="ph-bold ph-calendar-blank"></i> Día ${f.day} • ${formatCurrency(f.amount)}
+                        </p>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="toggleFixedIgnore('${f.id}', ${!!isIgnored})" class="w-8 h-8 rounded flex items-center justify-center ${eyeColor} hover:bg-neutral-800"><i class="ph-bold ${eyeIcon}"></i></button>
+                        <button onclick="toggleFixedIgnore('${f.id}', ${!!isIgnored})" class="w-8 h-8 rounded-lg flex items-center justify-center ${eyeColor} hover:bg-neutral-800 transition-colors"><i class="ph-bold ${eyeIcon}"></i></button>
                         ${actionBtn}
-                        <button onclick="deleteFixed('${f.id}')" class="w-8 h-8 rounded flex items-center justify-center text-neutral-600 hover:text-red-500"><i class="ph-bold ph-trash"></i></button>
+                        <button onclick="deleteFixed('${f.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-neutral-600 hover:text-red-500 hover:bg-neutral-800 transition-colors"><i class="ph-bold ph-trash"></i></button>
                     </div>
                 </div>
                 `;
@@ -1175,7 +1220,7 @@
             document.getElementById('loans-i-owe').textContent = formatCurrency(iOwe);
 
             if(loans.length === 0) {
-                list.innerHTML = '<div class="text-center text-neutral-600 py-4 col-span-full text-xs">Sin préstamos</div>';
+                list.innerHTML = '<div class="text-center text-neutral-600 py-4 col-span-full text-xs italic">Sin préstamos activos</div>';
                 return;
             }
 
@@ -1183,12 +1228,13 @@
                 const isLent = l.type === 'lent'; 
                 const icon = isLent ? 'ph-arrow-up-right' : 'ph-arrow-down-left';
                 const color = isLent ? 'text-green-500' : 'text-red-500';
+                const bgIcon = isLent ? 'bg-green-900/20' : 'bg-red-900/20';
 
                 return `
-                <div class="bg-neutral-900 border border-neutral-800 p-3 rounded-lg flex justify-between items-center">
+                <div class="bg-neutral-900 border border-neutral-800 p-3 rounded-xl flex justify-between items-center">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded bg-neutral-800 flex items-center justify-center ${color}">
-                            <i class="ph-bold ${icon}"></i>
+                        <div class="w-9 h-9 rounded-lg ${bgIcon} flex items-center justify-center ${color} shrink-0">
+                            <i class="ph-bold ${icon} text-lg"></i>
                         </div>
                         <div>
                             <p class="font-bold text-neutral-300 text-xs">${l.person}</p>
@@ -1197,13 +1243,52 @@
                     </div>
                      <div class="flex items-center gap-3">
                         <p class="font-bold ${color} text-xs">${formatCurrency(l.amount)}</p>
-                        <button onclick="deleteLoan('${l.id}')" class="text-neutral-600 hover:text-red-500"><i class="ph-bold ph-trash"></i></button>
+                        <button onclick="deleteLoan('${l.id}')" class="text-neutral-600 hover:text-red-500 transition-colors"><i class="ph-bold ph-trash"></i></button>
                     </div>
                 </div>
                 `;
             }).join('');
 
             list.innerHTML = html;
+        }
+
+        /**
+         * LÓGICA CORE: Calcular gastos fijos pendientes
+         * Recorre día por día desde mañana hasta la fecha objetivo
+         * para detectar CADA instancia de pago fijo, sin importar el mes.
+         */
+        function getPendingFixedAmount(targetDate) {
+            let pending = 0;
+            let cursor = new Date();
+            cursor.setHours(0,0,0,0);
+            cursor.setDate(cursor.getDate() + 1); // Empezamos a contar desde mañana
+
+            const end = new Date(targetDate);
+            end.setHours(0,0,0,0);
+
+            // Bucle día por día
+            while (cursor <= end) {
+                const dayNum = cursor.getDate();
+                const isCurrentMonth = (cursor.getMonth() === new Date().getMonth() && cursor.getFullYear() === new Date().getFullYear());
+
+                window.appData.fixed.forEach(f => {
+                    if (f.ignoreBudget) return;
+                    
+                    // Si el día del pago fijo coincide con el día del cursor
+                    if (parseInt(f.day) === dayNum) {
+                        // Si es este mes Y ya está pagado, no lo sumamos.
+                        // Si es otro mes, asumimos que NO está pagado (a menos que tengamos lógica compleja de historial futuro)
+                        if (isCurrentMonth && isFixedPaidThisMonth(f.id)) {
+                            return; 
+                        }
+                        // En cualquier otro caso (otro mes, o este mes no pagado), suma.
+                        pending += parseFloat(f.amount);
+                    }
+                });
+
+                cursor.setDate(cursor.getDate() + 1);
+            }
+            return pending;
         }
 
         function updatePaydayInfo(totalBalance) {
@@ -1226,6 +1311,7 @@
             if (!nextDate) return;
 
             const today = new Date(); today.setHours(0,0,0,0);
+            // Días restantes (incluyendo hoy para el presupuesto)
             const diff = Math.ceil((nextDate - today) / (1000 * 60 * 60 * 24));
             
             badge.textContent = diff <= 0 ? "Hoy Cobras" : `${diff} Días`;
@@ -1246,27 +1332,20 @@
                 return new Date(year, month, safeDay);
             };
 
-            if (s.frequency === 'biweekly') {
-                for(let m = 0; m <= 1; m++) {
-                    let monthIndex = currentMonth + m; let year = currentYear;
-                    if(monthIndex > 11) { monthIndex = 0; year++; }
+            // Generar fechas candidatas para este mes y el siguiente
+            for(let m = 0; m <= 1; m++) {
+                let monthIndex = currentMonth + m; 
+                let year = currentYear;
+                if(monthIndex > 11) { monthIndex -= 12; year++; }
+
+                if (s.frequency === 'biweekly') {
                     candidates.push(getSafeDate(year, monthIndex, 15));
                     candidates.push(getSafeDate(year, monthIndex, 30)); 
-                }
-            } else if (s.frequency === 'biweekly-custom' && s.payday1 && s.payday2) {
-                const p1 = parseInt(s.payday1); const p2 = parseInt(s.payday2);
-                for(let m = 0; m <= 1; m++) {
-                    let monthIndex = currentMonth + m; let year = currentYear;
-                    if(monthIndex > 11) { monthIndex = 0; year++; }
-                    candidates.push(getSafeDate(year, monthIndex, p1));
-                    candidates.push(getSafeDate(year, monthIndex, p2));
-                }
-            } else if (s.frequency === 'monthly' && s.payday) {
-                const day = parseInt(s.payday);
-                for(let m = 0; m <= 1; m++) {
-                    let monthIndex = currentMonth + m; let year = currentYear;
-                    if(monthIndex > 11) { monthIndex = 0; year++; }
-                    candidates.push(getSafeDate(year, monthIndex, day));
+                } else if (s.frequency === 'biweekly-custom' && s.payday1 && s.payday2) {
+                    candidates.push(getSafeDate(year, monthIndex, parseInt(s.payday1)));
+                    candidates.push(getSafeDate(year, monthIndex, parseInt(s.payday2)));
+                } else if (s.frequency === 'monthly' && s.payday) {
+                    candidates.push(getSafeDate(year, monthIndex, parseInt(s.payday)));
                 }
             }
             
@@ -1277,20 +1356,23 @@
                 d.setHours(0,0,0,0);
                 if (d >= today) return d;
             }
-            return adjustedCandidates[0];
+            return adjustedCandidates[0]; // Fallback
         }
 
         function getNextBusinessDay(date) {
             let d = new Date(date);
             const fmt = (x) => `${(x.getMonth()+1).toString().padStart(2,'0')}-${x.getDate().toString().padStart(2,'0')}`;
 
-            while (d.getDay() === 0 || d.getDay() === 6 || COMMON_HOLIDAYS.includes(fmt(d))) {
+            // Ajuste simple para fines de semana (no festivos complejos para simplificar)
+            // 0 = Dom, 6 = Sab
+            while (d.getDay() === 0 || d.getDay() === 6) {
                 d.setDate(d.getDate() + 1);
             }
             return d;
         }
 
         function updateDailyFormula(currentBalance, daysLeft, nextPaydayDate) {
+            // 1. Gastado HOY (para restarlo del presupuesto del día si ya se gastó)
             let spentToday = 0;
             const todayDate = new Date();
             todayDate.setHours(0,0,0,0);
@@ -1305,36 +1387,27 @@
                 }
             });
 
-            let pendingFixedSum = 0;
-            const nextPaydayDay = nextPaydayDate.getDate();
-            const todayDay = todayDate.getDate();
+            // 2. Gastos Fijos Pendientes (Usando la nueva lógica robusta)
+            // Calculamos hasta el día anterior al pago (porque el día de pago entra dinero)
+            const calcLimitDate = new Date(nextPaydayDate);
+            calcLimitDate.setDate(calcLimitDate.getDate() - 1);
+            
+            const pendingFixedSum = getPendingFixedAmount(calcLimitDate);
 
-            window.appData.fixed.forEach(f => {
-                if (f.ignoreBudget) return; 
-                const fDay = parseInt(f.day);
-                if (isFixedPaidThisMonth(f.id)) return;
-
-                if (fDay < todayDay) {
-                    pendingFixedSum += parseFloat(f.amount);
-                } else if (fDay >= todayDay && fDay <= nextPaydayDay) {
-                      pendingFixedSum += parseFloat(f.amount);
-                }
-            });
-
+            // 3. Fórmula
+            // Saldo Inicial Efectivo = (Saldo Actual + Lo gastado hoy (para ver el total del dia)) - Fijos futuros
+            // Se suma spentToday al balance porque 'currentBalance' ya lo tiene restado, pero queremos el budget "del día completo"
             const startOfDayBalance = currentBalance + spentToday;
             const effectiveStartBalance = startOfDayBalance - pendingFixedSum;
+            
             const divisor = daysLeft <= 0 ? 1 : daysLeft;
             
             let budgetForToday = effectiveStartBalance / divisor;
-
             const remainingToday = budgetForToday - spentToday;
             
-            const titleEl = document.getElementById('formula-title');
             const explEl = document.getElementById('formula-explanation');
 
-            titleEl.textContent = "PLAN DEL DÍA";
-            titleEl.className = "text-xs font-bold text-blue-400 uppercase";
-            explEl.innerHTML = `Presupuesto diario: <strong class="text-white">${formatCurrency(budgetForToday)}</strong>. Gastado hoy: <strong class="text-white">${formatCurrency(spentToday)}</strong>.`;
+            explEl.innerHTML = `Presupuesto base: <strong class="text-white">${formatCurrency(budgetForToday)}</strong>.<br>Gastado hoy: <strong class="text-neutral-400">-${formatCurrency(spentToday)}</strong>.`;
             
             const remainingEl = document.getElementById('formula-daily');
             remainingEl.textContent = formatCurrency(remainingToday);
@@ -1345,7 +1418,7 @@
             document.getElementById('formula-days-left').textContent = `Fijos pend: -${formatCurrency(pendingFixedSum)}`;
         }
 
-        // --- LÓGICA DE SIMULACIÓN ---
+        // --- LÓGICA DE SIMULACIÓN CORREGIDA ---
         window.runSimulation = function() {
             const dateInput = document.getElementById('sim-date').value;
             const amountInput = parseFloat(document.getElementById('sim-amount').value);
@@ -1358,22 +1431,16 @@
                 return;
             }
 
-            const futureDate = new Date(dateInput);
-            futureDate.setHours(0,0,0,0);
+            const futureDate = new Date(dateInput + 'T00:00:00'); // Forzar local time
             const today = new Date();
             today.setHours(0,0,0,0);
 
             // Calcular diferencia de días
             const diffTime = futureDate - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+            if (diffDays <= 0) diffDays = 1; // Evitar división por cero
 
-            if (diffDays <= 0) {
-                resultEl.textContent = "La fecha debe ser futura";
-                detailsEl.textContent = "Selecciona una fecha posterior a hoy.";
-                return;
-            }
-
-            // Calcular Saldo Actual Real
+            // 1. Saldo Actual Real
             let currentBalance = 0;
             window.appData.transactions.forEach(t => {
                 const val = Math.round(t.amount * 100);
@@ -1382,35 +1449,26 @@
             });
             currentBalance = currentBalance / 100;
 
-            // Calcular Pagos Fijos en ese intervalo
-            let pendingFixed = 0;
-            const startDay = today.getDate();
-            const endDay = futureDate.getDate(); // Simplificación: solo mira el día del mes, no cruza meses bien en logica simple pero funciona para corto plazo
-            
-            window.appData.fixed.forEach(f => {
-                if (f.ignoreBudget) return;
-                const fDay = parseInt(f.day);
-                // Si el pago cae entre hoy y la fecha futura Y no está pagado
-                // Nota: Lógica simplificada para el mismo mes o mes siguiente cercano
-                if (!isFixedPaidThisMonth(f.id)) {
-                     // Si hoy es 10 y cobro futuro es el 15. Si hay pago el 12, se resta.
-                     // Esta logica asume que el pago fijo es de ESTE mes.
-                     const targetDate = new Date();
-                     targetDate.setDate(fDay);
-                     if (targetDate >= today && targetDate <= futureDate) {
-                         pendingFixed += parseFloat(f.amount);
-                     }
-                }
-            });
+            // 2. Gastos Fijos Pendientes (Usando la nueva lógica de bucle)
+            // Calculamos fijos hasta la fecha de cobro futuro (exclusiva o inclusiva según se vea)
+            // Generalmente queremos sobrevivir HASTA ese día.
+            const pendingFixed = getPendingFixedAmount(futureDate);
 
-            // Fórmula: (Saldo Actual + Ingreso Futuro - Fijos Pendientes) / Días
+            // 3. Fórmula del Simulador
+            // Aquí asumimos que el usuario quiere saber: "¿Si cuento con ese dinero futuro, cuánto puedo gastar hoy?"
+            // Esto implica "credit spending" (gastar antes de tenerlo).
             const totalPool = currentBalance + amountInput - pendingFixed;
             const dailyBudget = totalPool / diffDays;
 
-            resultEl.textContent = formatCurrency(dailyBudget) + " / día";
-            detailsEl.textContent = `Faltan ${diffDays} días. (Saldo: ${formatCurrency(currentBalance)} + Futuro: ${formatCurrency(amountInput)} - Fijos: ${formatCurrency(pendingFixed)}) / ${diffDays}`;
-        }
+            resultEl.textContent = formatCurrency(dailyBudget);
+            if(dailyBudget < 0) resultEl.classList.add('text-red-400');
+            else resultEl.classList.remove('text-red-400');
 
+            detailsEl.innerHTML = `
+                Días: <strong>${diffDays}</strong><br>
+                (Saldo: ${formatCurrency(currentBalance)} + Futuro: ${formatCurrency(amountInput)} - Fijos: ${formatCurrency(pendingFixed)}) / ${diffDays}
+            `;
+        }
 
         function switchTab(id) {
             document.querySelectorAll('section[id^="view-"]').forEach(el => el.classList.add('hidden'));
@@ -1443,7 +1501,7 @@
             
             list.forEach(c => {
                 const div = document.createElement('div');
-                div.className = "chip";
+                div.className = "chip flex items-center gap-2";
                 div.innerHTML = `<i class="ph-fill ${c.icon}"></i> ${c.id}`;
                 div.onclick = () => selectChip(c.id);
                 div.dataset.id = c.id;
@@ -1499,9 +1557,9 @@
         function showToast(msg) {
             const t = document.getElementById('toast');
             document.getElementById('toast-msg').textContent = msg;
-            t.classList.remove('opacity-0', 'pointer-events-none');
+            t.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
             setTimeout(() => {
-                 t.classList.add('opacity-0', 'pointer-events-none');
+                 t.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
             }, 3000);
         }
 
@@ -1515,7 +1573,7 @@
             updateDateHeader();
         });
 
-        // Exponer funciones globales para onclick HTML
+        // Exponer funciones globales
         window.switchTab = switchTab;
         window.filterHistory = filterHistory;
         window.openModal = openModal;
