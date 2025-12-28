@@ -221,10 +221,10 @@
         
         <!-- Menú Desktop (Oculto en móvil) -->
         <div class="hidden md:flex gap-1 bg-input-bg p-1 rounded-xl border border-border">
-            <button onclick="switchTab('dashboard')" class="px-4 py-2 rounded-lg text-xs font-bold text-white bg-bg shadow-sm">Panel</button>
-            <button onclick="switchTab('history')" class="px-4 py-2 rounded-lg text-xs font-bold text-text-mute hover:text-white transition-colors">Historial</button>
-            <button onclick="switchTab('payments')" class="px-4 py-2 rounded-lg text-xs font-bold text-text-mute hover:text-white transition-colors">Pagos</button>
-            <button onclick="switchTab('settings')" class="px-4 py-2 rounded-lg text-xs font-bold text-text-mute hover:text-white transition-colors">Ajustes</button>
+            <button id="desktop-nav-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-lg text-xs font-bold text-white bg-bg shadow-sm transition-all">Panel</button>
+            <button id="desktop-nav-history" onclick="switchTab('history')" class="px-4 py-2 rounded-lg text-xs font-bold text-text-mute hover:text-white transition-all">Historial</button>
+            <button id="desktop-nav-payments" onclick="switchTab('payments')" class="px-4 py-2 rounded-lg text-xs font-bold text-text-mute hover:text-white transition-all">Pagos</button>
+            <button id="desktop-nav-settings" onclick="switchTab('settings')" class="px-4 py-2 rounded-lg text-xs font-bold text-text-mute hover:text-white transition-all">Ajustes</button>
         </div>
 
         <button onclick="window.authApp.logout()" class="md:hidden text-text-mute hover:text-alert transition-colors"><i class="ph-bold ph-sign-out text-xl"></i></button>
@@ -1557,24 +1557,36 @@
             document.querySelectorAll('section[id^="view-"]').forEach(el => el.classList.add('hidden'));
             document.getElementById(`view-${id}`).classList.remove('hidden');
             
-            // RESETEAR COLORES DE TODOS LOS BOTONES DE NAVEGACIÓN
-            // Primero, poner todos en GRIS (text-text-mute)
-            const navIds = ['nav-dashboard', 'nav-history', 'nav-payments', 'nav-settings'];
-            navIds.forEach(navId => {
-                const btn = document.getElementById(navId);
-                if(btn) {
-                    btn.classList.remove('text-white'); // Quitar blanco
-                    btn.classList.add('text-text-mute'); // Poner gris
+            // LOGICA PARA ACTUALIZAR NAVEGACION
+            const tabs = ['dashboard', 'history', 'payments', 'settings'];
+            
+            tabs.forEach(tab => {
+                // 1. Móvil
+                const mBtn = document.getElementById(`nav-${tab}`);
+                if(mBtn) {
+                    if(tab === id) {
+                        mBtn.classList.remove('text-text-mute');
+                        mBtn.classList.add('text-white');
+                    } else {
+                        mBtn.classList.add('text-text-mute');
+                        mBtn.classList.remove('text-white');
+                    }
+                }
+
+                // 2. Desktop (IDs agregados: desktop-nav-dashboard, etc)
+                const dBtn = document.getElementById(`desktop-nav-${tab}`);
+                if(dBtn) {
+                    if(tab === id) {
+                        // Estado Activo
+                        dBtn.classList.remove('text-text-mute', 'hover:text-white');
+                        dBtn.classList.add('text-white', 'bg-bg', 'shadow-sm');
+                    } else {
+                        // Estado Inactivo
+                        dBtn.classList.add('text-text-mute', 'hover:text-white');
+                        dBtn.classList.remove('text-white', 'bg-bg', 'shadow-sm');
+                    }
                 }
             });
-
-            // ACTIVAR EL BOTÓN SELECCIONADO
-            // Poner el actual en BLANCO (text-white)
-            const activeBtn = document.getElementById(`nav-${id}`);
-            if(activeBtn) {
-                activeBtn.classList.remove('text-text-mute'); // Quitar gris
-                activeBtn.classList.add('text-white'); // Poner blanco
-            }
 
             // Renderizar contenido específico
             if(id === 'dashboard') renderDashboard();
