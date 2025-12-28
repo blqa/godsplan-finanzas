@@ -1,18 +1,64 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>God's Plan | Aurora Edition</title>
+    <title>God's Plan | Finanzas</title>
     
-    <!-- Tailwind CSS -->
+    <!-- FAVICON -->
+    <link rel="shortcut icon" href="./favicon.ico?v=2" type="image/x-icon">
+
+    <!-- FUENTE UNIFICADA: PLUS JAKARTA SANS -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- SCRIPT DE ICONOS -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- TAILWIND CSS & CONFIGURACIÓN DE TEMA -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Iconos Phosphor -->
-    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class', 
+            theme: {
+                extend: {
+                    colors: {
+                        bg: 'var(--bg)',
+                        card: 'var(--card)',
+                        text: 'var(--text)',
+                        'text-mute': 'var(--text-mute)',
+                        brand: 'var(--brand)',
+                        'login-brand': 'var(--login-brand)',
+                        money: 'var(--money)',
+                        alert: 'var(--alert)',
+                        warn: 'var(--warn)',
+                        border: 'var(--border)',
+                        'input-bg': 'var(--input-bg)',
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.3s ease-out forwards',
+                        'nebula': 'nebula 20s infinite alternate',
+                        'float': 'float 6s ease-in-out infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'scale-in': 'scaleIn 0.2s ease-out forwards',
+                    },
+                    keyframes: {
+                        slideUp: { '0%': { transform: 'translateY(100%)' }, '100%': { transform: 'translateY(0)' } },
+                        nebula: { '0%': { transform: 'scale(1)', opacity: '0.3' }, '100%': { transform: 'scale(1.2)', opacity: '0.6' } },
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        fadeIn: { from: { opacity: 0, transform: 'translateY(-5px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+                        scaleIn: { from: { opacity: 0, transform: 'scale(0.95)' }, to: { opacity: 1, transform: 'scale(1)' } }
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
-        /* --- TU CSS PERSONALIZADO --- */
         :root {
             --bg: #000000;
             --card: #111111;
@@ -29,7 +75,7 @@
         }
 
         * { -webkit-tap-highlight-color: transparent; outline: none; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
-        body { overflow-x: hidden; background-color: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
+        body { overflow-x: hidden; background-color: var(--bg); color: var(--text); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -50,7 +96,7 @@
         .grid-bg {
             position: fixed; inset: 0; z-index: -1;
             background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
             background-size: 50px 50px;
             mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
             -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
@@ -58,457 +104,442 @@
         }
 
         .input-gp {
-            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: white;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); width: 100%; padding: 14px 16px; border-radius: 16px;
-            font-size: 0.95rem; font-weight: 500;
+            background: var(--input-bg); border: 1px solid var(--border); color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); width: 100%; padding: 14px 16px; border-radius: 12px;
+            font-size: 0.95rem; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        .input-gp:focus { border-color: var(--login-brand); outline: none; background: rgba(231,0,0,0.05); box-shadow: 0 0 20px rgba(231,0,0,0.2); transform: translateY(-2px); }
-        .input-gp::placeholder { color: rgba(255,255,255,0.3); }
+        .input-gp:focus { border-color: var(--brand); outline: none; background: rgba(220, 38, 38, 0.05); box-shadow: 0 0 20px rgba(220, 38, 38, 0.1); transform: translateY(-1px); }
+        .input-gp::placeholder { color: var(--text-mute); }
+        /* Fix date inputs dark scheme */
+        input[type="date"], input[type="datetime-local"], input[type="time"] { color-scheme: dark; }
 
         .glass-panel {
-            background: rgba(15, 15, 15, 0.6); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            background: rgba(17, 17, 17, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        .auth-switch { position: relative; display: flex; background: rgba(0,0,0,0.3); border-radius: 12px; padding: 4px; margin-bottom: 24px; }
-        .auth-switch button { flex: 1; padding: 8px; font-size: 0.8rem; font-weight: 700; z-index: 1; color: #666; transition: 0.3s; cursor: pointer; }
+        .auth-switch { position: relative; display: flex; background: rgba(0,0,0,0.3); border-radius: 12px; padding: 4px; margin-bottom: 24px; border: 1px solid var(--border); }
+        .auth-switch button { flex: 1; padding: 8px; font-size: 0.8rem; font-weight: 800; z-index: 1; color: var(--text-mute); transition: 0.3s; cursor: pointer; letter-spacing: 0.05em; }
         .auth-switch button.active { color: white; }
         .auth-switch-glider {
             position: absolute; top: 4px; left: 4px; height: calc(100% - 8px); width: calc(50% - 4px);
-            background: #222; border-radius: 8px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(255,255,255,0.1);
+            background: var(--card); border-radius: 8px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(255,255,255,0.1);
         }
-        /* Clase auxiliar para mover el glider */
         .auth-mode-register .auth-switch-glider { transform: translateX(100%); }
 
-        .btn-glow { position: relative; overflow: hidden; background: var(--login-brand); color: white; transition: all 0.3s; cursor: pointer; }
-        .btn-glow:hover { box-shadow: 0 0 30px rgba(231, 0, 0, 0.4); transform: translateY(-2px); }
+        .btn-glow { position: relative; overflow: hidden; background: var(--login-brand); color: white; transition: all 0.3s; cursor: pointer; border: none; }
+        .btn-glow:hover { box-shadow: 0 0 30px rgba(220, 38, 38, 0.4); transform: translateY(-2px); }
 
-        /* Estilos adicionales necesarios para la funcionalidad */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); }
         .modal-overlay.is-open { display: flex; }
-        .modal-content { background: var(--card); width: 100%; max-width: 400px; border-radius: 16px; border: 1px solid var(--border); padding: 24px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .modal-content { background: var(--card); width: 100%; max-width: 400px; border-radius: 20px; border: 1px solid var(--border); padding: 24px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.7); position: relative; }
 
-        .chip { border: 1px solid var(--border); background: var(--card); color: var(--text-mute); padding: 6px 12px; border-radius: 999px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
-        .chip.active { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: bold; transform: scale(1.05); }
+        .chip { border: 1px solid var(--border); background: var(--input-bg); color: var(--text-mute); padding: 8px 14px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .chip.active { background: var(--text); color: var(--bg); border-color: var(--text); transform: scale(1.05); }
 
         #toast { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease; }
         
-        /* Utilidades Tailwind overrides */
-        .text-brand { color: var(--brand); }
-        .border-brand { border-color: var(--brand); }
+        .nav-btn.active i { color: white; }
+        .nav-btn.active span { color: white; }
     </style>
 </head>
-<body class="flex flex-col h-[100dvh] overflow-hidden">
+<body class="bg-bg text-text font-sans selection:bg-brand selection:text-white flex flex-col h-[100dvh] overflow-hidden">
 
     <!-- FONDOS ANIMADOS -->
     <div class="aurora-bg"></div>
     <div class="grid-bg"></div>
 
     <!-- Loading -->
-    <div id="loading-screen" class="fixed inset-0 bg-black z-[100] flex items-center justify-center">
+    <div id="loading-screen" class="fixed inset-0 bg-bg z-[2000] flex items-center justify-center">
         <div class="text-center">
             <div class="spinner mx-auto mb-4"></div>
-            <p class="text-neutral-500 font-mono text-sm">Sincronizando...</p>
+            <p class="text-text-mute font-mono text-xs tracking-widest uppercase">Cargando...</p>
         </div>
     </div>
 
-    <!-- Login View (Rediseñado con CSS Nuevo) -->
-    <div id="login-view" class="fixed inset-0 z-[90] bg-black/50 backdrop-blur-sm flex flex-col items-center justify-center p-6 hidden">
-        <div class="w-full max-w-sm glass-panel rounded-2xl p-8 animate-fade-in">
-            <div class="text-center mb-8">
-                <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center mx-auto mb-4 text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-                     <i class="ph-bold ph-wallet text-2xl"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-white mb-2 tracking-wider">GOD'S PLAN</h1>
-                <p class="text-neutral-500 text-xs uppercase tracking-widest">Control Financiero Estricto</p>
-            </div>
-
-            <!-- Switcher con Glider Animation -->
-            <div id="auth-switcher-container" class="auth-switch">
-                <div class="auth-switch-glider"></div>
-                <button onclick="window.authApp.toggleAuth('login')" id="tab-login" class="active">INGRESAR</button>
-                <button onclick="window.authApp.toggleAuth('register')" id="tab-register">REGISTRO</button>
-            </div>
-
-            <form onsubmit="event.preventDefault(); window.authApp.handleAuthSubmit();" class="space-y-4">
-                <div id="field-name" class="hidden">
-                    <input type="text" id="input-name" class="input-gp" placeholder="Tu Nombre">
-                </div>
-                <div>
-                    <input type="text" id="input-id" class="input-gp" placeholder="Usuario o Email" required>
-                </div>
-                <div>
-                    <input type="password" id="input-pass" class="input-gp" placeholder="Contraseña" required>
-                </div>
-
-                <div id="auth-error-msg" class="hidden text-red-400 text-xs font-bold text-center py-2 bg-red-900/10 rounded border border-red-900/50">
-                    <span id="auth-error-txt">Error</span>
-                </div>
-
-                <button type="submit" id="btn-submit" class="w-full btn-glow py-3 rounded-xl font-bold text-sm mt-4">
-                    <span id="btn-text">INICIAR SESIÓN</span>
-                </button>
-            </form>
+    <!-- Login View -->
+    <div id="login-view" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#030000] hidden">
+        <div class="absolute top-8 left-8 flex items-center gap-3 animate-fade-in opacity-50">
+             <div class="relative w-8 h-8 flex items-center justify-center"><i class="ph-fill ph-wallet text-2xl text-brand"></i></div>
+            <span class="font-bold tracking-widest text-lg">GOD'S PLAN</span>
         </div>
+        <div class="w-full max-w-md animate-float">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">FINANZAS</h1>
+                <p class="text-zinc-500 text-sm font-mono tracking-widest uppercase">Control Financiero Estricto</p>
+            </div>
+            
+            <div class="glass-panel rounded-3xl p-8 relative overflow-hidden">
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-brand blur-md opacity-50"></div>
+                
+                <div id="auth-switcher-container" class="auth-switch">
+                    <div class="auth-switch-glider"></div>
+                    <button onclick="window.authApp.toggleAuth('login')" id="tab-login" class="active">INGRESAR</button>
+                    <button onclick="window.authApp.toggleAuth('register')" id="tab-register">REGISTRO</button>
+                </div>
+
+                <form onsubmit="event.preventDefault(); window.authApp.handleAuthSubmit();" class="flex flex-col gap-4">
+                    <div id="field-name" class="hidden">
+                        <div class="relative group">
+                            <i class="ph-bold ph-user absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-brand transition-colors"></i>
+                            <input type="text" id="input-name" class="input-gp pl-12" placeholder="Tu Nombre">
+                        </div>
+                    </div>
+                    <div class="relative group">
+                        <i class="ph-bold ph-identification-card absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-brand transition-colors"></i>
+                        <input type="text" id="input-id" class="input-gp pl-12" placeholder="Usuario o Email" required>
+                    </div>
+                    <div class="relative group">
+                        <i class="ph-bold ph-lock-key absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-brand transition-colors"></i>
+                        <input type="password" id="input-pass" class="input-gp pl-12" placeholder="Contraseña" required>
+                    </div>
+
+                    <div id="auth-error-msg" class="hidden p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-bold text-center flex items-center justify-center gap-2">
+                         <i class="ph-fill ph-warning-circle"></i> <span id="auth-error-txt">Error</span>
+                    </div>
+
+                    <button type="submit" id="btn-submit" class="btn-glow w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm mt-2 flex items-center justify-center gap-2 group">
+                        <span id="btn-text">INICIAR SESIÓN</span> <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <footer class="absolute bottom-4 left-0 w-full text-center pointer-events-none opacity-30">
+            <p class="text-[10px] font-mono tracking-[0.5em] text-white">SYSTEM v2.0 // SECURE</p>
+        </footer>
     </div>
     
-    <!-- Navbar Superior -->
-    <nav id="global-nav" class="h-16 bg-black/80 backdrop-blur-md border-b border-[#262626] flex items-center justify-between px-4 shrink-0 hidden sticky top-0 z-30">
+    <!-- HEADER APP -->
+    <nav id="global-nav" class="bg-card border-b border-border fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 py-3 shadow-sm transition-all h-[64px] hidden">
         <div class="flex items-center gap-3">
-             <div class="w-9 h-9 bg-[#111] rounded-lg flex items-center justify-center text-white border border-[#262626]">
-                <i class="ph-bold ph-wallet"></i>
+             <div class="w-9 h-9 bg-input-bg rounded-lg flex items-center justify-center text-brand border border-border">
+                <i class="ph-fill ph-wallet text-xl"></i>
             </div>
             <div>
-                <h1 class="text-white font-bold text-sm leading-tight">Finanzas</h1>
-                <p class="text-[10px] text-neutral-500 font-mono" id="current-date-header">...</p>
+                <h1 class="text-text font-black text-sm uppercase tracking-wide leading-tight">Finanzas</h1>
+                <p class="text-[10px] text-text-mute font-mono font-bold" id="current-date-header">...</p>
             </div>
         </div>
         
-        <!-- Menú Desktop -->
-        <div class="hidden md:flex gap-1 bg-[#111] p-1 rounded-lg border border-[#262626]">
-            <button onclick="switchTab('dashboard')" class="px-4 py-1.5 rounded text-xs font-bold text-white bg-[#222]">Panel</button>
-            <button onclick="switchTab('history')" class="px-4 py-1.5 rounded text-xs font-bold text-neutral-400 hover:text-white transition-colors">Historial</button>
-            <button onclick="switchTab('payments')" class="px-4 py-1.5 rounded text-xs font-bold text-neutral-400 hover:text-white transition-colors">Pagos</button>
-            <button onclick="switchTab('settings')" class="px-4 py-1.5 rounded text-xs font-bold text-neutral-400 hover:text-white transition-colors">Ajustes</button>
+        <!-- Menú Desktop (Oculto en móvil) -->
+        <div class="hidden md:flex gap-1 bg-input-bg p-1 rounded-xl border border-border">
+            <button onclick="switchTab('dashboard')" class="px-4 py-2 rounded-lg text-xs font-bold text-white bg-bg shadow-sm">Panel</button>
+            <button onclick="switchTab('history')" class="px-4 py-2 rounded-lg text-xs font-bold text-text-mute hover:text-white transition-colors">Historial</button>
+            <button onclick="switchTab('payments')" class="px-4 py-2 rounded-lg text-xs font-bold text-text-mute hover:text-white transition-colors">Pagos</button>
+            <button onclick="switchTab('settings')" class="px-4 py-2 rounded-lg text-xs font-bold text-text-mute hover:text-white transition-colors">Ajustes</button>
         </div>
 
-        <div class="w-8 md:hidden"></div> <!-- Spacer móvil -->
+        <button onclick="window.authApp.logout()" class="md:hidden text-text-mute hover:text-alert transition-colors"><i class="ph-bold ph-sign-out text-xl"></i></button>
     </nav>
 
     <!-- Contenido Principal -->
-    <main id="main-container" class="flex-1 overflow-y-auto p-4 md:p-6 pb-24 relative hidden scroll-smooth no-scrollbar">
-        <div class="max-w-3xl mx-auto space-y-6">
-
-            <!-- DASHBOARD -->
-            <section id="view-dashboard" class="space-y-6 animate-fade-in">
-                
-                <!-- Tarjeta de Balance con Glass Panel -->
-                <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="ph-fill ph-wallet text-9xl text-white"></i>
-                    </div>
-
-                    <div class="flex justify-between items-start mb-2 relative z-10">
-                        <span class="text-xs font-bold text-neutral-500 uppercase tracking-widest">Disponible Real</span>
-                        <button onclick="openAdjustModal()" class="text-neutral-400 hover:text-white text-xs font-bold bg-white/5 px-2 py-1 rounded border border-white/10 transition-colors">Ajustar</button>
-                    </div>
-                    
-                    <div class="text-5xl md:text-6xl font-bold text-white mb-6 relative z-10 tracking-tight" id="total-balance">$0.00</div>
-                    
-                    <div class="mb-6 relative z-10">
-                        <div class="flex justify-between text-[10px] font-bold text-neutral-500 mb-2 uppercase">
-                            <span>Presupuesto usado</span>
-                            <span id="progress-percent">0%</span>
-                        </div>
-                        <div class="h-3 bg-black/50 rounded-full w-full overflow-hidden border border-white/10">
-                            <div id="balance-progress" class="h-full bg-white w-0 transition-all duration-700 ease-out shadow-[0_0_15px_rgba(255,255,255,0.8)]"></div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-4 relative z-10">
-                        <div>
-                            <span class="block text-[10px] text-neutral-500 uppercase font-bold mb-1 flex items-center gap-1"><i class="ph-bold ph-arrow-down-left text-green-500"></i> Ingresos</span>
-                            <span class="text-lg font-bold text-green-400" id="total-income">$0.00</span>
-                        </div>
-                        <div class="text-right">
-                            <span class="block text-[10px] text-neutral-500 uppercase font-bold mb-1 flex items-center justify-end gap-1">Gastos <i class="ph-bold ph-arrow-up-right text-red-500"></i></span>
-                            <span class="text-lg font-bold text-red-400" id="total-expense">$0.00</span>
-                        </div>
-                    </div>
+    <main id="main-container" class="flex-1 overflow-y-auto p-4 md:p-6 pb-28 pt-20 relative hidden scroll-smooth no-scrollbar w-full max-w-[900px] mx-auto">
+        
+        <!-- DASHBOARD -->
+        <section id="view-dashboard" class="space-y-6 animate-fade-in">
+            
+            <!-- Tarjeta de Balance -->
+            <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group border border-border">
+                <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+                    <i class="ph-fill ph-wallet text-9xl text-white"></i>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Fórmula del Día -->
-                    <div class="glass-panel rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden h-full">
-                        <div>
-                             <div class="flex justify-between items-start mb-3">
-                                <p class="text-xs font-bold text-purple-400 uppercase tracking-widest flex items-center gap-2">
-                                    <i class="ph-fill ph-calculator"></i> PLAN DEL DÍA
-                                </p>
-                                <span id="payday-badge" class="text-[10px] bg-black/50 text-neutral-400 px-2 py-1 rounded border border-white/10 font-mono">...</span>
-                            </div>
-                            <p class="text-sm text-neutral-300 leading-relaxed mb-4 font-light" id="formula-explanation">Analizando tus finanzas...</p>
-                        </div>
-                        
-                        <div class="pt-4 border-t border-white/10 mt-auto">
-                            <div class="flex justify-between items-end">
-                                <div>
-                                    <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Límite Diario Seguro</p>
-                                    <span class="font-bold text-3xl text-white tracking-tight" id="formula-daily">$0.00</span>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-[10px] text-neutral-500 font-bold uppercase">Meta</p>
-                                    <p id="formula-days-left" class="text-xs font-mono text-neutral-400">...</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Botones de Acción -->
-                    <div class="grid grid-rows-2 gap-4 h-full">
-                        <button onclick="openAddModal('income')" class="glass-panel hover:bg-white/5 rounded-2xl text-green-500 font-bold text-sm flex items-center justify-center gap-3 transition-all group border-l-4 border-l-green-500">
-                            <div class="w-8 h-8 rounded-full bg-green-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <i class="ph-bold ph-arrow-down-left"></i>
-                            </div>
-                            REGISTRAR INGRESO
-                        </button>
-                        <button onclick="openAddModal('expense')" class="glass-panel hover:bg-white/5 rounded-2xl text-brand font-bold text-sm flex items-center justify-center gap-3 transition-all group border-l-4 border-l-red-600">
-                            <div class="w-8 h-8 rounded-full bg-red-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <i class="ph-bold ph-minus"></i>
-                            </div>
-                            REGISTRAR GASTO
-                        </button>
-                    </div>
-                </div>
-
-                <!-- SIMULADOR DE INGRESO (Estilo actualizado) -->
-                <div id="simulation-container" class="hidden glass-panel rounded-2xl p-6 relative overflow-hidden bg-blue-900/10 border-blue-500/20">
-                    <div class="absolute -right-4 -top-4 text-blue-900/20 z-0">
-                         <i class="ph-fill ph-crystal-ball text-9xl"></i>
-                    </div>
-                    
-                    <div class="relative z-10">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="bg-blue-500/20 p-1.5 rounded-lg">
-                                <i class="ph-fill ph-magic-wand text-blue-400"></i>
-                            </div>
-                            <h3 class="text-sm font-bold text-blue-100 uppercase tracking-wide">Simulador de Futuro</h3>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-4">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="text-[10px] uppercase font-bold text-blue-300/70 block mb-1">Fecha Futura</label>
-                                        <input type="date" id="sim-date" class="input-gp bg-black/40 border-blue-500/30 text-xs py-2" onchange="runSimulation()">
-                                    </div>
-                                    <div>
-                                        <label class="text-[10px] uppercase font-bold text-blue-300/70 block mb-1">Monto a Recibir</label>
-                                        <input type="number" id="sim-amount" class="input-gp bg-black/40 border-blue-500/30 text-xs py-2" placeholder="0.00" oninput="runSimulation()">
-                                    </div>
-                                </div>
-                                <p class="text-[10px] text-blue-300/50 leading-tight">
-                                    * Este cálculo simula los gastos fijos día a día hasta la fecha seleccionada.
-                                </p>
-                            </div>
-                            
-                            <div class="bg-black/40 rounded-xl p-4 flex flex-col justify-center border border-blue-900/30">
-                                <p class="text-xs text-blue-300/70 mb-1">Nuevo límite diario proyectado:</p>
-                                <p class="text-3xl font-bold text-blue-400 tracking-tight" id="sim-result">$0.00</p>
-                                <p class="text-[10px] text-neutral-400 mt-2 font-mono" id="sim-details">Esperando datos...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lista Reciente -->
-                <div>
-                     <div class="flex justify-between items-center mb-4 px-1">
-                         <h3 class="text-xs font-bold text-neutral-500 uppercase tracking-widest">Actividad Reciente</h3>
-                         <button onclick="switchTab('history')" class="text-xs font-bold text-white hover:text-neutral-300 transition-colors">Ver Todo <i class="ph-bold ph-arrow-right"></i></button>
-                    </div>
-                    <div id="recent-list" class="space-y-3">
-                        <!-- Items se inyectan aquí -->
-                    </div>
-                </div>
-
-            </section>
-
-            <!-- HISTORIAL -->
-            <section id="view-history" class="hidden space-y-4 animate-fade-in">
-                <div class="flex items-center justify-between sticky top-0 bg-black/80 backdrop-blur-md z-20 py-4 border-b border-[#262626]">
-                    <h2 class="text-xl font-bold text-white">Historial</h2>
-                     <div class="flex gap-2">
-                        <button onclick="filterHistory('all')" class="filter-btn active chip" data-filter="all">Todos</button>
-                        <button onclick="filterHistory('income')" class="filter-btn chip" data-filter="income">Ingresos</button>
-                        <button onclick="filterHistory('expense')" class="filter-btn chip" data-filter="expense">Gastos</button>
-                    </div>
-                </div>
-                <div id="full-history-list" class="space-y-6 pb-6"></div>
-            </section>
-
-            <!-- PAGOS Y DEUDAS -->
-            <section id="view-payments" class="hidden space-y-8 animate-fade-in">
-                
-                <!-- Sección Fijos -->
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="ph-bold ph-calendar-check"></i> Pagos Fijos</h2>
-                        <button onclick="openModal('fixed-modal')" class="bg-white hover:bg-neutral-200 text-black px-4 py-2 rounded-full font-bold text-xs flex items-center gap-2 transition-colors">
-                            <i class="ph-bold ph-plus"></i> Nuevo
-                        </button>
-                    </div>
-                    <div class="glass-panel p-4 rounded-xl text-xs text-purple-200 flex gap-3 border border-purple-500/20 bg-purple-900/10">
-                        <i class="ph-fill ph-info text-lg shrink-0"></i>
-                        <div>
-                            Estos pagos se restan automáticamente de tu "Plan del Día".
-                        </div>
-                    </div>
-                    <div id="fixed-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-                </div>
-
-                <div class="border-t border-[#262626]"></div>
-
-                <!-- Sección Préstamos -->
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="ph-bold ph-handshake"></i> Préstamos</h2>
-                        <button onclick="openLoanModal()" class="bg-white hover:bg-neutral-200 text-black px-4 py-2 rounded-full font-bold text-xs flex items-center gap-2 transition-colors">
-                            <i class="ph-bold ph-plus"></i> Nuevo
-                        </button>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="glass-panel p-4 rounded-xl">
-                            <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Me deben</p>
-                            <p class="text-lg font-bold text-green-500" id="loans-owed-to-me">$0.00</p>
-                        </div>
-                        <div class="glass-panel p-4 rounded-xl">
-                            <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Debo</p>
-                            <p class="text-lg font-bold text-red-500" id="loans-i-owe">$0.00</p>
-                        </div>
-                    </div>
-
-                    <div id="loans-list" class="space-y-2"></div>
-                </div>
-            </section>
-
-            <!-- AJUSTES -->
-            <section id="view-settings" class="hidden space-y-6 animate-fade-in">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-white">Configuración</h2>
+                <div class="flex justify-between items-start mb-4 relative z-10">
+                    <span class="text-xs font-black text-text-mute uppercase tracking-widest flex items-center gap-2"><i class="ph-bold ph-coins"></i> Disponible Real</span>
+                    <button onclick="openAdjustModal()" class="text-text-mute hover:text-white text-[0.65rem] font-bold bg-bg/50 px-2 py-1 rounded border border-border transition-colors uppercase tracking-wider">Ajustar</button>
                 </div>
                 
-                <div class="glass-panel p-6 rounded-2xl">
-                    <div class="flex items-center gap-4 mb-6 pb-6 border-b border-white/10">
-                        <div class="w-12 h-12 bg-[#222] rounded-full flex items-center justify-center text-white border border-[#333]">
-                            <i class="ph-bold ph-user text-xl"></i>
+                <div class="text-[clamp(2.5rem,5vw,3.5rem)] font-black text-text mb-6 relative z-10 tracking-tight leading-none" id="total-balance">$0.00</div>
+                
+                <div class="mb-6 relative z-10">
+                    <div class="flex justify-between text-[10px] font-bold text-text-mute mb-2 uppercase tracking-wide">
+                        <span>Presupuesto usado</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="h-2 bg-black/50 rounded-full w-full overflow-hidden border border-white/5">
+                        <div id="balance-progress" class="h-full bg-white w-0 transition-all duration-700 ease-out shadow-[0_0_15px_rgba(255,255,255,0.5)]"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 border-t border-white/5 pt-4 relative z-10">
+                    <div>
+                        <span class="block text-[10px] text-text-mute uppercase font-black mb-1 flex items-center gap-1"><i class="ph-bold ph-arrow-down-left text-money"></i> Ingresos</span>
+                        <span class="text-xl font-bold text-money tracking-tight" id="total-income">$0.00</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="block text-[10px] text-text-mute uppercase font-black mb-1 flex items-center justify-end gap-1">Gastos <i class="ph-bold ph-arrow-up-right text-brand"></i></span>
+                        <span class="text-xl font-bold text-brand tracking-tight" id="total-expense">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fórmula del Día -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-card border border-border rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden h-full shadow-sm">
+                    <div>
+                         <div class="flex justify-between items-start mb-4">
+                            <p class="text-xs font-black text-violet-400 uppercase tracking-widest flex items-center gap-2">
+                                <i class="ph-fill ph-calculator"></i> PLAN DEL DÍA
+                            </p>
+                            <span id="payday-badge" class="text-[10px] bg-violet-900/20 text-violet-300 px-2 py-0.5 rounded border border-violet-500/20 font-bold uppercase">...</span>
                         </div>
-                        <div>
-                            <h3 class="font-bold text-white text-lg" id="user-display-name">Usuario</h3>
-                            <p class="text-xs text-neutral-500 font-mono" id="user-display-email">ID</p>
-                        </div>
+                        <p class="text-sm text-text-mute leading-relaxed mb-4 font-medium" id="formula-explanation">Analizando tus finanzas...</p>
                     </div>
                     
-                    <button onclick="window.authApp.logout()" class="w-full py-3 border border-red-900/50 text-red-500 text-xs font-bold rounded-lg hover:bg-red-900/10 transition-colors">
-                        CERRAR SESIÓN
+                    <div class="pt-4 border-t border-border mt-auto">
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <p class="text-[10px] text-text-mute uppercase font-black mb-1">Límite Diario</p>
+                                <span class="font-black text-3xl text-text tracking-tight" id="formula-daily">$0.00</span>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[10px] text-text-mute font-black uppercase">Pendientes</p>
+                                <p id="formula-days-left" class="text-xs font-bold text-text-mute">...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="grid grid-rows-2 gap-4 h-full">
+                    <button onclick="openAddModal('income')" class="bg-card border border-border hover:bg-input-bg rounded-2xl text-money font-black text-sm flex items-center justify-center gap-3 transition-all group relative overflow-hidden">
+                         <div class="absolute left-0 top-0 w-1 h-full bg-money"></div>
+                        <div class="w-10 h-10 rounded-xl bg-green-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="ph-bold ph-arrow-down-left text-xl"></i>
+                        </div>
+                        <span class="tracking-wide">REGISTRAR INGRESO</span>
+                    </button>
+                    <button onclick="openAddModal('expense')" class="bg-card border border-border hover:bg-input-bg rounded-2xl text-brand font-black text-sm flex items-center justify-center gap-3 transition-all group relative overflow-hidden">
+                        <div class="absolute left-0 top-0 w-1 h-full bg-brand"></div>
+                        <div class="w-10 h-10 rounded-xl bg-red-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="ph-bold ph-minus text-xl"></i>
+                        </div>
+                        <span class="tracking-wide">REGISTRAR GASTO</span>
                     </button>
                 </div>
+            </div>
 
-                <div class="glass-panel p-6 rounded-2xl space-y-5">
-                    <h3 class="font-bold text-white text-sm flex items-center gap-2"><i class="ph-bold ph-calendar"></i> Frecuencia de Cobro</h3>
-                    <p class="text-xs text-neutral-500">Esto ayuda a calcular los días restantes en tu Plan del Día.</p>
-                    
-                    <div class="space-y-2">
-                        <label class="flex items-center gap-3 p-3 bg-black/40 border border-white/10 rounded-lg cursor-pointer hover:border-white/20 transition-colors">
-                            <input type="radio" name="pay-freq" value="biweekly" class="accent-white w-4 h-4" onchange="togglePaydayInput()">
-                            <span class="text-sm text-neutral-300">Quincenal (15 y 30)</span>
-                        </label>
-                        <label class="flex items-center gap-3 p-3 bg-black/40 border border-white/10 rounded-lg cursor-pointer hover:border-white/20 transition-colors">
-                            <input type="radio" name="pay-freq" value="biweekly-custom" class="accent-white w-4 h-4" onchange="togglePaydayInput()">
-                            <span class="text-sm text-neutral-300">Quincenal (Personalizado)</span>
-                        </label>
-                        <label class="flex items-center gap-3 p-3 bg-black/40 border border-white/10 rounded-lg cursor-pointer hover:border-white/20 transition-colors">
-                            <input type="radio" name="pay-freq" value="monthly" class="accent-white w-4 h-4" onchange="togglePaydayInput()">
-                            <span class="text-sm text-neutral-300">Mensual</span>
-                        </label>
-                    </div>
-
-                    <div id="monthly-select-container" class="hidden animate-fade-in">
-                        <label class="text-[10px] text-neutral-500 font-bold uppercase block mb-1">Día de pago</label>
-                        <select id="payday-select" class="input-gp bg-black/50 text-xs py-2"></select>
-                    </div>
-
-                    <div id="biweekly-custom-container" class="hidden grid grid-cols-2 gap-4 animate-fade-in">
-                        <div>
-                            <label class="text-[10px] text-neutral-500 font-bold uppercase block mb-1">Día 1</label>
-                            <select id="payday-1-select" class="input-gp bg-black/50 text-xs py-2"></select>
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-neutral-500 font-bold uppercase block mb-1">Día 2</label>
-                            <select id="payday-2-select" class="input-gp bg-black/50 text-xs py-2"></select>
-                        </div>
+            <!-- SIMULADOR (Oculto por defecto) -->
+            <div id="simulation-container" class="hidden bg-blue-900/10 border border-blue-500/20 rounded-2xl p-6 relative overflow-hidden">
+                <div class="relative z-10">
+                    <div class="flex items-center gap-2 mb-4 border-b border-blue-500/20 pb-3">
+                        <i class="ph-fill ph-magic-wand text-blue-400 text-xl"></i>
+                        <h3 class="text-sm font-black text-blue-100 uppercase tracking-wide">Simulador de Futuro</h3>
                     </div>
                     
-                    <button onclick="saveSettings()" class="w-full bg-white text-black py-3 rounded-lg font-bold text-xs hover:bg-neutral-200 mt-2 shadow-lg shadow-white/10 transition-colors">GUARDAR CONFIGURACIÓN</button>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-[10px] uppercase font-bold text-blue-300/70 block mb-1">Fecha Futura</label>
+                                    <input type="date" id="sim-date" class="input-gp bg-black/40 border-blue-500/30 text-xs py-2" onchange="runSimulation()">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] uppercase font-bold text-blue-300/70 block mb-1">Monto a Recibir</label>
+                                    <input type="number" id="sim-amount" class="input-gp bg-black/40 border-blue-500/30 text-xs py-2" placeholder="0.00" oninput="runSimulation()">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-black/40 rounded-xl p-4 flex flex-col justify-center border border-blue-900/30 text-center">
+                            <p class="text-xs text-blue-300/70 mb-1 font-bold uppercase">Nuevo límite diario proyectado</p>
+                            <p class="text-3xl font-black text-blue-400 tracking-tight" id="sim-result">$0.00</p>
+                            <p class="text-[10px] text-text-mute mt-1 font-mono" id="sim-details">Esperando datos...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista Reciente -->
+            <div>
+                 <div class="flex justify-between items-center mb-4 px-1 border-b border-border pb-2">
+                     <h3 class="text-xs font-black text-text-mute uppercase tracking-widest">Actividad Reciente</h3>
+                     <button onclick="switchTab('history')" class="text-xs font-bold text-brand hover:text-white transition-colors flex items-center gap-1">Ver Todo <i class="ph-bold ph-arrow-right"></i></button>
+                </div>
+                <div id="recent-list" class="space-y-3">
+                    <!-- Items se inyectan aquí -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- HISTORIAL -->
+        <section id="view-history" class="hidden space-y-4 animate-fade-in">
+            <div class="flex items-center justify-between sticky top-0 bg-bg/90 backdrop-blur-md z-20 py-4 border-b border-border">
+                <h2 class="text-lg font-black text-text uppercase tracking-wide">Historial</h2>
+                 <div class="flex gap-2">
+                    <button onclick="filterHistory('all')" class="filter-btn active chip" data-filter="all">Todos</button>
+                    <button onclick="filterHistory('income')" class="filter-btn chip" data-filter="income">Ingresos</button>
+                    <button onclick="filterHistory('expense')" class="filter-btn chip" data-filter="expense">Gastos</button>
+                </div>
+            </div>
+            <div id="full-history-list" class="space-y-4 pb-6"></div>
+        </section>
+
+        <!-- PAGOS Y DEUDAS -->
+        <section id="view-payments" class="hidden space-y-8 animate-fade-in">
+            
+            <!-- Sección Fijos -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between border-b border-border pb-2">
+                    <h2 class="text-lg font-black text-text uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-calendar-check text-brand"></i> Pagos Fijos</h2>
+                    <button onclick="openModal('fixed-modal')" class="bg-input-bg border border-border hover:bg-white/5 text-text px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-2 transition-colors">
+                        <i class="ph-bold ph-plus"></i> Nuevo
+                    </button>
+                </div>
+                <div class="bg-violet-900/10 border border-violet-500/20 p-4 rounded-xl text-xs text-violet-200 flex gap-3">
+                    <i class="ph-fill ph-info text-lg shrink-0"></i>
+                    <div class="font-medium">
+                        Estos pagos se restan automáticamente de tu "Plan del Día" para proteger tu liquidez.
+                    </div>
+                </div>
+                <div id="fixed-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+            </div>
+
+            <!-- Sección Préstamos -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between border-b border-border pb-2">
+                    <h2 class="text-lg font-black text-text uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-handshake text-brand"></i> Préstamos</h2>
+                    <button onclick="openLoanModal()" class="bg-input-bg border border-border hover:bg-white/5 text-text px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-2 transition-colors">
+                        <i class="ph-bold ph-plus"></i> Nuevo
+                    </button>
                 </div>
                 
-                 <div class="glass-panel p-6 rounded-2xl space-y-4">
-                      <h3 class="font-bold text-white text-sm flex items-center gap-2"><i class="ph-bold ph-faders"></i> Extras</h3>
-                      <label class="flex items-center justify-between cursor-pointer p-2 hover:bg-white/5 rounded-lg transition-colors">
-                        <div>
-                             <span class="text-sm text-neutral-300 font-bold">Modo "Ahorro Forzoso"</span>
-                             <p class="text-[10px] text-neutral-500">Oculta el 10% de tu saldo real.</p>
-                        </div>
-                        <input type="checkbox" id="toggle-forced-savings" class="accent-purple-500 w-5 h-5" onchange="saveSettings()">
-                    </label>
-                    <div class="border-t border-white/10"></div>
-                    <label class="flex items-center justify-between cursor-pointer p-2 hover:bg-white/5 rounded-lg transition-colors">
-                        <div>
-                            <span class="text-sm text-neutral-300 font-bold">Habilitar Simulador</span>
-                            <p class="text-[10px] text-neutral-500">Calculadora para ingresos futuros.</p>
-                        </div>
-                        <input type="checkbox" id="toggle-simulation" class="accent-blue-500 w-5 h-5" onchange="saveSettings()">
-                    </label>
-                 </div>
-
-                <div class="glass-panel p-6 rounded-2xl">
-                    <h3 class="font-bold text-white text-sm mb-4">Gestión de Datos</h3>
-                    <div class="flex gap-3">
-                        <button onclick="exportData()" class="flex-1 bg-black/40 border border-white/10 py-3 rounded-lg text-xs font-bold text-neutral-400 hover:text-white transition-colors border-dashed">Descargar JSON</button>
-                        <button onclick="document.getElementById('import-file').click()" class="flex-1 bg-black/40 border border-white/10 py-3 rounded-lg text-xs font-bold text-neutral-400 hover:text-white transition-colors border-dashed">Restaurar JSON</button>
-                        <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-card border border-border p-4 rounded-xl text-center">
+                        <p class="text-[10px] text-text-mute uppercase font-black mb-1">Me deben</p>
+                        <p class="text-xl font-black text-money tracking-tight" id="loans-owed-to-me">$0.00</p>
                     </div>
-                    <button onclick="resetApp()" class="w-full mt-6 text-brand text-[10px] font-bold uppercase hover:text-red-400 transition-colors">Eliminar todos los datos y empezar de cero</button>
+                    <div class="bg-card border border-border p-4 rounded-xl text-center">
+                        <p class="text-[10px] text-text-mute uppercase font-black mb-1">Debo</p>
+                        <p class="text-xl font-black text-brand tracking-tight" id="loans-i-owe">$0.00</p>
+                    </div>
                 </div>
-            </section>
-        </div>
+
+                <div id="loans-list" class="space-y-2"></div>
+            </div>
+        </section>
+
+        <!-- AJUSTES -->
+        <section id="view-settings" class="hidden space-y-6 animate-fade-in">
+            <h2 class="text-lg font-black text-text uppercase tracking-wide border-b border-border pb-4">Configuración</h2>
+            
+            <div class="bg-card border border-border p-6 rounded-2xl">
+                <div class="flex items-center gap-4 mb-6 pb-6 border-b border-border">
+                    <div class="w-12 h-12 bg-input-bg rounded-full flex items-center justify-center text-text border border-border">
+                        <i class="ph-bold ph-user text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-text text-lg" id="user-display-name">Usuario</h3>
+                        <p class="text-xs text-text-mute font-mono" id="user-display-email">ID</p>
+                    </div>
+                </div>
+                
+                <button onclick="window.authApp.logout()" class="w-full py-3 border border-alert bg-alert/10 text-alert text-xs font-black rounded-xl hover:bg-alert/20 transition-colors uppercase tracking-widest">
+                    CERRAR SESIÓN
+                </button>
+            </div>
+
+            <div class="bg-card border border-border p-6 rounded-2xl space-y-5">
+                <h3 class="font-bold text-text text-sm flex items-center gap-2 uppercase tracking-wide"><i class="ph-bold ph-calendar text-brand"></i> Frecuencia de Cobro</h3>
+                
+                <div class="space-y-2">
+                    <label class="flex items-center gap-3 p-3 bg-input-bg border border-border rounded-xl cursor-pointer hover:border-brand transition-colors">
+                        <input type="radio" name="pay-freq" value="biweekly" class="accent-brand w-4 h-4" onchange="togglePaydayInput()">
+                        <span class="text-sm text-text font-bold">Quincenal (15 y 30)</span>
+                    </label>
+                    <label class="flex items-center gap-3 p-3 bg-input-bg border border-border rounded-xl cursor-pointer hover:border-brand transition-colors">
+                        <input type="radio" name="pay-freq" value="biweekly-custom" class="accent-brand w-4 h-4" onchange="togglePaydayInput()">
+                        <span class="text-sm text-text font-bold">Quincenal (Personalizado)</span>
+                    </label>
+                    <label class="flex items-center gap-3 p-3 bg-input-bg border border-border rounded-xl cursor-pointer hover:border-brand transition-colors">
+                        <input type="radio" name="pay-freq" value="monthly" class="accent-brand w-4 h-4" onchange="togglePaydayInput()">
+                        <span class="text-sm text-text font-bold">Mensual</span>
+                    </label>
+                </div>
+
+                <div id="monthly-select-container" class="hidden animate-fade-in">
+                    <label class="text-[10px] text-text-mute font-black uppercase block mb-1">Día de pago</label>
+                    <select id="payday-select" class="input-gp bg-input-bg text-xs py-2"></select>
+                </div>
+
+                <div id="biweekly-custom-container" class="hidden grid grid-cols-2 gap-4 animate-fade-in">
+                    <div>
+                        <label class="text-[10px] text-text-mute font-black uppercase block mb-1">Día 1</label>
+                        <select id="payday-1-select" class="input-gp bg-input-bg text-xs py-2"></select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-text-mute font-black uppercase block mb-1">Día 2</label>
+                        <select id="payday-2-select" class="input-gp bg-input-bg text-xs py-2"></select>
+                    </div>
+                </div>
+                
+                <button onclick="saveSettings()" class="w-full bg-brand text-white py-3 rounded-xl font-bold text-xs hover:bg-red-600 mt-2 shadow-lg shadow-brand/20 transition-colors uppercase tracking-widest">GUARDAR</button>
+            </div>
+            
+             <div class="bg-card border border-border p-6 rounded-2xl space-y-4">
+                  <h3 class="font-bold text-text text-sm flex items-center gap-2 uppercase tracking-wide"><i class="ph-bold ph-faders text-brand"></i> Extras</h3>
+                  <label class="flex items-center justify-between cursor-pointer p-2 hover:bg-input-bg rounded-lg transition-colors">
+                    <div>
+                         <span class="text-sm text-text font-bold">Modo "Ahorro Forzoso"</span>
+                         <p class="text-[10px] text-text-mute font-medium">Oculta el 10% de tu saldo real.</p>
+                    </div>
+                    <input type="checkbox" id="toggle-forced-savings" class="accent-brand w-5 h-5" onchange="saveSettings()">
+                </label>
+                <div class="border-t border-border"></div>
+                <label class="flex items-center justify-between cursor-pointer p-2 hover:bg-input-bg rounded-lg transition-colors">
+                    <div>
+                        <span class="text-sm text-text font-bold">Habilitar Simulador</span>
+                        <p class="text-[10px] text-text-mute font-medium">Calculadora para ingresos futuros.</p>
+                    </div>
+                    <input type="checkbox" id="toggle-simulation" class="accent-brand w-5 h-5" onchange="saveSettings()">
+                </label>
+             </div>
+
+            <div class="bg-card border border-border p-6 rounded-2xl">
+                <h3 class="font-bold text-text text-sm mb-4 uppercase tracking-wide">Gestión de Datos</h3>
+                <div class="flex gap-3">
+                    <button onclick="exportData()" class="flex-1 bg-input-bg border border-border py-3 rounded-xl text-xs font-bold text-text hover:bg-bg transition-colors border-dashed flex items-center justify-center gap-2"><i class="ph-bold ph-download-simple"></i> JSON</button>
+                    <button onclick="document.getElementById('import-file').click()" class="flex-1 bg-input-bg border border-border py-3 rounded-xl text-xs font-bold text-text hover:bg-bg transition-colors border-dashed flex items-center justify-center gap-2"><i class="ph-bold ph-upload-simple"></i> Importar</button>
+                    <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
+                </div>
+                <button onclick="resetApp()" class="w-full mt-6 text-brand text-[10px] font-black uppercase hover:text-red-400 transition-colors flex items-center justify-center gap-2"><i class="ph-bold ph-trash"></i> Eliminar todos los datos</button>
+            </div>
+        </section>
     </main>
 
-    <!-- Barra Inferior Móvil -->
-    <nav class="md:hidden fixed bottom-0 w-full bg-black/90 backdrop-blur-xl border-t border-[#262626] h-20 grid grid-cols-5 z-40 pb-4 px-2" id="bottom-nav">
-        <button onclick="switchTab('dashboard')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white transition-colors group" id="nav-dashboard">
-            <div class="p-1 rounded-full group-hover:bg-[#222] transition-colors mb-1">
-                <i class="ph-fill ph-squares-four text-xl"></i>
-            </div>
-            <span class="text-[9px] font-bold">Panel</span>
+    <!-- Barra Inferior Móvil (Estilo Adherencia) -->
+    <nav class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] bg-card/90 backdrop-blur-xl border border-border rounded-2xl h-16 grid grid-cols-5 z-40 shadow-2xl items-center px-2" id="bottom-nav">
+        <button onclick="switchTab('dashboard')" class="nav-btn flex flex-col items-center justify-center text-text-mute hover:text-white transition-colors gap-1" id="nav-dashboard">
+            <i class="ph-fill ph-squares-four text-2xl"></i>
         </button>
-        <button onclick="switchTab('history')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white transition-colors group" id="nav-history">
-            <div class="p-1 rounded-full group-hover:bg-[#222] transition-colors mb-1">
-                 <i class="ph-fill ph-list-dashes text-xl"></i>
-            </div>
-            <span class="text-[9px] font-bold">Historial</span>
+        <button onclick="switchTab('history')" class="nav-btn flex flex-col items-center justify-center text-text-mute hover:text-white transition-colors gap-1" id="nav-history">
+             <i class="ph-fill ph-list-dashes text-2xl"></i>
         </button>
         
         <!-- Botón Central Flotante -->
-        <div class="relative -top-6 flex justify-center pointer-events-none">
-            <button onclick="openAddModal('expense')" class="pointer-events-auto w-14 h-14 bg-white rounded-full flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 transition-transform btn-glow">
+        <div class="relative flex justify-center items-center pointer-events-none -top-6">
+            <button onclick="openAddModal('expense')" class="pointer-events-auto w-14 h-14 bg-brand rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(220,38,38,0.5)] hover:scale-105 active:scale-95 transition-transform border-4 border-bg">
                 <i class="ph-bold ph-plus text-2xl"></i>
             </button>
         </div>
 
-        <button onclick="switchTab('payments')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white transition-colors group" id="nav-payments">
-             <div class="p-1 rounded-full group-hover:bg-[#222] transition-colors mb-1">
-                <i class="ph-fill ph-receipt text-xl"></i>
-            </div>
-            <span class="text-[9px] font-bold">Pagos</span>
+        <button onclick="switchTab('payments')" class="nav-btn flex flex-col items-center justify-center text-text-mute hover:text-white transition-colors gap-1" id="nav-payments">
+             <i class="ph-fill ph-receipt text-2xl"></i>
         </button>
-        <button onclick="switchTab('settings')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white transition-colors group" id="nav-settings">
-             <div class="p-1 rounded-full group-hover:bg-[#222] transition-colors mb-1">
-                <i class="ph-fill ph-gear text-xl"></i>
-            </div>
-            <span class="text-[9px] font-bold">Ajustes</span>
+        <button onclick="switchTab('settings')" class="nav-btn flex flex-col items-center justify-center text-text-mute hover:text-white transition-colors gap-1" id="nav-settings">
+             <i class="ph-fill ph-gear text-2xl"></i>
         </button>
     </nav>
 
-    <!-- MODALES (Adaptados a Glass/Input-GP) -->
+    <!-- MODALES -->
     
     <!-- Transacción -->
     <div id="transaction-modal" class="modal-overlay">
         <div class="modal-content animate-scale-in">
-             <div class="flex justify-between items-center mb-6">
-                <h3 class="font-bold text-white text-lg" id="modal-tx-title">Nuevo Movimiento</h3>
-                <button onclick="closeModal('transaction-modal')" class="w-8 h-8 rounded-full bg-[#222] flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
+             <div class="flex justify-between items-center mb-6 border-b border-border pb-4">
+                <h3 class="font-black text-text text-lg uppercase tracking-wide" id="modal-tx-title">Nuevo Movimiento</h3>
+                <button onclick="closeModal('transaction-modal')" class="w-8 h-8 rounded-full bg-input-bg flex items-center justify-center text-text-mute hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
              </div>
              
              <form id="transaction-form" onsubmit="addTransaction(event)">
@@ -519,33 +550,33 @@
                 </div>
                 
                 <div class="mb-8 text-center">
-                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-2">Monto</label>
-                    <div class="relative inline-block">
-                        <span class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl font-bold text-neutral-600">$</span>
-                        <input type="number" id="t-amount" step="0.01" class="w-full bg-transparent border-b-2 border-[#333] text-4xl font-bold text-white py-2 pl-6 pr-2 text-center focus:border-white transition-colors placeholder-[#333]" placeholder="0.00" required>
+                    <label class="text-[10px] uppercase font-bold text-text-mute block mb-2">Monto</label>
+                    <div class="relative inline-block w-full">
+                        <span class="absolute left-8 top-1/2 -translate-y-1/2 text-2xl font-bold text-text-mute">$</span>
+                        <input type="number" id="t-amount" step="0.01" class="w-full bg-transparent border-b-2 border-border text-4xl font-black text-text py-2 pl-12 pr-2 text-center focus:border-brand transition-colors placeholder-zinc-800" placeholder="0.00" required>
                     </div>
                 </div>
 
                 <div class="mb-6">
-                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-3">Categoría</label>
+                    <label class="text-[10px] uppercase font-bold text-text-mute block mb-3 text-center">Categoría</label>
                     <div class="flex flex-wrap gap-2 justify-center" id="category-chips"></div>
                     <input type="hidden" id="t-category" required>
                 </div>
                 
-                <div class="space-y-4 mb-8 bg-black/30 p-4 rounded-xl border border-white/5">
+                <div class="space-y-4 mb-8 bg-input-bg p-4 rounded-xl border border-border">
                     <div>
-                        <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Concepto</label>
-                        <input type="text" id="t-title" class="input-gp" placeholder="Descripción corta...">
+                        <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Concepto</label>
+                        <input type="text" id="t-title" class="input-gp bg-bg border-border" placeholder="Descripción corta...">
                     </div>
                     <div>
-                        <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Fecha</label>
-                        <input type="datetime-local" id="t-date" class="input-gp" required>
+                        <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Fecha</label>
+                        <input type="datetime-local" id="t-date" class="input-gp bg-bg border-border" required>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
-                    <button type="button" id="btn-delete-tx" onclick="deleteCurrentTransaction()" class="hidden py-3 border border-red-900/50 text-red-500 font-bold text-xs rounded-lg hover:bg-red-900/20 transition-colors">ELIMINAR</button>
-                    <button type="submit" id="btn-save-tx" class="col-span-2 py-3 bg-white text-black font-bold text-xs rounded-lg hover:bg-neutral-200 shadow-lg shadow-white/10 transition-colors">GUARDAR</button>
+                    <button type="button" id="btn-delete-tx" onclick="deleteCurrentTransaction()" class="hidden py-3 border border-alert bg-alert/10 text-alert font-bold text-xs rounded-xl hover:bg-alert/20 transition-colors uppercase">ELIMINAR</button>
+                    <button type="submit" id="btn-save-tx" class="col-span-2 py-3 bg-brand text-white font-bold text-xs rounded-xl hover:bg-red-600 shadow-lg shadow-brand/20 transition-colors uppercase tracking-widest">GUARDAR</button>
                 </div>
              </form>
         </div>
@@ -553,22 +584,22 @@
 
     <!-- Ajustar Saldo -->
     <div id="adjust-modal" class="modal-overlay">
-        <div class="modal-content animate-scale-in">
+        <div class="modal-content animate-scale-in text-center">
              <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-white">Ajustar Saldo Real</h3>
-                <button onclick="closeModal('adjust-modal')" class="w-8 h-8 rounded-full bg-[#222] flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
+                <h3 class="font-bold text-text">Ajustar Saldo Real</h3>
+                <button onclick="closeModal('adjust-modal')" class="w-8 h-8 rounded-full bg-input-bg flex items-center justify-center text-text-mute hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
              </div>
-             <div class="bg-black/30 border border-white/10 p-4 rounded-xl mb-6 text-center">
-                 <p class="text-xs text-neutral-500 uppercase font-bold mb-1">El sistema calcula:</p>
-                 <p class="text-2xl font-bold text-white tracking-tight" id="adjust-current-display">$0.00</p>
+             <div class="bg-input-bg border border-border p-6 rounded-2xl mb-6">
+                 <p class="text-xs text-text-mute uppercase font-bold mb-1">El sistema calcula:</p>
+                 <p class="text-3xl font-black text-text tracking-tight" id="adjust-current-display">$0.00</p>
              </div>
              <form onsubmit="submitAdjustment(event)">
                 <div class="mb-6">
-                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-2">¿Cuánto tienes realmente?</label>
+                    <label class="text-[10px] uppercase font-bold text-text-mute block mb-2">¿Cuánto tienes realmente?</label>
                     <input type="number" id="adjust-amount" step="0.01" class="input-gp text-3xl font-bold text-center" placeholder="0.00" required>
-                    <p class="text-[10px] text-neutral-500 mt-2 text-center">Se creará un movimiento de "Ajuste" automáticamente.</p>
+                    <p class="text-[10px] text-text-mute mt-2">Se creará un movimiento de "Ajuste" automáticamente.</p>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold text-xs hover:bg-blue-500 shadow-lg shadow-blue-900/20 transition-colors">CORREGIR SALDO</button>
+                <button type="submit" class="w-full bg-brand text-white py-3 rounded-xl font-bold text-xs hover:bg-red-600 shadow-lg shadow-brand/20 transition-colors uppercase tracking-widest">CORREGIR SALDO</button>
              </form>
         </div>
     </div>
@@ -576,30 +607,30 @@
     <!-- Modal Fijo -->
     <div id="fixed-modal" class="modal-overlay">
         <div class="modal-content animate-scale-in">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-bold text-white">Nuevo Pago Fijo</h3>
-                <button onclick="closeModal('fixed-modal')" class="w-8 h-8 rounded-full bg-[#222] flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
+            <div class="flex justify-between items-center mb-6 border-b border-border pb-4">
+                <h3 class="font-black text-text uppercase">Nuevo Pago Fijo</h3>
+                <button onclick="closeModal('fixed-modal')" class="w-8 h-8 rounded-full bg-input-bg flex items-center justify-center text-text-mute hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
              </div>
              <form id="fixed-form" onsubmit="addFixed(event)" class="space-y-5">
                  <div>
-                      <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Nombre del Servicio</label>
+                      <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Nombre del Servicio</label>
                       <input type="text" id="f-title" class="input-gp" placeholder="Ej. Netflix, Renta..." required>
                  </div>
                  <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Monto Mensual</label>
+                        <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Monto Mensual</label>
                         <input type="number" id="f-amount" step="0.01" class="input-gp" placeholder="0.00" required>
                       </div>
                       <div>
-                        <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Día del mes</label>
-                        <select id="f-day" class="input-gp"></select>
+                        <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Día del mes</label>
+                        <select id="f-day" class="input-gp bg-input-bg"></select>
                       </div>
                  </div>
-                 <label class="flex items-center gap-3 cursor-pointer p-3 bg-black/30 border border-white/10 rounded-lg">
-                    <input type="checkbox" id="f-include" class="accent-white w-4 h-4" checked>
-                    <span class="text-xs text-neutral-300 font-bold">Descontar del Plan Diario</span>
+                 <label class="flex items-center gap-3 cursor-pointer p-3 bg-input-bg border border-border rounded-xl">
+                    <input type="checkbox" id="f-include" class="accent-brand w-4 h-4" checked>
+                    <span class="text-xs text-text font-bold">Descontar del Plan Diario</span>
                  </label>
-                 <button type="submit" class="w-full bg-white text-black py-3 rounded-lg font-bold text-xs hover:bg-neutral-200 shadow-lg shadow-white/10 transition-colors">GUARDAR PAGO</button>
+                 <button type="submit" class="w-full bg-brand text-white py-3 rounded-xl font-bold text-xs hover:bg-red-600 shadow-lg shadow-brand/20 transition-colors uppercase tracking-widest">GUARDAR</button>
              </form>
         </div>
     </div>
@@ -607,37 +638,37 @@
     <!-- Modal Préstamos -->
     <div id="loans-modal" class="modal-overlay">
         <div class="modal-content animate-scale-in">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-bold text-white">Nuevo Préstamo</h3>
-                <button onclick="closeModal('loans-modal')" class="w-8 h-8 rounded-full bg-[#222] flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
+            <div class="flex justify-between items-center mb-6 border-b border-border pb-4">
+                <h3 class="font-black text-text uppercase">Nuevo Préstamo</h3>
+                <button onclick="closeModal('loans-modal')" class="w-8 h-8 rounded-full bg-input-bg flex items-center justify-center text-text-mute hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
             </div>
             <form onsubmit="saveLoan(event)" class="space-y-4">
-                <div class="flex bg-[#222] rounded-lg p-1 border border-white/5">
-                    <button type="button" onclick="setLoanType('lent')" id="btn-lent" class="flex-1 py-2 text-xs font-bold rounded-md bg-[#333] text-green-500 transition-all">ME DEBEN</button>
-                    <button type="button" onclick="setLoanType('borrowed')" id="btn-borrowed" class="flex-1 py-2 text-xs font-bold text-neutral-500 transition-all">DEBO</button>
+                <div class="flex bg-input-bg rounded-xl p-1 border border-border">
+                    <button type="button" onclick="setLoanType('lent')" id="btn-lent" class="flex-1 py-2 text-xs font-bold rounded-lg bg-card text-money transition-all shadow-sm">ME DEBEN</button>
+                    <button type="button" onclick="setLoanType('borrowed')" id="btn-borrowed" class="flex-1 py-2 text-xs font-bold text-text-mute transition-all">DEBO</button>
                 </div>
                 <input type="hidden" id="loan-type" value="lent">
                 
                 <div>
-                      <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Persona</label>
+                      <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Persona</label>
                       <input type="text" id="loan-person" class="input-gp" required>
                  </div>
                  <div>
-                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Monto</label>
+                    <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Monto</label>
                     <input type="number" id="loan-amount" step="0.01" class="input-gp" required>
                  </div>
                  <div>
-                    <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Fecha Límite/Registro</label>
-                    <input type="date" id="loan-date" class="input-gp" required>
+                    <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Fecha Límite/Registro</label>
+                    <input type="date" id="loan-date" class="input-gp bg-input-bg" required>
                 </div>
-                <button type="submit" class="w-full bg-white text-black py-3 rounded-lg font-bold text-xs hover:bg-neutral-200 shadow-lg shadow-white/10 transition-colors">GUARDAR</button>
+                <button type="submit" class="w-full bg-brand text-white py-3 rounded-xl font-bold text-xs hover:bg-red-600 shadow-lg shadow-brand/20 transition-colors uppercase tracking-widest">GUARDAR</button>
             </form>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-white text-black px-6 py-3 rounded-full shadow-[0_10px_30px_rgba(255,255,255,0.2)] z-[200] opacity-0 pointer-events-none font-bold text-xs flex items-center gap-2">
-        <i class="ph-bold ph-check-circle text-lg text-green-600"></i>
+    <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-white text-black px-6 py-3 rounded-full shadow-[0_10px_30px_rgba(255,255,255,0.2)] z-[2000] opacity-0 pointer-events-none font-bold text-xs flex items-center gap-2">
+        <i class="ph-bold ph-check-circle text-lg text-brand"></i>
         <span id="toast-msg">Mensaje</span>
     </div>
 
@@ -744,7 +775,9 @@
                 document.getElementById('login-view').classList.add('hidden');
                 document.getElementById('main-container').classList.remove('hidden');
                 document.getElementById('global-nav').classList.remove('hidden');
+                document.getElementById('global-nav').classList.add('flex');
                 document.getElementById('bottom-nav').classList.remove('hidden');
+                document.getElementById('bottom-nav').classList.add('grid');
                 
                 document.getElementById('user-display-name').textContent = user.displayName || 'Usuario';
                 document.getElementById('user-display-email').textContent = user.email;
@@ -755,7 +788,9 @@
                 currentUser = null;
                 document.getElementById('main-container').classList.add('hidden');
                 document.getElementById('global-nav').classList.add('hidden');
+                document.getElementById('global-nav').classList.remove('flex');
                 document.getElementById('bottom-nav').classList.add('hidden');
+                document.getElementById('bottom-nav').classList.remove('grid');
                 document.getElementById('login-view').classList.remove('hidden');
                 document.getElementById('loading-screen').classList.add('hidden');
             }
@@ -908,11 +943,11 @@
             document.getElementById('loan-type').value = type;
 
             if (type === 'lent') {
-                btnLent.className = "flex-1 py-2 text-xs font-bold rounded-md bg-[#333] text-green-500 transition-colors border border-green-900/30";
-                btnBorrowed.className = "flex-1 py-2 text-xs font-bold text-neutral-500 transition-colors";
+                btnLent.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-card text-money transition-all shadow-sm";
+                btnBorrowed.className = "flex-1 py-2 text-xs font-bold text-text-mute transition-all";
             } else {
-                btnBorrowed.className = "flex-1 py-2 text-xs font-bold rounded-md bg-[#333] text-red-500 transition-colors border border-red-900/30";
-                btnLent.className = "flex-1 py-2 text-xs font-bold text-neutral-500 transition-colors";
+                btnBorrowed.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-card text-brand transition-all shadow-sm";
+                btnLent.className = "flex-1 py-2 text-xs font-bold text-text-mute transition-all";
             }
         };
 
@@ -1115,8 +1150,6 @@
             document.getElementById('total-income').textContent = formatCurrency(showInc);
             document.getElementById('total-expense').textContent = formatCurrency(showExp);
 
-            // Progress bar calc using Total Monthly Income vs Expense
-            // Using logic: If Income is 0, bar is full if expense > 0.
             const totalMonthlyIncome = incM;
             const totalMonthlyExpense = expM;
             
@@ -1130,9 +1163,8 @@
             document.getElementById('balance-progress').style.width = `${percent}%`;
             document.getElementById('progress-percent').textContent = `${Math.round(percent)}%`;
             
-            // Color logic for bar
             const bar = document.getElementById('balance-progress');
-            bar.className = `h-full w-0 transition-all duration-700 ease-out shadow-[0_0_15px_rgba(255,255,255,0.8)] ${percent > 90 ? 'bg-red-500' : (percent > 60 ? 'bg-yellow-400' : 'bg-white')}`;
+            bar.className = `h-full w-0 transition-all duration-700 ease-out shadow-[0_0_15px_rgba(255,255,255,0.8)] ${percent > 90 ? 'bg-alert' : (percent > 60 ? 'bg-yellow-400' : 'bg-white')}`;
 
             const listEl = document.getElementById('recent-list');
             const displayTx = monthlyTx;
@@ -1140,7 +1172,7 @@
             displayTx.sort((a,b) => new Date(b.date) - new Date(a.date));
             
             if(displayTx.length === 0) {
-                listEl.innerHTML = '<div class="text-center text-neutral-600 text-xs py-4 italic">Sin movimientos este mes</div>';
+                listEl.innerHTML = '<div class="text-center text-text-mute text-xs py-4 italic font-medium">Sin movimientos este mes</div>';
             } else {
                 const listHTML = displayTx.slice(0, 5).map(t => createTxHTML(t)).join('');
                 listEl.innerHTML = listHTML;
@@ -1168,21 +1200,24 @@
                        dateDisplay = d.getDate() + '/' + (d.getMonth()+1);
                 }
             }
+            
+            let amountClass = isInc ? 'text-money bg-emerald-900/20' : 'text-text bg-white/5';
+            let iconClass = isInc ? 'bg-green-900/20 text-money' : 'bg-input-bg text-text-mute';
 
             return `
-            <div class="flex justify-between items-center p-3 rounded-xl bg-black/40 border border-[#262626] hover:bg-black/60 hover:border-white/20 cursor-pointer transition-all group glass-panel shadow-none" onclick="editTransaction('${t.id}')">
+            <div class="flex justify-between items-center p-3 rounded-xl bg-card border border-border hover:bg-input-bg cursor-pointer transition-all group shadow-sm" onclick="editTransaction('${t.id}')">
                 <div class="flex items-center gap-3 overflow-hidden flex-1">
-                    <div class="w-9 h-9 rounded-lg bg-[#222] flex items-center justify-center text-neutral-400 border border-[#333] group-hover:border-neutral-500 group-hover:text-white transition-colors shrink-0">
+                    <div class="w-10 h-10 rounded-xl ${iconClass} flex items-center justify-center border border-border group-hover:border-brand/50 group-hover:text-text transition-colors shrink-0">
                         <i class="ph-fill ${icon} text-lg"></i>
                     </div>
                     <div class="min-w-0">
-                        <h4 class="font-bold text-neutral-300 text-xs truncate group-hover:text-white transition-colors">${t.title}</h4>
-                        <p class="text-[10px] text-neutral-500 uppercase font-bold truncate">
+                        <h4 class="font-bold text-text text-xs truncate group-hover:text-white transition-colors uppercase tracking-wide">${t.title}</h4>
+                        <p class="text-[10px] text-text-mute uppercase font-bold truncate">
                             ${t.category} • ${dateDisplay}
                         </p>
                     </div>
                 </div>
-                <span class="font-bold text-sm ${isInc ? 'text-green-500' : 'text-neutral-200'} ml-2">
+                <span class="font-black text-xs ${amountClass} px-2 py-1 rounded-lg ml-2">
                     ${isInc ? '+' : '-'}${formatCurrency(t.amount)}
                 </span>
             </div>
@@ -1200,7 +1235,7 @@
             if(filter !== 'all') txs = txs.filter(t => t.type === filter);
             
             if(txs.length === 0) {
-                list.innerHTML = '<div class="text-center text-neutral-600 py-8 text-xs flex flex-col items-center gap-2"><i class="ph-bold ph-ghost text-2xl"></i><span>Sin registros aún</span></div>';
+                list.innerHTML = '<div class="text-center text-text-mute py-8 text-xs flex flex-col items-center gap-2"><i class="ph-bold ph-ghost text-2xl"></i><span class="font-medium">Sin registros aún</span></div>';
                 return;
             }
 
@@ -1227,10 +1262,10 @@
                 const txItemsHTML = grouped[date].map(t => createTxHTML(t)).join('');
                 
                 groupDiv.innerHTML = `
-                    <div class="sticky top-12 bg-black/95 backdrop-blur-sm z-10 py-1 mb-2 border-b border-[#262626]">
-                        <h3 class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest pl-1">${label}</h3>
+                    <div class="sticky top-14 bg-bg/95 backdrop-blur-sm z-10 py-2 mb-2 border-b border-border">
+                        <h3 class="text-[10px] font-black text-text-mute uppercase tracking-widest pl-1 flex items-center gap-2"><i class="ph-fill ph-calendar-blank"></i> ${label}</h3>
                     </div>
-                    <div class="space-y-1">
+                    <div class="space-y-2">
                         ${txItemsHTML}
                     </div>
                 `;
@@ -1241,7 +1276,7 @@
         function renderFixed() {
             const list = document.getElementById('fixed-list');
             if(window.appData.fixed.length === 0) {
-                list.innerHTML = '<div class="text-center text-neutral-600 py-4 col-span-full text-xs italic">No has configurado pagos fijos</div>';
+                list.innerHTML = '<div class="text-center text-text-mute py-4 col-span-full text-xs italic font-medium">No has configurado pagos fijos</div>';
                 return;
             }
 
@@ -1249,28 +1284,28 @@
                 const isPaid = isFixedPaidThisMonth(f.id);
                 const isIgnored = f.ignoreBudget;
                 
-                const bgClass = isPaid ? "bg-green-900/10 border-green-900/30" : "bg-[#171717] border-[#262626]";
-                const textClass = isPaid ? "text-green-500" : (isIgnored ? "text-neutral-500 line-through" : "text-neutral-200");
+                const bgClass = isPaid ? "bg-emerald-900/10 border-emerald-900/30" : "bg-card border-border";
+                const textClass = isPaid ? "text-money" : (isIgnored ? "text-text-mute line-through" : "text-text");
                 
                 const eyeIcon = isIgnored ? 'ph-eye-slash' : 'ph-eye';
-                const eyeColor = isIgnored ? 'text-neutral-600' : 'text-blue-500';
+                const eyeColor = isIgnored ? 'text-text-mute' : 'text-blue-500';
                 
                 const actionBtn = isPaid 
-                    ? `<div class="w-8 h-8 rounded-lg flex items-center justify-center text-green-500"><i class="ph-bold ph-check-circle text-xl"></i></div>`
-                    : `<button onclick="payFixed('${f.id}')" class="w-8 h-8 rounded-lg bg-[#222] flex items-center justify-center text-neutral-400 hover:text-white hover:bg-[#333] transition-all"><i class="ph-bold ph-check"></i></button>`;
+                    ? `<div class="w-8 h-8 rounded-lg flex items-center justify-center text-money bg-emerald-900/20"><i class="ph-bold ph-check-circle text-xl"></i></div>`
+                    : `<button onclick="payFixed('${f.id}')" class="w-8 h-8 rounded-lg bg-input-bg flex items-center justify-center text-text-mute hover:text-white hover:bg-white/10 transition-all border border-border"><i class="ph-bold ph-check"></i></button>`;
 
                 return `
-                <div class="${bgClass} border p-3 rounded-xl flex justify-between items-center transition-all glass-panel shadow-none">
+                <div class="${bgClass} border p-3 rounded-xl flex justify-between items-center transition-all shadow-sm">
                     <div>
-                        <p class="font-bold ${textClass} text-xs mb-0.5">${f.title}</p>
-                        <p class="text-[10px] text-neutral-500 font-bold uppercase flex items-center gap-1">
+                        <p class="font-bold ${textClass} text-xs mb-0.5 uppercase tracking-wide">${f.title}</p>
+                        <p class="text-[10px] text-text-mute font-bold uppercase flex items-center gap-1">
                              <i class="ph-bold ph-calendar-blank"></i> Día ${f.day} • ${formatCurrency(f.amount)}
                         </p>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="toggleFixedIgnore('${f.id}', ${!!isIgnored})" class="w-8 h-8 rounded-lg flex items-center justify-center ${eyeColor} hover:bg-[#222] transition-colors"><i class="ph-bold ${eyeIcon}"></i></button>
+                        <button onclick="toggleFixedIgnore('${f.id}', ${!!isIgnored})" class="w-8 h-8 rounded-lg flex items-center justify-center ${eyeColor} hover:bg-white/5 transition-colors"><i class="ph-bold ${eyeIcon}"></i></button>
                         ${actionBtn}
-                        <button onclick="deleteFixed('${f.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-neutral-600 hover:text-red-500 hover:bg-[#222] transition-colors"><i class="ph-bold ph-trash"></i></button>
+                        <button onclick="deleteFixed('${f.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-text-mute hover:text-alert hover:bg-alert/10 transition-colors"><i class="ph-bold ph-trash"></i></button>
                     </div>
                 </div>
                 `;
@@ -1296,30 +1331,30 @@
             document.getElementById('loans-i-owe').textContent = formatCurrency(iOwe);
 
             if(loans.length === 0) {
-                list.innerHTML = '<div class="text-center text-neutral-600 py-4 col-span-full text-xs italic">Sin préstamos activos</div>';
+                list.innerHTML = '<div class="text-center text-text-mute py-4 col-span-full text-xs italic font-medium">Sin préstamos activos</div>';
                 return;
             }
 
             const html = loans.map(l => {
                 const isLent = l.type === 'lent'; 
                 const icon = isLent ? 'ph-arrow-up-right' : 'ph-arrow-down-left';
-                const color = isLent ? 'text-green-500' : 'text-red-500';
-                const bgIcon = isLent ? 'bg-green-900/20' : 'bg-red-900/20';
+                const color = isLent ? 'text-money' : 'text-brand';
+                const bgIcon = isLent ? 'bg-emerald-900/20' : 'bg-red-900/20';
 
                 return `
-                <div class="bg-[#171717] border border-[#262626] p-3 rounded-xl flex justify-between items-center glass-panel shadow-none">
+                <div class="bg-card border border-border p-3 rounded-xl flex justify-between items-center shadow-sm">
                     <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-lg ${bgIcon} flex items-center justify-center ${color} shrink-0">
+                        <div class="w-9 h-9 rounded-lg ${bgIcon} flex items-center justify-center ${color} shrink-0 border border-border">
                             <i class="ph-bold ${icon} text-lg"></i>
                         </div>
                         <div>
-                            <p class="font-bold text-neutral-300 text-xs">${l.person}</p>
-                            <p class="text-[10px] text-neutral-500 font-bold uppercase">${l.date}</p>
+                            <p class="font-bold text-text text-xs uppercase tracking-wide">${l.person}</p>
+                            <p class="text-[10px] text-text-mute font-bold uppercase">${l.date}</p>
                         </div>
                     </div>
                      <div class="flex items-center gap-3">
-                        <p class="font-bold ${color} text-xs">${formatCurrency(l.amount)}</p>
-                        <button onclick="deleteLoan('${l.id}')" class="text-neutral-600 hover:text-red-500 transition-colors"><i class="ph-bold ph-trash"></i></button>
+                        <p class="font-black ${color} text-xs">${formatCurrency(l.amount)}</p>
+                        <button onclick="deleteLoan('${l.id}')" class="text-text-mute hover:text-alert transition-colors"><i class="ph-bold ph-trash"></i></button>
                     </div>
                 </div>
                 `;
@@ -1463,15 +1498,15 @@
             
             const explEl = document.getElementById('formula-explanation');
 
-            explEl.innerHTML = `Presupuesto base: <strong class="text-white">${formatCurrency(budgetForToday)}</strong>.<br>Gastado hoy: <strong class="text-neutral-400">-${formatCurrency(spentToday)}</strong>.`;
+            explEl.innerHTML = `Base: <strong class="text-white">${formatCurrency(budgetForToday)}</strong> • Gastado: <strong class="text-text-mute">-${formatCurrency(spentToday)}</strong>`;
             
             const remainingEl = document.getElementById('formula-daily');
             remainingEl.textContent = formatCurrency(remainingToday);
             
-            if(remainingToday < 0) remainingEl.classList.add('text-red-500');
-            else remainingEl.classList.remove('text-red-500');
+            if(remainingToday < 0) remainingEl.classList.add('text-alert');
+            else remainingEl.classList.remove('text-alert');
 
-            document.getElementById('formula-days-left').textContent = `Fijos pend: -${formatCurrency(pendingFixedSum)}`;
+            document.getElementById('formula-days-left').textContent = `Fijos: -${formatCurrency(pendingFixedSum)}`;
         }
 
         window.runSimulation = function() {
@@ -1508,8 +1543,8 @@
             const dailyBudget = totalPool / diffDays;
 
             resultEl.textContent = formatCurrency(dailyBudget);
-            if(dailyBudget < 0) resultEl.classList.add('text-red-400');
-            else resultEl.classList.remove('text-red-400');
+            if(dailyBudget < 0) resultEl.classList.add('text-alert');
+            else resultEl.classList.remove('text-alert');
 
             detailsEl.innerHTML = `
                 Días: <strong>${diffDays}</strong><br>
@@ -1521,13 +1556,13 @@
             document.querySelectorAll('section[id^="view-"]').forEach(el => el.classList.add('hidden'));
             document.getElementById(`view-${id}`).classList.remove('hidden');
             
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('text-white'));
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.add('text-neutral-500'));
-            
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.nav-btn i').forEach(i => i.classList.remove('text-white'));
+            document.querySelectorAll('.nav-btn span').forEach(s => s.classList.remove('text-white'));
+
             const mobBtn = document.getElementById(`nav-${id}`);
             if(mobBtn) {
-                mobBtn.classList.remove('text-neutral-500');
-                mobBtn.classList.add('text-white');
+                mobBtn.classList.add('active');
             }
 
             if(id === 'dashboard') renderDashboard();
