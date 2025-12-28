@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>God's Plan | Fórmula Corregida</title>
+    <title>God's Plan | Aurora Edition</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,67 +12,140 @@
     <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
 
     <style>
-        /* Estilos base */
-        body { background-color: #0a0a0a; color: #e5e5e5; font-family: system-ui, -apple-system, sans-serif; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: #3b82f6; }
-        
-        /* Modales */
+        /* --- TU CSS PERSONALIZADO --- */
+        :root {
+            --bg: #000000;
+            --card: #111111;
+            --border: #262626;
+            --input-bg: #0a0a0a;
+            --text: #e5e5e5;
+            --text-mute: #737373;
+            --brand: #dc2626;
+            --login-brand: #E70000;
+            --money: #16a34a;
+            --alert: #b91c1c;
+            --warn: #d97706;
+            --header-bg: rgba(0, 0, 0, 0.9);
+        }
+
+        * { -webkit-tap-highlight-color: transparent; outline: none; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+        body { overflow-x: hidden; background-color: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .animate-pulse-custom { animation: pulse 2s infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .spinner { border: 4px solid var(--border); border-top: 4px solid var(--brand); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -2;
+            background: radial-gradient(circle at 50% 50%, rgba(50, 0, 0, 0.4) 0%, transparent 60%),
+                        radial-gradient(circle at 80% 20%, rgba(231, 0, 0, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 20% 80%, rgba(100, 0, 0, 0.2) 0%, transparent 40%);
+            filter: blur(80px);
+            pointer-events: none;
+        }
+
+        .grid-bg {
+            position: fixed; inset: 0; z-index: -1;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .input-gp {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); width: 100%; padding: 14px 16px; border-radius: 16px;
+            font-size: 0.95rem; font-weight: 500;
+        }
+        .input-gp:focus { border-color: var(--login-brand); outline: none; background: rgba(231,0,0,0.05); box-shadow: 0 0 20px rgba(231,0,0,0.2); transform: translateY(-2px); }
+        .input-gp::placeholder { color: rgba(255,255,255,0.3); }
+
+        .glass-panel {
+            background: rgba(15, 15, 15, 0.6); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-switch { position: relative; display: flex; background: rgba(0,0,0,0.3); border-radius: 12px; padding: 4px; margin-bottom: 24px; }
+        .auth-switch button { flex: 1; padding: 8px; font-size: 0.8rem; font-weight: 700; z-index: 1; color: #666; transition: 0.3s; cursor: pointer; }
+        .auth-switch button.active { color: white; }
+        .auth-switch-glider {
+            position: absolute; top: 4px; left: 4px; height: calc(100% - 8px); width: calc(50% - 4px);
+            background: #222; border-radius: 8px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(255,255,255,0.1);
+        }
+        /* Clase auxiliar para mover el glider */
+        .auth-mode-register .auth-switch-glider { transform: translateX(100%); }
+
+        .btn-glow { position: relative; overflow: hidden; background: var(--login-brand); color: white; transition: all 0.3s; cursor: pointer; }
+        .btn-glow:hover { box-shadow: 0 0 30px rgba(231, 0, 0, 0.4); transform: translateY(-2px); }
+
+        /* Estilos adicionales necesarios para la funcionalidad */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
         .modal-overlay.is-open { display: flex; }
-        .modal-content { background: #171717; width: 100%; max-width: 400px; border-radius: 16px; border: 1px solid #262626; padding: 24px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .modal-content { background: var(--card); width: 100%; max-width: 400px; border-radius: 16px; border: 1px solid var(--border); padding: 24px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
 
-        /* Chips */
-        .chip { border: 1px solid #262626; background: #171717; color: #a3a3a3; padding: 6px 12px; border-radius: 999px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
-        .chip.active { background: #e5e5e5; color: #0a0a0a; border-color: #e5e5e5; font-weight: bold; transform: scale(1.05); }
-        
-        /* Toast */
+        .chip { border: 1px solid var(--border); background: var(--card); color: var(--text-mute); padding: 6px 12px; border-radius: 999px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
+        .chip.active { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: bold; transform: scale(1.05); }
+
         #toast { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease; }
+        
+        /* Utilidades Tailwind overrides */
+        .text-brand { color: var(--brand); }
+        .border-brand { border-color: var(--brand); }
     </style>
 </head>
 <body class="flex flex-col h-[100dvh] overflow-hidden">
 
+    <!-- FONDOS ANIMADOS -->
+    <div class="aurora-bg"></div>
+    <div class="grid-bg"></div>
+
     <!-- Loading -->
-    <div id="loading-screen" class="fixed inset-0 bg-[#0a0a0a] z-[100] flex items-center justify-center">
+    <div id="loading-screen" class="fixed inset-0 bg-black z-[100] flex items-center justify-center">
         <div class="text-center">
-            <i class="ph-bold ph-spinner animate-spin text-3xl text-neutral-500 mb-2"></i>
+            <div class="spinner mx-auto mb-4"></div>
             <p class="text-neutral-500 font-mono text-sm">Sincronizando...</p>
         </div>
     </div>
 
-    <!-- Login View -->
-    <div id="login-view" class="fixed inset-0 z-[90] bg-[#0a0a0a] flex flex-col items-center justify-center p-6 hidden">
-        <div class="w-full max-w-sm bg-neutral-900 border border-neutral-800 rounded-xl p-8 shadow-2xl">
+    <!-- Login View (Rediseñado con CSS Nuevo) -->
+    <div id="login-view" class="fixed inset-0 z-[90] bg-black/50 backdrop-blur-sm flex flex-col items-center justify-center p-6 hidden">
+        <div class="w-full max-w-sm glass-panel rounded-2xl p-8 animate-fade-in">
             <div class="text-center mb-8">
-                <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center mx-auto mb-4 text-black">
+                <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center mx-auto mb-4 text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]">
                      <i class="ph-bold ph-wallet text-2xl"></i>
                 </div>
-                <h1 class="text-2xl font-bold text-white mb-2">GOD'S PLAN</h1>
-                <p class="text-neutral-500 text-xs uppercase tracking-wider">Control Financiero Estricto</p>
+                <h1 class="text-2xl font-bold text-white mb-2 tracking-wider">GOD'S PLAN</h1>
+                <p class="text-neutral-500 text-xs uppercase tracking-widest">Control Financiero Estricto</p>
             </div>
 
-            <div class="flex bg-neutral-800 p-1 rounded-lg mb-6">
-                <button onclick="window.authApp.toggleAuth('login')" id="tab-login" class="flex-1 py-2 text-xs font-bold rounded bg-neutral-700 text-white transition-all">INGRESAR</button>
-                <button onclick="window.authApp.toggleAuth('register')" id="tab-register" class="flex-1 py-2 text-xs font-bold text-neutral-400 transition-all">REGISTRO</button>
+            <!-- Switcher con Glider Animation -->
+            <div id="auth-switcher-container" class="auth-switch">
+                <div class="auth-switch-glider"></div>
+                <button onclick="window.authApp.toggleAuth('login')" id="tab-login" class="active">INGRESAR</button>
+                <button onclick="window.authApp.toggleAuth('register')" id="tab-register">REGISTRO</button>
             </div>
 
             <form onsubmit="event.preventDefault(); window.authApp.handleAuthSubmit();" class="space-y-4">
-                <div id="field-name" class="hidden animate-fade-in">
-                    <input type="text" id="input-name" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white placeholder-neutral-600 focus:border-neutral-500 transition-colors" placeholder="Tu Nombre">
+                <div id="field-name" class="hidden">
+                    <input type="text" id="input-name" class="input-gp" placeholder="Tu Nombre">
                 </div>
                 <div>
-                    <input type="text" id="input-id" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white placeholder-neutral-600 focus:border-neutral-500 transition-colors" placeholder="Usuario o Email" required>
+                    <input type="text" id="input-id" class="input-gp" placeholder="Usuario o Email" required>
                 </div>
                 <div>
-                    <input type="password" id="input-pass" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white placeholder-neutral-600 focus:border-neutral-500 transition-colors" placeholder="Contraseña" required>
+                    <input type="password" id="input-pass" class="input-gp" placeholder="Contraseña" required>
                 </div>
 
                 <div id="auth-error-msg" class="hidden text-red-400 text-xs font-bold text-center py-2 bg-red-900/10 rounded border border-red-900/50">
                     <span id="auth-error-txt">Error</span>
                 </div>
 
-                <button type="submit" id="btn-submit" class="w-full bg-white text-black py-3 rounded-lg font-bold text-sm hover:bg-neutral-200 transition-colors shadow-lg shadow-white/10">
+                <button type="submit" id="btn-submit" class="w-full btn-glow py-3 rounded-xl font-bold text-sm mt-4">
                     <span id="btn-text">INICIAR SESIÓN</span>
                 </button>
             </form>
@@ -80,9 +153,9 @@
     </div>
     
     <!-- Navbar Superior -->
-    <nav id="global-nav" class="h-16 bg-neutral-900/80 backdrop-blur-md border-b border-neutral-800 flex items-center justify-between px-4 shrink-0 hidden sticky top-0 z-30">
+    <nav id="global-nav" class="h-16 bg-black/80 backdrop-blur-md border-b border-[#262626] flex items-center justify-between px-4 shrink-0 hidden sticky top-0 z-30">
         <div class="flex items-center gap-3">
-             <div class="w-9 h-9 bg-neutral-800 rounded-lg flex items-center justify-center text-white border border-neutral-700">
+             <div class="w-9 h-9 bg-[#111] rounded-lg flex items-center justify-center text-white border border-[#262626]">
                 <i class="ph-bold ph-wallet"></i>
             </div>
             <div>
@@ -92,8 +165,8 @@
         </div>
         
         <!-- Menú Desktop -->
-        <div class="hidden md:flex gap-1 bg-neutral-900 p-1 rounded-lg border border-neutral-800">
-            <button onclick="switchTab('dashboard')" class="px-4 py-1.5 rounded text-xs font-bold text-white bg-neutral-800">Panel</button>
+        <div class="hidden md:flex gap-1 bg-[#111] p-1 rounded-lg border border-[#262626]">
+            <button onclick="switchTab('dashboard')" class="px-4 py-1.5 rounded text-xs font-bold text-white bg-[#222]">Panel</button>
             <button onclick="switchTab('history')" class="px-4 py-1.5 rounded text-xs font-bold text-neutral-400 hover:text-white transition-colors">Historial</button>
             <button onclick="switchTab('payments')" class="px-4 py-1.5 rounded text-xs font-bold text-neutral-400 hover:text-white transition-colors">Pagos</button>
             <button onclick="switchTab('settings')" class="px-4 py-1.5 rounded text-xs font-bold text-neutral-400 hover:text-white transition-colors">Ajustes</button>
@@ -103,21 +176,21 @@
     </nav>
 
     <!-- Contenido Principal -->
-    <main id="main-container" class="flex-1 overflow-y-auto p-4 md:p-6 pb-24 relative hidden scroll-smooth">
+    <main id="main-container" class="flex-1 overflow-y-auto p-4 md:p-6 pb-24 relative hidden scroll-smooth no-scrollbar">
         <div class="max-w-3xl mx-auto space-y-6">
 
             <!-- DASHBOARD -->
             <section id="view-dashboard" class="space-y-6 animate-fade-in">
                 
-                <!-- Tarjeta de Balance -->
-                <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+                <!-- Tarjeta de Balance con Glass Panel -->
+                <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
                     <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="ph-fill ph-wallet text-9xl"></i>
+                        <i class="ph-fill ph-wallet text-9xl text-white"></i>
                     </div>
 
                     <div class="flex justify-between items-start mb-2 relative z-10">
                         <span class="text-xs font-bold text-neutral-500 uppercase tracking-widest">Disponible Real</span>
-                        <button onclick="openAdjustModal()" class="text-blue-400 hover:text-blue-300 text-xs font-bold bg-blue-900/20 px-2 py-1 rounded border border-blue-900/30 transition-colors">Ajustar</button>
+                        <button onclick="openAdjustModal()" class="text-neutral-400 hover:text-white text-xs font-bold bg-white/5 px-2 py-1 rounded border border-white/10 transition-colors">Ajustar</button>
                     </div>
                     
                     <div class="text-5xl md:text-6xl font-bold text-white mb-6 relative z-10 tracking-tight" id="total-balance">$0.00</div>
@@ -127,12 +200,12 @@
                             <span>Presupuesto usado</span>
                             <span id="progress-percent">0%</span>
                         </div>
-                        <div class="h-3 bg-neutral-800 rounded-full w-full overflow-hidden border border-neutral-800">
-                            <div id="balance-progress" class="h-full bg-white w-0 transition-all duration-700 ease-out shadow-[0_0_10px_rgba(255,255,255,0.5)]"></div>
+                        <div class="h-3 bg-black/50 rounded-full w-full overflow-hidden border border-white/10">
+                            <div id="balance-progress" class="h-full bg-white w-0 transition-all duration-700 ease-out shadow-[0_0_15px_rgba(255,255,255,0.8)]"></div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 border-t border-neutral-800 pt-4 relative z-10">
+                    <div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-4 relative z-10">
                         <div>
                             <span class="block text-[10px] text-neutral-500 uppercase font-bold mb-1 flex items-center gap-1"><i class="ph-bold ph-arrow-down-left text-green-500"></i> Ingresos</span>
                             <span class="text-lg font-bold text-green-400" id="total-income">$0.00</span>
@@ -146,18 +219,18 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Fórmula del Día -->
-                    <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden h-full">
+                    <div class="glass-panel rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden h-full">
                         <div>
                              <div class="flex justify-between items-start mb-3">
                                 <p class="text-xs font-bold text-purple-400 uppercase tracking-widest flex items-center gap-2">
                                     <i class="ph-fill ph-calculator"></i> PLAN DEL DÍA
                                 </p>
-                                <span id="payday-badge" class="text-[10px] bg-neutral-800 text-neutral-400 px-2 py-1 rounded border border-neutral-700 font-mono">...</span>
+                                <span id="payday-badge" class="text-[10px] bg-black/50 text-neutral-400 px-2 py-1 rounded border border-white/10 font-mono">...</span>
                             </div>
                             <p class="text-sm text-neutral-300 leading-relaxed mb-4 font-light" id="formula-explanation">Analizando tus finanzas...</p>
                         </div>
                         
-                        <div class="pt-4 border-t border-neutral-800 mt-auto">
+                        <div class="pt-4 border-t border-white/10 mt-auto">
                             <div class="flex justify-between items-end">
                                 <div>
                                     <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Límite Diario Seguro</p>
@@ -173,13 +246,13 @@
 
                     <!-- Botones de Acción -->
                     <div class="grid grid-rows-2 gap-4 h-full">
-                        <button onclick="openAddModal('income')" class="bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 hover:border-green-900/50 rounded-2xl text-green-500 font-bold text-sm flex items-center justify-center gap-3 transition-all group">
+                        <button onclick="openAddModal('income')" class="glass-panel hover:bg-white/5 rounded-2xl text-green-500 font-bold text-sm flex items-center justify-center gap-3 transition-all group border-l-4 border-l-green-500">
                             <div class="w-8 h-8 rounded-full bg-green-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <i class="ph-bold ph-arrow-down-left"></i>
                             </div>
                             REGISTRAR INGRESO
                         </button>
-                        <button onclick="openAddModal('expense')" class="bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 hover:border-red-900/50 rounded-2xl text-red-500 font-bold text-sm flex items-center justify-center gap-3 transition-all group">
+                        <button onclick="openAddModal('expense')" class="glass-panel hover:bg-white/5 rounded-2xl text-brand font-bold text-sm flex items-center justify-center gap-3 transition-all group border-l-4 border-l-red-600">
                             <div class="w-8 h-8 rounded-full bg-red-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <i class="ph-bold ph-minus"></i>
                             </div>
@@ -188,8 +261,8 @@
                     </div>
                 </div>
 
-                <!-- SIMULADOR DE INGRESO (MEJORADO) -->
-                <div id="simulation-container" class="hidden bg-gradient-to-r from-blue-950/40 to-neutral-900 border border-blue-900/50 rounded-2xl p-6 relative overflow-hidden">
+                <!-- SIMULADOR DE INGRESO (Estilo actualizado) -->
+                <div id="simulation-container" class="hidden glass-panel rounded-2xl p-6 relative overflow-hidden bg-blue-900/10 border-blue-500/20">
                     <div class="absolute -right-4 -top-4 text-blue-900/20 z-0">
                          <i class="ph-fill ph-crystal-ball text-9xl"></i>
                     </div>
@@ -207,19 +280,19 @@
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="text-[10px] uppercase font-bold text-blue-300/70 block mb-1">Fecha Futura</label>
-                                        <input type="date" id="sim-date" class="w-full bg-neutral-950/50 border border-blue-900/30 p-2.5 rounded-lg text-sm text-white focus:border-blue-500 transition-colors" onchange="runSimulation()">
+                                        <input type="date" id="sim-date" class="input-gp bg-black/40 border-blue-500/30 text-xs py-2" onchange="runSimulation()">
                                     </div>
                                     <div>
                                         <label class="text-[10px] uppercase font-bold text-blue-300/70 block mb-1">Monto a Recibir</label>
-                                        <input type="number" id="sim-amount" class="w-full bg-neutral-950/50 border border-blue-900/30 p-2.5 rounded-lg text-sm text-white focus:border-blue-500 transition-colors" placeholder="0.00" oninput="runSimulation()">
+                                        <input type="number" id="sim-amount" class="input-gp bg-black/40 border-blue-500/30 text-xs py-2" placeholder="0.00" oninput="runSimulation()">
                                     </div>
                                 </div>
                                 <p class="text-[10px] text-blue-300/50 leading-tight">
-                                    * Este cálculo simula los gastos fijos día a día hasta la fecha seleccionada para darte un presupuesto real.
+                                    * Este cálculo simula los gastos fijos día a día hasta la fecha seleccionada.
                                 </p>
                             </div>
                             
-                            <div class="bg-neutral-950/80 rounded-xl p-4 flex flex-col justify-center border border-blue-900/30">
+                            <div class="bg-black/40 rounded-xl p-4 flex flex-col justify-center border border-blue-900/30">
                                 <p class="text-xs text-blue-300/70 mb-1">Nuevo límite diario proyectado:</p>
                                 <p class="text-3xl font-bold text-blue-400 tracking-tight" id="sim-result">$0.00</p>
                                 <p class="text-[10px] text-neutral-400 mt-2 font-mono" id="sim-details">Esperando datos...</p>
@@ -243,7 +316,7 @@
 
             <!-- HISTORIAL -->
             <section id="view-history" class="hidden space-y-4 animate-fade-in">
-                <div class="flex items-center justify-between sticky top-0 bg-[#0a0a0a] z-20 py-2 border-b border-neutral-800">
+                <div class="flex items-center justify-between sticky top-0 bg-black/80 backdrop-blur-md z-20 py-4 border-b border-[#262626]">
                     <h2 class="text-xl font-bold text-white">Historial</h2>
                      <div class="flex gap-2">
                         <button onclick="filterHistory('all')" class="filter-btn active chip" data-filter="all">Todos</button>
@@ -265,16 +338,16 @@
                             <i class="ph-bold ph-plus"></i> Nuevo
                         </button>
                     </div>
-                    <div class="bg-purple-900/20 border border-purple-900/50 p-4 rounded-xl text-xs text-purple-200 flex gap-3">
+                    <div class="glass-panel p-4 rounded-xl text-xs text-purple-200 flex gap-3 border border-purple-500/20 bg-purple-900/10">
                         <i class="ph-fill ph-info text-lg shrink-0"></i>
                         <div>
-                            Estos pagos se restan automáticamente de tu "Plan del Día" conforme se acerca la fecha de pago, asegurando que no gastes ese dinero.
+                            Estos pagos se restan automáticamente de tu "Plan del Día".
                         </div>
                     </div>
                     <div id="fixed-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
                 </div>
 
-                <div class="border-t border-neutral-800"></div>
+                <div class="border-t border-[#262626]"></div>
 
                 <!-- Sección Préstamos -->
                 <div class="space-y-4">
@@ -286,11 +359,11 @@
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-xl">
+                        <div class="glass-panel p-4 rounded-xl">
                             <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Me deben</p>
                             <p class="text-lg font-bold text-green-500" id="loans-owed-to-me">$0.00</p>
                         </div>
-                        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-xl">
+                        <div class="glass-panel p-4 rounded-xl">
                             <p class="text-[10px] text-neutral-500 uppercase font-bold mb-1">Debo</p>
                             <p class="text-lg font-bold text-red-500" id="loans-i-owe">$0.00</p>
                         </div>
@@ -306,9 +379,9 @@
                     <h2 class="text-xl font-bold text-white">Configuración</h2>
                 </div>
                 
-                <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl">
-                    <div class="flex items-center gap-4 mb-6 pb-6 border-b border-neutral-800">
-                        <div class="w-12 h-12 bg-neutral-800 rounded-full flex items-center justify-center text-white border border-neutral-700">
+                <div class="glass-panel p-6 rounded-2xl">
+                    <div class="flex items-center gap-4 mb-6 pb-6 border-b border-white/10">
+                        <div class="w-12 h-12 bg-[#222] rounded-full flex items-center justify-center text-white border border-[#333]">
                             <i class="ph-bold ph-user text-xl"></i>
                         </div>
                         <div>
@@ -322,20 +395,20 @@
                     </button>
                 </div>
 
-                <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl space-y-5">
+                <div class="glass-panel p-6 rounded-2xl space-y-5">
                     <h3 class="font-bold text-white text-sm flex items-center gap-2"><i class="ph-bold ph-calendar"></i> Frecuencia de Cobro</h3>
                     <p class="text-xs text-neutral-500">Esto ayuda a calcular los días restantes en tu Plan del Día.</p>
                     
                     <div class="space-y-2">
-                        <label class="flex items-center gap-3 p-3 bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer hover:border-neutral-700 transition-colors">
+                        <label class="flex items-center gap-3 p-3 bg-black/40 border border-white/10 rounded-lg cursor-pointer hover:border-white/20 transition-colors">
                             <input type="radio" name="pay-freq" value="biweekly" class="accent-white w-4 h-4" onchange="togglePaydayInput()">
                             <span class="text-sm text-neutral-300">Quincenal (15 y 30)</span>
                         </label>
-                        <label class="flex items-center gap-3 p-3 bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer hover:border-neutral-700 transition-colors">
+                        <label class="flex items-center gap-3 p-3 bg-black/40 border border-white/10 rounded-lg cursor-pointer hover:border-white/20 transition-colors">
                             <input type="radio" name="pay-freq" value="biweekly-custom" class="accent-white w-4 h-4" onchange="togglePaydayInput()">
                             <span class="text-sm text-neutral-300">Quincenal (Personalizado)</span>
                         </label>
-                        <label class="flex items-center gap-3 p-3 bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer hover:border-neutral-700 transition-colors">
+                        <label class="flex items-center gap-3 p-3 bg-black/40 border border-white/10 rounded-lg cursor-pointer hover:border-white/20 transition-colors">
                             <input type="radio" name="pay-freq" value="monthly" class="accent-white w-4 h-4" onchange="togglePaydayInput()">
                             <span class="text-sm text-neutral-300">Mensual</span>
                         </label>
@@ -343,34 +416,34 @@
 
                     <div id="monthly-select-container" class="hidden animate-fade-in">
                         <label class="text-[10px] text-neutral-500 font-bold uppercase block mb-1">Día de pago</label>
-                        <select id="payday-select" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors"></select>
+                        <select id="payday-select" class="input-gp bg-black/50 text-xs py-2"></select>
                     </div>
 
                     <div id="biweekly-custom-container" class="hidden grid grid-cols-2 gap-4 animate-fade-in">
                         <div>
                             <label class="text-[10px] text-neutral-500 font-bold uppercase block mb-1">Día 1</label>
-                            <select id="payday-1-select" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors"></select>
+                            <select id="payday-1-select" class="input-gp bg-black/50 text-xs py-2"></select>
                         </div>
                         <div>
                             <label class="text-[10px] text-neutral-500 font-bold uppercase block mb-1">Día 2</label>
-                            <select id="payday-2-select" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors"></select>
+                            <select id="payday-2-select" class="input-gp bg-black/50 text-xs py-2"></select>
                         </div>
                     </div>
                     
                     <button onclick="saveSettings()" class="w-full bg-white text-black py-3 rounded-lg font-bold text-xs hover:bg-neutral-200 mt-2 shadow-lg shadow-white/10 transition-colors">GUARDAR CONFIGURACIÓN</button>
                 </div>
                 
-                 <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl space-y-4">
+                 <div class="glass-panel p-6 rounded-2xl space-y-4">
                       <h3 class="font-bold text-white text-sm flex items-center gap-2"><i class="ph-bold ph-faders"></i> Extras</h3>
-                      <label class="flex items-center justify-between cursor-pointer p-2 hover:bg-neutral-800 rounded-lg transition-colors">
+                      <label class="flex items-center justify-between cursor-pointer p-2 hover:bg-white/5 rounded-lg transition-colors">
                         <div>
                              <span class="text-sm text-neutral-300 font-bold">Modo "Ahorro Forzoso"</span>
                              <p class="text-[10px] text-neutral-500">Oculta el 10% de tu saldo real.</p>
                         </div>
                         <input type="checkbox" id="toggle-forced-savings" class="accent-purple-500 w-5 h-5" onchange="saveSettings()">
                     </label>
-                    <div class="border-t border-neutral-800"></div>
-                    <label class="flex items-center justify-between cursor-pointer p-2 hover:bg-neutral-800 rounded-lg transition-colors">
+                    <div class="border-t border-white/10"></div>
+                    <label class="flex items-center justify-between cursor-pointer p-2 hover:bg-white/5 rounded-lg transition-colors">
                         <div>
                             <span class="text-sm text-neutral-300 font-bold">Habilitar Simulador</span>
                             <p class="text-[10px] text-neutral-500">Calculadora para ingresos futuros.</p>
@@ -379,29 +452,29 @@
                     </label>
                  </div>
 
-                <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl">
+                <div class="glass-panel p-6 rounded-2xl">
                     <h3 class="font-bold text-white text-sm mb-4">Gestión de Datos</h3>
                     <div class="flex gap-3">
-                        <button onclick="exportData()" class="flex-1 bg-neutral-950 border border-neutral-800 py-3 rounded-lg text-xs font-bold text-neutral-400 hover:text-white transition-colors border-dashed">Descargar JSON</button>
-                        <button onclick="document.getElementById('import-file').click()" class="flex-1 bg-neutral-950 border border-neutral-800 py-3 rounded-lg text-xs font-bold text-neutral-400 hover:text-white transition-colors border-dashed">Restaurar JSON</button>
+                        <button onclick="exportData()" class="flex-1 bg-black/40 border border-white/10 py-3 rounded-lg text-xs font-bold text-neutral-400 hover:text-white transition-colors border-dashed">Descargar JSON</button>
+                        <button onclick="document.getElementById('import-file').click()" class="flex-1 bg-black/40 border border-white/10 py-3 rounded-lg text-xs font-bold text-neutral-400 hover:text-white transition-colors border-dashed">Restaurar JSON</button>
                         <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this)">
                     </div>
-                    <button onclick="resetApp()" class="w-full mt-6 text-red-500 text-[10px] font-bold uppercase hover:text-red-400 transition-colors">Eliminar todos los datos y empezar de cero</button>
+                    <button onclick="resetApp()" class="w-full mt-6 text-brand text-[10px] font-bold uppercase hover:text-red-400 transition-colors">Eliminar todos los datos y empezar de cero</button>
                 </div>
             </section>
         </div>
     </main>
 
     <!-- Barra Inferior Móvil -->
-    <nav class="md:hidden fixed bottom-0 w-full bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-neutral-800 h-20 grid grid-cols-5 z-40 pb-4 px-2" id="bottom-nav">
+    <nav class="md:hidden fixed bottom-0 w-full bg-black/90 backdrop-blur-xl border-t border-[#262626] h-20 grid grid-cols-5 z-40 pb-4 px-2" id="bottom-nav">
         <button onclick="switchTab('dashboard')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white transition-colors group" id="nav-dashboard">
-            <div class="p-1 rounded-full group-hover:bg-neutral-800 transition-colors mb-1">
+            <div class="p-1 rounded-full group-hover:bg-[#222] transition-colors mb-1">
                 <i class="ph-fill ph-squares-four text-xl"></i>
             </div>
             <span class="text-[9px] font-bold">Panel</span>
         </button>
         <button onclick="switchTab('history')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white transition-colors group" id="nav-history">
-            <div class="p-1 rounded-full group-hover:bg-neutral-800 transition-colors mb-1">
+            <div class="p-1 rounded-full group-hover:bg-[#222] transition-colors mb-1">
                  <i class="ph-fill ph-list-dashes text-xl"></i>
             </div>
             <span class="text-[9px] font-bold">Historial</span>
@@ -409,33 +482,33 @@
         
         <!-- Botón Central Flotante -->
         <div class="relative -top-6 flex justify-center pointer-events-none">
-            <button onclick="openAddModal('expense')" class="pointer-events-auto w-14 h-14 bg-white rounded-full flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 transition-transform">
+            <button onclick="openAddModal('expense')" class="pointer-events-auto w-14 h-14 bg-white rounded-full flex items-center justify-center text-black shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 transition-transform btn-glow">
                 <i class="ph-bold ph-plus text-2xl"></i>
             </button>
         </div>
 
         <button onclick="switchTab('payments')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white transition-colors group" id="nav-payments">
-             <div class="p-1 rounded-full group-hover:bg-neutral-800 transition-colors mb-1">
+             <div class="p-1 rounded-full group-hover:bg-[#222] transition-colors mb-1">
                 <i class="ph-fill ph-receipt text-xl"></i>
             </div>
             <span class="text-[9px] font-bold">Pagos</span>
         </button>
         <button onclick="switchTab('settings')" class="nav-btn flex flex-col items-center justify-center text-neutral-500 hover:text-white transition-colors group" id="nav-settings">
-             <div class="p-1 rounded-full group-hover:bg-neutral-800 transition-colors mb-1">
+             <div class="p-1 rounded-full group-hover:bg-[#222] transition-colors mb-1">
                 <i class="ph-fill ph-gear text-xl"></i>
             </div>
             <span class="text-[9px] font-bold">Ajustes</span>
         </button>
     </nav>
 
-    <!-- MODALES -->
+    <!-- MODALES (Adaptados a Glass/Input-GP) -->
     
     <!-- Transacción -->
     <div id="transaction-modal" class="modal-overlay">
         <div class="modal-content animate-scale-in">
              <div class="flex justify-between items-center mb-6">
                 <h3 class="font-bold text-white text-lg" id="modal-tx-title">Nuevo Movimiento</h3>
-                <button onclick="closeModal('transaction-modal')" class="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
+                <button onclick="closeModal('transaction-modal')" class="w-8 h-8 rounded-full bg-[#222] flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
              </div>
              
              <form id="transaction-form" onsubmit="addTransaction(event)">
@@ -449,7 +522,7 @@
                     <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-2">Monto</label>
                     <div class="relative inline-block">
                         <span class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl font-bold text-neutral-600">$</span>
-                        <input type="number" id="t-amount" step="0.01" class="w-full bg-transparent border-b-2 border-neutral-800 text-4xl font-bold text-white py-2 pl-6 pr-2 text-center focus:border-white transition-colors placeholder-neutral-800" placeholder="0.00" required>
+                        <input type="number" id="t-amount" step="0.01" class="w-full bg-transparent border-b-2 border-[#333] text-4xl font-bold text-white py-2 pl-6 pr-2 text-center focus:border-white transition-colors placeholder-[#333]" placeholder="0.00" required>
                     </div>
                 </div>
 
@@ -459,14 +532,14 @@
                     <input type="hidden" id="t-category" required>
                 </div>
                 
-                <div class="space-y-4 mb-8 bg-neutral-900/50 p-4 rounded-xl border border-neutral-800">
+                <div class="space-y-4 mb-8 bg-black/30 p-4 rounded-xl border border-white/5">
                     <div>
                         <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Concepto</label>
-                        <input type="text" id="t-title" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors" placeholder="Descripción corta...">
+                        <input type="text" id="t-title" class="input-gp" placeholder="Descripción corta...">
                     </div>
                     <div>
                         <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Fecha</label>
-                        <input type="datetime-local" id="t-date" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors" required>
+                        <input type="datetime-local" id="t-date" class="input-gp" required>
                     </div>
                 </div>
 
@@ -483,16 +556,16 @@
         <div class="modal-content animate-scale-in">
              <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-white">Ajustar Saldo Real</h3>
-                <button onclick="closeModal('adjust-modal')" class="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
+                <button onclick="closeModal('adjust-modal')" class="w-8 h-8 rounded-full bg-[#222] flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
              </div>
-             <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-xl mb-6 text-center">
+             <div class="bg-black/30 border border-white/10 p-4 rounded-xl mb-6 text-center">
                  <p class="text-xs text-neutral-500 uppercase font-bold mb-1">El sistema calcula:</p>
                  <p class="text-2xl font-bold text-white tracking-tight" id="adjust-current-display">$0.00</p>
              </div>
              <form onsubmit="submitAdjustment(event)">
                 <div class="mb-6">
                     <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-2">¿Cuánto tienes realmente?</label>
-                    <input type="number" id="adjust-amount" step="0.01" class="w-full bg-neutral-950 border border-neutral-800 p-4 rounded-xl text-3xl font-bold text-white text-center focus:border-blue-500 transition-colors" placeholder="0.00" required>
+                    <input type="number" id="adjust-amount" step="0.01" class="input-gp text-3xl font-bold text-center" placeholder="0.00" required>
                     <p class="text-[10px] text-neutral-500 mt-2 text-center">Se creará un movimiento de "Ajuste" automáticamente.</p>
                 </div>
                 <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold text-xs hover:bg-blue-500 shadow-lg shadow-blue-900/20 transition-colors">CORREGIR SALDO</button>
@@ -505,24 +578,24 @@
         <div class="modal-content animate-scale-in">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="font-bold text-white">Nuevo Pago Fijo</h3>
-                <button onclick="closeModal('fixed-modal')" class="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
+                <button onclick="closeModal('fixed-modal')" class="w-8 h-8 rounded-full bg-[#222] flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
              </div>
              <form id="fixed-form" onsubmit="addFixed(event)" class="space-y-5">
                  <div>
                       <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Nombre del Servicio</label>
-                      <input type="text" id="f-title" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors" placeholder="Ej. Netflix, Renta..." required>
+                      <input type="text" id="f-title" class="input-gp" placeholder="Ej. Netflix, Renta..." required>
                  </div>
                  <div class="grid grid-cols-2 gap-4">
                       <div>
                         <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Monto Mensual</label>
-                        <input type="number" id="f-amount" step="0.01" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors" placeholder="0.00" required>
+                        <input type="number" id="f-amount" step="0.01" class="input-gp" placeholder="0.00" required>
                       </div>
                       <div>
                         <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Día del mes</label>
-                        <select id="f-day" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors"></select>
+                        <select id="f-day" class="input-gp"></select>
                       </div>
                  </div>
-                 <label class="flex items-center gap-3 cursor-pointer p-3 bg-neutral-900 border border-neutral-800 rounded-lg">
+                 <label class="flex items-center gap-3 cursor-pointer p-3 bg-black/30 border border-white/10 rounded-lg">
                     <input type="checkbox" id="f-include" class="accent-white w-4 h-4" checked>
                     <span class="text-xs text-neutral-300 font-bold">Descontar del Plan Diario</span>
                  </label>
@@ -536,26 +609,26 @@
         <div class="modal-content animate-scale-in">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="font-bold text-white">Nuevo Préstamo</h3>
-                <button onclick="closeModal('loans-modal')" class="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
+                <button onclick="closeModal('loans-modal')" class="w-8 h-8 rounded-full bg-[#222] flex items-center justify-center text-neutral-400 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
             </div>
             <form onsubmit="saveLoan(event)" class="space-y-4">
-                <div class="flex bg-neutral-900 rounded-lg p-1 border border-neutral-800">
-                    <button type="button" onclick="setLoanType('lent')" id="btn-lent" class="flex-1 py-2 text-xs font-bold rounded-md bg-neutral-800 text-green-500 transition-all">ME DEBEN</button>
+                <div class="flex bg-[#222] rounded-lg p-1 border border-white/5">
+                    <button type="button" onclick="setLoanType('lent')" id="btn-lent" class="flex-1 py-2 text-xs font-bold rounded-md bg-[#333] text-green-500 transition-all">ME DEBEN</button>
                     <button type="button" onclick="setLoanType('borrowed')" id="btn-borrowed" class="flex-1 py-2 text-xs font-bold text-neutral-500 transition-all">DEBO</button>
                 </div>
                 <input type="hidden" id="loan-type" value="lent">
                 
                 <div>
                       <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Persona</label>
-                      <input type="text" id="loan-person" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors" required>
+                      <input type="text" id="loan-person" class="input-gp" required>
                  </div>
                  <div>
                     <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Monto</label>
-                    <input type="number" id="loan-amount" step="0.01" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors" required>
+                    <input type="number" id="loan-amount" step="0.01" class="input-gp" required>
                  </div>
                  <div>
                     <label class="text-[10px] uppercase font-bold text-neutral-500 block mb-1">Fecha Límite/Registro</label>
-                    <input type="date" id="loan-date" class="w-full bg-neutral-950 border border-neutral-800 p-3 rounded-lg text-sm text-white focus:border-white transition-colors" required>
+                    <input type="date" id="loan-date" class="input-gp" required>
                 </div>
                 <button type="submit" class="w-full bg-white text-black py-3 rounded-lg font-bold text-xs hover:bg-neutral-200 shadow-lg shadow-white/10 transition-colors">GUARDAR</button>
             </form>
@@ -607,18 +680,21 @@
                 const nameField = document.getElementById('field-name');
                 const btnLogin = document.getElementById('tab-login');
                 const btnReg = document.getElementById('tab-register');
+                const switcher = document.getElementById('auth-switcher-container');
                 
                 document.getElementById('auth-error-msg').classList.add('hidden');
                 document.getElementById('btn-text').textContent = this.isRegistering ? "CREAR CUENTA" : "INICIAR SESIÓN";
                 
                 if (this.isRegistering) {
                     nameField.classList.remove('hidden');
-                    btnReg.className = "flex-1 py-2 text-xs font-bold rounded bg-neutral-700 text-white shadow-lg";
-                    btnLogin.className = "flex-1 py-2 text-xs font-bold text-neutral-400 hover:text-white";
+                    switcher.classList.add('auth-mode-register');
+                    btnReg.classList.add('active');
+                    btnLogin.classList.remove('active');
                 } else {
                     nameField.classList.add('hidden');
-                    btnLogin.className = "flex-1 py-2 text-xs font-bold rounded bg-neutral-700 text-white shadow-lg";
-                    btnReg.className = "flex-1 py-2 text-xs font-bold text-neutral-400 hover:text-white";
+                    switcher.classList.remove('auth-mode-register');
+                    btnLogin.classList.add('active');
+                    btnReg.classList.remove('active');
                 }
             },
             async handleAuthSubmit() {
@@ -832,10 +908,10 @@
             document.getElementById('loan-type').value = type;
 
             if (type === 'lent') {
-                btnLent.className = "flex-1 py-2 text-xs font-bold rounded-md bg-neutral-800 text-green-500 transition-colors border border-green-900/30";
+                btnLent.className = "flex-1 py-2 text-xs font-bold rounded-md bg-[#333] text-green-500 transition-colors border border-green-900/30";
                 btnBorrowed.className = "flex-1 py-2 text-xs font-bold text-neutral-500 transition-colors";
             } else {
-                btnBorrowed.className = "flex-1 py-2 text-xs font-bold rounded-md bg-neutral-800 text-red-500 transition-colors border border-red-900/30";
+                btnBorrowed.className = "flex-1 py-2 text-xs font-bold rounded-md bg-[#333] text-red-500 transition-colors border border-red-900/30";
                 btnLent.className = "flex-1 py-2 text-xs font-bold text-neutral-500 transition-colors";
             }
         };
@@ -1056,7 +1132,7 @@
             
             // Color logic for bar
             const bar = document.getElementById('balance-progress');
-            bar.className = `h-full w-0 transition-all duration-700 ease-out shadow-[0_0_10px_rgba(255,255,255,0.5)] ${percent > 90 ? 'bg-red-500' : (percent > 60 ? 'bg-yellow-400' : 'bg-white')}`;
+            bar.className = `h-full w-0 transition-all duration-700 ease-out shadow-[0_0_15px_rgba(255,255,255,0.8)] ${percent > 90 ? 'bg-red-500' : (percent > 60 ? 'bg-yellow-400' : 'bg-white')}`;
 
             const listEl = document.getElementById('recent-list');
             const displayTx = monthlyTx;
@@ -1094,9 +1170,9 @@
             }
 
             return `
-            <div class="flex justify-between items-center p-3 rounded-xl bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 hover:border-neutral-700 cursor-pointer transition-all group" onclick="editTransaction('${t.id}')">
+            <div class="flex justify-between items-center p-3 rounded-xl bg-black/40 border border-[#262626] hover:bg-black/60 hover:border-white/20 cursor-pointer transition-all group glass-panel shadow-none" onclick="editTransaction('${t.id}')">
                 <div class="flex items-center gap-3 overflow-hidden flex-1">
-                    <div class="w-9 h-9 rounded-lg bg-neutral-800 flex items-center justify-center text-neutral-400 border border-neutral-700 group-hover:border-neutral-600 group-hover:text-white transition-colors shrink-0">
+                    <div class="w-9 h-9 rounded-lg bg-[#222] flex items-center justify-center text-neutral-400 border border-[#333] group-hover:border-neutral-500 group-hover:text-white transition-colors shrink-0">
                         <i class="ph-fill ${icon} text-lg"></i>
                     </div>
                     <div class="min-w-0">
@@ -1151,7 +1227,7 @@
                 const txItemsHTML = grouped[date].map(t => createTxHTML(t)).join('');
                 
                 groupDiv.innerHTML = `
-                    <div class="sticky top-12 bg-[#0a0a0a]/95 backdrop-blur-sm z-10 py-1 mb-2 border-b border-neutral-800/50">
+                    <div class="sticky top-12 bg-black/95 backdrop-blur-sm z-10 py-1 mb-2 border-b border-[#262626]">
                         <h3 class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest pl-1">${label}</h3>
                     </div>
                     <div class="space-y-1">
@@ -1173,7 +1249,7 @@
                 const isPaid = isFixedPaidThisMonth(f.id);
                 const isIgnored = f.ignoreBudget;
                 
-                const bgClass = isPaid ? "bg-green-900/10 border-green-900/30" : "bg-neutral-900 border-neutral-800";
+                const bgClass = isPaid ? "bg-green-900/10 border-green-900/30" : "bg-[#171717] border-[#262626]";
                 const textClass = isPaid ? "text-green-500" : (isIgnored ? "text-neutral-500 line-through" : "text-neutral-200");
                 
                 const eyeIcon = isIgnored ? 'ph-eye-slash' : 'ph-eye';
@@ -1181,10 +1257,10 @@
                 
                 const actionBtn = isPaid 
                     ? `<div class="w-8 h-8 rounded-lg flex items-center justify-center text-green-500"><i class="ph-bold ph-check-circle text-xl"></i></div>`
-                    : `<button onclick="payFixed('${f.id}')" class="w-8 h-8 rounded-lg bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-700 transition-all"><i class="ph-bold ph-check"></i></button>`;
+                    : `<button onclick="payFixed('${f.id}')" class="w-8 h-8 rounded-lg bg-[#222] flex items-center justify-center text-neutral-400 hover:text-white hover:bg-[#333] transition-all"><i class="ph-bold ph-check"></i></button>`;
 
                 return `
-                <div class="${bgClass} border p-3 rounded-xl flex justify-between items-center transition-all">
+                <div class="${bgClass} border p-3 rounded-xl flex justify-between items-center transition-all glass-panel shadow-none">
                     <div>
                         <p class="font-bold ${textClass} text-xs mb-0.5">${f.title}</p>
                         <p class="text-[10px] text-neutral-500 font-bold uppercase flex items-center gap-1">
@@ -1192,9 +1268,9 @@
                         </p>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="toggleFixedIgnore('${f.id}', ${!!isIgnored})" class="w-8 h-8 rounded-lg flex items-center justify-center ${eyeColor} hover:bg-neutral-800 transition-colors"><i class="ph-bold ${eyeIcon}"></i></button>
+                        <button onclick="toggleFixedIgnore('${f.id}', ${!!isIgnored})" class="w-8 h-8 rounded-lg flex items-center justify-center ${eyeColor} hover:bg-[#222] transition-colors"><i class="ph-bold ${eyeIcon}"></i></button>
                         ${actionBtn}
-                        <button onclick="deleteFixed('${f.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-neutral-600 hover:text-red-500 hover:bg-neutral-800 transition-colors"><i class="ph-bold ph-trash"></i></button>
+                        <button onclick="deleteFixed('${f.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-neutral-600 hover:text-red-500 hover:bg-[#222] transition-colors"><i class="ph-bold ph-trash"></i></button>
                     </div>
                 </div>
                 `;
@@ -1231,7 +1307,7 @@
                 const bgIcon = isLent ? 'bg-green-900/20' : 'bg-red-900/20';
 
                 return `
-                <div class="bg-neutral-900 border border-neutral-800 p-3 rounded-xl flex justify-between items-center">
+                <div class="bg-[#171717] border border-[#262626] p-3 rounded-xl flex justify-between items-center glass-panel shadow-none">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-lg ${bgIcon} flex items-center justify-center ${color} shrink-0">
                             <i class="ph-bold ${icon} text-lg"></i>
@@ -1252,21 +1328,15 @@
             list.innerHTML = html;
         }
 
-        /**
-         * LÓGICA CORE: Calcular gastos fijos pendientes
-         * Recorre día por día desde mañana hasta la fecha objetivo
-         * para detectar CADA instancia de pago fijo, sin importar el mes.
-         */
         function getPendingFixedAmount(targetDate) {
             let pending = 0;
             let cursor = new Date();
             cursor.setHours(0,0,0,0);
-            cursor.setDate(cursor.getDate() + 1); // Empezamos a contar desde mañana
+            cursor.setDate(cursor.getDate() + 1); 
 
             const end = new Date(targetDate);
             end.setHours(0,0,0,0);
 
-            // Bucle día por día
             while (cursor <= end) {
                 const dayNum = cursor.getDate();
                 const isCurrentMonth = (cursor.getMonth() === new Date().getMonth() && cursor.getFullYear() === new Date().getFullYear());
@@ -1274,14 +1344,10 @@
                 window.appData.fixed.forEach(f => {
                     if (f.ignoreBudget) return;
                     
-                    // Si el día del pago fijo coincide con el día del cursor
                     if (parseInt(f.day) === dayNum) {
-                        // Si es este mes Y ya está pagado, no lo sumamos.
-                        // Si es otro mes, asumimos que NO está pagado (a menos que tengamos lógica compleja de historial futuro)
                         if (isCurrentMonth && isFixedPaidThisMonth(f.id)) {
                             return; 
                         }
-                        // En cualquier otro caso (otro mes, o este mes no pagado), suma.
                         pending += parseFloat(f.amount);
                     }
                 });
@@ -1311,7 +1377,6 @@
             if (!nextDate) return;
 
             const today = new Date(); today.setHours(0,0,0,0);
-            // Días restantes (incluyendo hoy para el presupuesto)
             const diff = Math.ceil((nextDate - today) / (1000 * 60 * 60 * 24));
             
             badge.textContent = diff <= 0 ? "Hoy Cobras" : `${diff} Días`;
@@ -1332,7 +1397,6 @@
                 return new Date(year, month, safeDay);
             };
 
-            // Generar fechas candidatas para este mes y el siguiente
             for(let m = 0; m <= 1; m++) {
                 let monthIndex = currentMonth + m; 
                 let year = currentYear;
@@ -1356,15 +1420,13 @@
                 d.setHours(0,0,0,0);
                 if (d >= today) return d;
             }
-            return adjustedCandidates[0]; // Fallback
+            return adjustedCandidates[0]; 
         }
 
         function getNextBusinessDay(date) {
             let d = new Date(date);
             const fmt = (x) => `${(x.getMonth()+1).toString().padStart(2,'0')}-${x.getDate().toString().padStart(2,'0')}`;
 
-            // Ajuste simple para fines de semana (no festivos complejos para simplificar)
-            // 0 = Dom, 6 = Sab
             while (d.getDay() === 0 || d.getDay() === 6) {
                 d.setDate(d.getDate() + 1);
             }
@@ -1372,7 +1434,6 @@
         }
 
         function updateDailyFormula(currentBalance, daysLeft, nextPaydayDate) {
-            // 1. Gastado HOY (para restarlo del presupuesto del día si ya se gastó)
             let spentToday = 0;
             const todayDate = new Date();
             todayDate.setHours(0,0,0,0);
@@ -1387,16 +1448,11 @@
                 }
             });
 
-            // 2. Gastos Fijos Pendientes (Usando la nueva lógica robusta)
-            // Calculamos hasta el día anterior al pago (porque el día de pago entra dinero)
             const calcLimitDate = new Date(nextPaydayDate);
             calcLimitDate.setDate(calcLimitDate.getDate() - 1);
             
             const pendingFixedSum = getPendingFixedAmount(calcLimitDate);
 
-            // 3. Fórmula
-            // Saldo Inicial Efectivo = (Saldo Actual + Lo gastado hoy (para ver el total del dia)) - Fijos futuros
-            // Se suma spentToday al balance porque 'currentBalance' ya lo tiene restado, pero queremos el budget "del día completo"
             const startOfDayBalance = currentBalance + spentToday;
             const effectiveStartBalance = startOfDayBalance - pendingFixedSum;
             
@@ -1418,7 +1474,6 @@
             document.getElementById('formula-days-left').textContent = `Fijos pend: -${formatCurrency(pendingFixedSum)}`;
         }
 
-        // --- LÓGICA DE SIMULACIÓN CORREGIDA ---
         window.runSimulation = function() {
             const dateInput = document.getElementById('sim-date').value;
             const amountInput = parseFloat(document.getElementById('sim-amount').value);
@@ -1431,16 +1486,14 @@
                 return;
             }
 
-            const futureDate = new Date(dateInput + 'T00:00:00'); // Forzar local time
+            const futureDate = new Date(dateInput + 'T00:00:00'); 
             const today = new Date();
             today.setHours(0,0,0,0);
 
-            // Calcular diferencia de días
             const diffTime = futureDate - today;
             let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-            if (diffDays <= 0) diffDays = 1; // Evitar división por cero
+            if (diffDays <= 0) diffDays = 1; 
 
-            // 1. Saldo Actual Real
             let currentBalance = 0;
             window.appData.transactions.forEach(t => {
                 const val = Math.round(t.amount * 100);
@@ -1449,14 +1502,8 @@
             });
             currentBalance = currentBalance / 100;
 
-            // 2. Gastos Fijos Pendientes (Usando la nueva lógica de bucle)
-            // Calculamos fijos hasta la fecha de cobro futuro (exclusiva o inclusiva según se vea)
-            // Generalmente queremos sobrevivir HASTA ese día.
             const pendingFixed = getPendingFixedAmount(futureDate);
 
-            // 3. Fórmula del Simulador
-            // Aquí asumimos que el usuario quiere saber: "¿Si cuento con ese dinero futuro, cuánto puedo gastar hoy?"
-            // Esto implica "credit spending" (gastar antes de tenerlo).
             const totalPool = currentBalance + amountInput - pendingFixed;
             const dailyBudget = totalPool / diffDays;
 
