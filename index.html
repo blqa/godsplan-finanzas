@@ -685,7 +685,7 @@
         </div>
     </div>
 
-    <!-- Modal Deuda Plazo (NUEVO) -->
+    <!-- Modal Deuda Plazo (ACTUALIZADO CON FRECUENCIA) -->
     <div id="debt-modal" class="modal-overlay">
         <div class="modal-content animate-scale-in">
             <div class="flex justify-between items-center mb-6 border-b border-border pb-4">
@@ -703,8 +703,14 @@
                         <input type="number" id="debt-amount" step="0.01" class="input-gp" placeholder="0.00" required>
                       </div>
                       <div>
-                        <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Meses</label>
-                        <input type="number" id="debt-months" class="input-gp" placeholder="12" required>
+                        <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Plazos</label>
+                        <div class="flex gap-2">
+                             <input type="number" id="debt-installments" class="input-gp" placeholder="12" required>
+                             <select id="debt-frequency" class="input-gp w-auto px-2 bg-input-bg text-xs">
+                                <option value="monthly">Mes</option>
+                                <option value="biweekly">Qna</option>
+                             </select>
+                        </div>
                       </div>
                  </div>
                  <button type="submit" class="w-full bg-brand text-white py-3 rounded-xl font-bold text-xs hover:bg-red-600 shadow-lg shadow-brand/20 transition-colors uppercase tracking-widest">GUARDAR</button>
@@ -1015,7 +1021,7 @@
             await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'fixed', id), { ignoreBudget: !current });
         };
 
-        // --- LÓGICA DEUDAS A PLAZOS ---
+        // --- LÓGICA DEUDAS A PLAZOS (ACTUALIZADA) ---
 
         window.openDebtModal = function(id = null) {
             editingDebtId = id;
@@ -1023,10 +1029,13 @@
                 const d = window.appData.debts.find(x => x.id === id);
                 document.getElementById('debt-title').value = d.title;
                 document.getElementById('debt-amount').value = d.totalAmount;
-                document.getElementById('debt-months').value = d.months;
+                // Si existe el campo installments, usarlo, si no, usar months (legacy)
+                document.getElementById('debt-installments').value = d.installments || d.months; 
+                document.getElementById('debt-frequency').value = d.frequency || 'monthly';
                 document.getElementById('btn-delete-debt').classList.remove('hidden');
             } else {
                 document.getElementById('debt-form').reset();
+                document.getElementById('debt-frequency').value = 'monthly';
                 document.getElementById('btn-delete-debt').classList.add('hidden');
             }
             openModal('debt-modal');
@@ -1036,22 +1045,28 @@
             e.preventDefault();
             const title = document.getElementById('debt-title').value;
             const totalAmount = parseFloat(document.getElementById('debt-amount').value);
-            const months = parseInt(document.getElementById('debt-months').value);
+            const installments = parseInt(document.getElementById('debt-installments').value);
+            const frequency = document.getElementById('debt-frequency').value;
+            
+            // Guardamos "months" también para retrocompatibilidad por si acaso, aunque la UI usará installments
+            const months = installments; 
             
             if (editingDebtId) {
                 const old = window.appData.debts.find(x => x.id === editingDebtId);
                 let newPayments = old.payments;
-                if (months !== old.months) {
-                    newPayments = new Array(months).fill(false);
+                const oldInstallments = old.installments || old.months;
+                
+                if (installments !== oldInstallments) {
+                    newPayments = new Array(installments).fill(false);
                 }
                 
                 await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'debts', editingDebtId), {
-                    title, totalAmount, months, payments: newPayments
+                    title, totalAmount, installments, months, frequency, payments: newPayments
                 });
             } else {
-                const payments = new Array(months).fill(false);
+                const payments = new Array(installments).fill(false);
                 await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'debts'), {
-                    title, totalAmount, months, payments, createdAt: new Date().toISOString()
+                    title, totalAmount, installments, months, frequency, payments, createdAt: new Date().toISOString()
                 });
             }
             closeModal('debt-modal');
@@ -1087,14 +1102,19 @@
             }
 
             container.innerHTML = window.appData.debts.map(d => {
-                const monthly = d.totalAmount / d.months;
+                // Compatibilidad hacia atrás
+                const numPlazos = d.installments || d.months;
+                const freq = d.frequency || 'monthly';
+                const freqLabel = freq === 'monthly' ? '/mes' : '/qna';
+                
+                const installmentAmount = d.totalAmount / numPlazos;
                 const paidCount = d.payments.filter(Boolean).length;
-                const paidAmount = paidCount * monthly;
+                const paidAmount = paidCount * installmentAmount;
                 const remaining = d.totalAmount - paidAmount;
-                const progress = Math.round((paidCount / d.months) * 100);
+                const progress = Math.round((paidCount / numPlazos) * 100);
 
                 let bubblesHTML = '';
-                for(let i=0; i < d.months; i++) {
+                for(let i=0; i < numPlazos; i++) {
                     const isPaid = d.payments[i];
                     bubblesHTML += `<div onclick="event.stopPropagation(); toggleDebtPayment('${d.id}', ${i})" class="debt-bubble ${isPaid ? 'paid' : ''}">${i + 1}</div>`;
                 }
@@ -1104,7 +1124,7 @@
                     <div class="flex justify-between items-start mb-4" onclick="openDebtModal('${d.id}')">
                         <div>
                             <h3 class="font-bold text-text uppercase tracking-wide cursor-pointer hover:text-brand transition-colors">${d.title}</h3>
-                            <p class="text-[10px] text-text-mute font-medium">Pago sugerido: ${formatCurrency(monthly)}/mes</p>
+                            <p class="text-[10px] text-text-mute font-medium">Pago sugerido: ${formatCurrency(installmentAmount)}${freqLabel}</p>
                         </div>
                         <div class="text-right">
                             <p class="font-black text-brand text-lg tracking-tight">${formatCurrency(remaining)}</p>
