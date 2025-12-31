@@ -138,6 +138,17 @@
         .chip.active { background: var(--text); color: var(--bg); border-color: var(--text); transform: scale(1.05); }
 
         #toast { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease; }
+        
+        /* Estilos para las bolitas de deuda */
+        .debt-bubble {
+            width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 800; transition: all 0.2s; cursor: pointer; border: 1px solid var(--border);
+            background: var(--input-bg); color: var(--text-mute);
+        }
+        .debt-bubble.paid {
+            background: var(--money); border-color: var(--money); color: white; box-shadow: 0 0 10px rgba(22, 163, 74, 0.4);
+        }
+        .debt-bubble:hover { transform: scale(1.1); }
     </style>
 </head>
 <body class="bg-bg text-text font-sans selection:bg-brand selection:text-white flex flex-col h-[100dvh] overflow-hidden">
@@ -192,7 +203,7 @@
                     </div>
 
                     <div id="auth-error-msg" class="hidden p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-bold text-center flex items-center justify-center gap-2">
-                         <i class="ph-fill ph-warning-circle"></i> <span id="auth-error-txt">Error</span>
+                          <i class="ph-fill ph-warning-circle"></i> <span id="auth-error-txt">Error</span>
                     </div>
 
                     <button type="submit" id="btn-submit" class="btn-glow w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm mt-2 flex items-center justify-center gap-2 group">
@@ -376,25 +387,38 @@
         <!-- PAGOS Y DEUDAS -->
         <section id="view-payments" class="hidden space-y-8 animate-fade-in">
             
-            <!-- Sección Fijos -->
+            <!-- Sección Deudas a Plazos (NUEVA) -->
             <div class="space-y-4">
+                 <div class="flex items-center justify-between border-b border-border pb-2">
+                    <h2 class="text-lg font-black text-text uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-chart-bar-horizontal text-blue-500"></i> Deudas a Plazos</h2>
+                    <button onclick="openDebtModal()" class="bg-input-bg border border-border hover:bg-white/5 text-text px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-2 transition-colors">
+                        <i class="ph-bold ph-plus"></i> Nuevo
+                    </button>
+                </div>
+                <div class="bg-blue-900/10 border border-blue-500/20 p-4 rounded-xl text-xs text-blue-200 flex gap-3">
+                    <i class="ph-fill ph-check-circle text-lg shrink-0"></i>
+                    <div class="font-medium">
+                        Control visual de pagos a meses. Toca los círculos para marcar el mes como pagado.
+                    </div>
+                </div>
+                <div id="debts-list" class="grid grid-cols-1 gap-4">
+                    <!-- Deudas aquí -->
+                </div>
+            </div>
+
+            <!-- Sección Fijos -->
+            <div class="space-y-4 pt-6 border-t border-border">
                 <div class="flex items-center justify-between border-b border-border pb-2">
                     <h2 class="text-lg font-black text-text uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-calendar-check text-brand"></i> Pagos Fijos</h2>
                     <button onclick="openModal('fixed-modal')" class="bg-input-bg border border-border hover:bg-white/5 text-text px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-2 transition-colors">
                         <i class="ph-bold ph-plus"></i> Nuevo
                     </button>
                 </div>
-                <div class="bg-violet-900/10 border border-violet-500/20 p-4 rounded-xl text-xs text-violet-200 flex gap-3">
-                    <i class="ph-fill ph-info text-lg shrink-0"></i>
-                    <div class="font-medium">
-                        Estos pagos se restan automáticamente de tu "Plan del Día" para proteger tu liquidez.
-                    </div>
-                </div>
                 <div id="fixed-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
             </div>
 
             <!-- Sección Préstamos -->
-            <div class="space-y-4">
+            <div class="space-y-4 pt-6 border-t border-border">
                 <div class="flex items-center justify-between border-b border-border pb-2">
                     <h2 class="text-lg font-black text-text uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-handshake text-brand"></i> Préstamos</h2>
                     <button onclick="openLoanModal()" class="bg-input-bg border border-border hover:bg-white/5 text-text px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-2 transition-colors">
@@ -632,6 +656,34 @@
         </div>
     </div>
 
+    <!-- Modal Deuda Plazo (NUEVO) -->
+    <div id="debt-modal" class="modal-overlay">
+        <div class="modal-content animate-scale-in">
+            <div class="flex justify-between items-center mb-6 border-b border-border pb-4">
+                <h3 class="font-black text-text uppercase">Nueva Deuda a Plazo</h3>
+                <button onclick="closeModal('debt-modal')" class="w-8 h-8 rounded-full bg-input-bg flex items-center justify-center text-text-mute hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
+             </div>
+             <form id="debt-form" onsubmit="saveDebt(event)" class="space-y-4">
+                 <div>
+                      <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Concepto (ej. iPhone)</label>
+                      <input type="text" id="debt-title" class="input-gp" required>
+                 </div>
+                 <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Monto Total</label>
+                        <input type="number" id="debt-amount" step="0.01" class="input-gp" placeholder="0.00" required>
+                      </div>
+                      <div>
+                        <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Meses</label>
+                        <input type="number" id="debt-months" class="input-gp" placeholder="12" required>
+                      </div>
+                 </div>
+                 <button type="submit" class="w-full bg-brand text-white py-3 rounded-xl font-bold text-xs hover:bg-red-600 shadow-lg shadow-brand/20 transition-colors uppercase tracking-widest">GUARDAR</button>
+                 <button type="button" id="btn-delete-debt" class="w-full py-2 text-alert font-bold text-xs uppercase hidden" onclick="deleteDebt()">Eliminar Deuda</button>
+             </form>
+        </div>
+    </div>
+
     <!-- Modal Préstamos -->
     <div id="loans-modal" class="modal-overlay">
         <div class="modal-content animate-scale-in">
@@ -692,12 +744,14 @@
         let currentUser = null;
         let listeners = [];
         let editingTransactionId = null;
-        let editingLoanId = null; // Nuevo estado para edición de préstamos
+        let editingLoanId = null; 
+        let editingDebtId = null; // Nuevo estado para deudas
 
         window.appData = {
             transactions: [],
             fixed: [],
             loans: [], 
+            debts: [], // Nueva colección
             settings: { frequency: 'biweekly', payday: null, forcedSavings: false, simulationMode: false }
         };
 
@@ -810,6 +864,11 @@
             listeners.push(onSnapshot(collection(db, 'artifacts', appId, 'users', userId, 'loans'), (snap) => {
                 window.appData.loans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderLoans();
+            }));
+
+             listeners.push(onSnapshot(collection(db, 'artifacts', appId, 'users', userId, 'debts'), (snap) => {
+                window.appData.debts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderDebts();
             }));
 
             listeners.push(onSnapshot(doc(db, 'artifacts', appId, 'users', userId, 'settings', 'config'), (snap) => {
@@ -927,6 +986,122 @@
             await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'fixed', id), { ignoreBudget: !current });
         };
 
+        // --- LÓGICA DEUDAS A PLAZOS ---
+
+        window.openDebtModal = function(id = null) {
+            editingDebtId = id;
+            if (id) {
+                const d = window.appData.debts.find(x => x.id === id);
+                document.getElementById('debt-title').value = d.title;
+                document.getElementById('debt-amount').value = d.totalAmount;
+                document.getElementById('debt-months').value = d.months;
+                document.getElementById('btn-delete-debt').classList.remove('hidden');
+            } else {
+                document.getElementById('debt-form').reset();
+                document.getElementById('btn-delete-debt').classList.add('hidden');
+            }
+            openModal('debt-modal');
+        };
+
+        window.saveDebt = async function(e) {
+            e.preventDefault();
+            const title = document.getElementById('debt-title').value;
+            const totalAmount = parseFloat(document.getElementById('debt-amount').value);
+            const months = parseInt(document.getElementById('debt-months').value);
+            
+            if (editingDebtId) {
+                // Si editamos, actualizamos campos básicos. Si cambian los meses, tendríamos que reajustar el array de pagos, 
+                // pero por simplicidad, asumimos que solo se edita el nombre o monto, o se resetea si cambian los meses.
+                const old = window.appData.debts.find(x => x.id === editingDebtId);
+                let newPayments = old.payments;
+                if (months !== old.months) {
+                    newPayments = new Array(months).fill(false);
+                }
+                
+                await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'debts', editingDebtId), {
+                    title, totalAmount, months, payments: newPayments
+                });
+            } else {
+                const payments = new Array(months).fill(false);
+                await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'debts'), {
+                    title, totalAmount, months, payments, createdAt: new Date().toISOString()
+                });
+            }
+            closeModal('debt-modal');
+            showToast('Deuda Guardada');
+        };
+
+        window.deleteDebt = async function() {
+            if(!editingDebtId) return;
+            if(confirm('¿Eliminar esta deuda?')) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'debts', editingDebtId));
+                closeModal('debt-modal');
+                showToast('Deuda Eliminada');
+            }
+        };
+
+        window.toggleDebtPayment = async function(debtId, index) {
+            const debt = window.appData.debts.find(d => d.id === debtId);
+            if (!debt) return;
+            
+            const newPayments = [...debt.payments];
+            newPayments[index] = !newPayments[index]; // Toggle status
+            
+            await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'debts', debtId), {
+                payments: newPayments
+            });
+            // Opcional: Podríamos preguntar si quiere agregar el gasto al historial, pero por ahora solo es visual.
+        };
+
+        function renderDebts() {
+            const container = document.getElementById('debts-list');
+            if (window.appData.debts.length === 0) {
+                container.innerHTML = '<div class="text-center text-text-mute text-xs italic py-4">No tienes deudas registradas</div>';
+                return;
+            }
+
+            container.innerHTML = window.appData.debts.map(d => {
+                const monthly = d.totalAmount / d.months;
+                const paidCount = d.payments.filter(Boolean).length;
+                const paidAmount = paidCount * monthly;
+                const remaining = d.totalAmount - paidAmount;
+                const progress = Math.round((paidCount / d.months) * 100);
+
+                let bubblesHTML = '';
+                for(let i=0; i < d.months; i++) {
+                    const isPaid = d.payments[i];
+                    bubblesHTML += `<div onclick="event.stopPropagation(); toggleDebtPayment('${d.id}', ${i})" class="debt-bubble ${isPaid ? 'paid' : ''}">${i + 1}</div>`;
+                }
+
+                return `
+                <div class="bg-card border border-border p-4 rounded-2xl relative overflow-hidden group">
+                    <div class="flex justify-between items-start mb-4" onclick="openDebtModal('${d.id}')">
+                        <div>
+                            <h3 class="font-bold text-text uppercase tracking-wide cursor-pointer hover:text-brand transition-colors">${d.title}</h3>
+                            <p class="text-[10px] text-text-mute font-medium">Pago sugerido: ${formatCurrency(monthly)}/mes</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-black text-brand text-lg tracking-tight">${formatCurrency(remaining)}</p>
+                             <p class="text-[10px] text-text-mute font-bold">Restante</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        ${bubblesHTML}
+                    </div>
+                    
+                    <div class="w-full bg-input-bg h-1 rounded-full mt-2 overflow-hidden">
+                        <div class="bg-brand h-full transition-all duration-500" style="width: ${progress}%"></div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+
+        // --- FIN LOGICA DEUDAS ---
+
+
         window.openLoanModal = function() {
             editingLoanId = null; // Resetear edición
             document.getElementById('loan-modal-title').textContent = "Nuevo Préstamo";
@@ -1019,10 +1194,12 @@
                 const txs = window.appData.transactions;
                 const fxs = window.appData.fixed;
                 const loans = window.appData.loans;
+                const debts = window.appData.debts;
                 
                 txs.forEach(t => deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions', t.id)));
                 fxs.forEach(f => deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'fixed', f.id)));
                 loans.forEach(l => deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'loans', l.id)));
+                debts.forEach(d => deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'debts', d.id)));
                 
                 showToast('Reseteado');
             }
@@ -1063,7 +1240,7 @@
         }
 
         window.exportData = function() {
-            const data = { transactions: window.appData.transactions, fixed: window.appData.fixed, loans: window.appData.loans, settings: window.appData.settings };
+            const data = { transactions: window.appData.transactions, fixed: window.appData.fixed, loans: window.appData.loans, debts: window.appData.debts, settings: window.appData.settings };
             const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = "godsplan_backup.json"; a.click();
@@ -1078,6 +1255,7 @@
                 if(json.transactions) json.transactions.forEach(t => addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions'), t));
                 if(json.fixed) json.fixed.forEach(f => addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'fixed'), f));
                 if(json.loans) json.loans.forEach(l => addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'loans'), l));
+                if(json.debts) json.debts.forEach(d => addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'debts'), d));
                 showToast('Datos Importados');
             };
             reader.readAsText(file);
@@ -1378,7 +1556,7 @@
                             <p class="text-[10px] text-text-mute font-bold uppercase">${l.date}</p>
                         </div>
                     </div>
-                     <div class="flex items-center gap-3">
+                      <div class="flex items-center gap-3">
                         <p class="font-black ${color} text-xs">${formatCurrency(l.amount)}</p>
                         <button onclick="event.stopPropagation(); deleteLoan('${l.id}')" class="text-text-mute hover:text-alert transition-colors p-1"><i class="ph-bold ph-trash"></i></button>
                     </div>
@@ -1617,7 +1795,7 @@
             // Renderizar contenido específico
             if(id === 'dashboard') renderDashboard();
             if(id === 'history') renderHistory();
-            if(id === 'payments') { renderFixed(); renderLoans(); }
+            if(id === 'payments') { renderFixed(); renderLoans(); renderDebts(); }
         }
 
         function filterHistory(type) {
