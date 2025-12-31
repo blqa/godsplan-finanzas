@@ -282,7 +282,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-card border border-border rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden h-full shadow-sm">
                     <div>
-                         <div class="flex justify-between items-start mb-4">
+                          <div class="flex justify-between items-start mb-4">
                             <p class="text-xs font-black text-violet-400 uppercase tracking-widest flex items-center gap-2">
                                 <i class="ph-fill ph-calculator"></i> PLAN DEL DÍA
                             </p>
@@ -305,8 +305,8 @@
                     </div>
                 </div>
 
-                <!-- Botones de Acción -->
-                <div class="grid grid-rows-2 gap-4 h-full">
+                <!-- Botones de Acción (SOLO PC - hidden en móvil, grid en md) -->
+                <div class="hidden md:grid grid-rows-2 gap-4 h-full">
                     <button onclick="openAddModal('income')" class="bg-card border border-border hover:bg-input-bg rounded-2xl text-money font-black text-sm flex items-center justify-center gap-3 transition-all group relative overflow-hidden">
                          <div class="absolute left-0 top-0 w-1 h-full bg-money"></div>
                         <div class="w-10 h-10 rounded-xl bg-green-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -356,6 +356,20 @@
                         <span class="block text-[10px] text-text-mute uppercase font-black mb-1 flex items-center justify-end gap-1">Gastos <i class="ph-bold ph-arrow-up-right text-brand"></i></span>
                         <span class="text-xl font-bold text-brand tracking-tight" id="total-expense">$0.00</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- Resumen Financiero Situacional (NUEVO) -->
+            <div class="bg-input-bg border border-border rounded-2xl p-4 grid grid-cols-2 gap-4">
+                <div class="flex flex-col">
+                    <p class="text-[10px] text-text-mute uppercase font-black mb-1 flex items-center gap-1"><i class="ph-fill ph-trend-down text-brand"></i> Deuda Total</p>
+                    <p class="text-lg font-bold text-text tracking-tight" id="dashboard-total-debt">$0.00</p>
+                    <p class="text-[9px] text-text-mute leading-none mt-1">Plazos restantes</p>
+                </div>
+                <div class="flex flex-col text-right">
+                    <p class="text-[10px] text-text-mute uppercase font-black mb-1 flex items-center justify-end gap-1">Préstamos <i class="ph-fill ph-handshake text-blue-400"></i></p>
+                    <p class="text-lg font-bold text-text tracking-tight" id="dashboard-loans-net">$0.00</p>
+                    <p class="text-[9px] text-text-mute leading-none mt-1">Balance (Me deben - Debo)</p>
                 </div>
             </div>
 
@@ -443,7 +457,10 @@
                         <i class="ph-bold ph-plus"></i> Nuevo
                     </button>
                 </div>
-                <div id="fixed-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+                <!-- Contenedor dividido en Q1 y Q2 -->
+                <div id="fixed-container" class="space-y-6">
+                    <!-- Inyectado por JS -->
+                </div>
             </div>
 
             <!-- Sección Préstamos -->
@@ -780,13 +797,13 @@
         let listeners = [];
         let editingTransactionId = null;
         let editingLoanId = null; 
-        let editingDebtId = null; // Nuevo estado para deudas
+        let editingDebtId = null;
 
         window.appData = {
             transactions: [],
             fixed: [],
             loans: [], 
-            debts: [], // Nueva colección
+            debts: [],
             settings: { frequency: 'biweekly', payday: null, forcedSavings: false, simulationMode: false }
         };
 
@@ -898,12 +915,12 @@
 
             listeners.push(onSnapshot(collection(db, 'artifacts', appId, 'users', userId, 'loans'), (snap) => {
                 window.appData.loans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderLoans();
+                renderLoans(); renderDashboard();
             }));
 
              listeners.push(onSnapshot(collection(db, 'artifacts', appId, 'users', userId, 'debts'), (snap) => {
                 window.appData.debts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderDebts();
+                renderDebts(); renderDashboard();
             }));
 
             listeners.push(onSnapshot(doc(db, 'artifacts', appId, 'users', userId, 'settings', 'config'), (snap) => {
@@ -1021,7 +1038,7 @@
             await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'fixed', id), { ignoreBudget: !current });
         };
 
-        // --- LÓGICA DEUDAS A PLAZOS (ACTUALIZADA) ---
+        // --- LÓGICA DEUDAS A PLAZOS ---
 
         window.openDebtModal = function(id = null) {
             editingDebtId = id;
@@ -1029,7 +1046,6 @@
                 const d = window.appData.debts.find(x => x.id === id);
                 document.getElementById('debt-title').value = d.title;
                 document.getElementById('debt-amount').value = d.totalAmount;
-                // Si existe el campo installments, usarlo, si no, usar months (legacy)
                 document.getElementById('debt-installments').value = d.installments || d.months; 
                 document.getElementById('debt-frequency').value = d.frequency || 'monthly';
                 document.getElementById('btn-delete-debt').classList.remove('hidden');
@@ -1048,7 +1064,6 @@
             const installments = parseInt(document.getElementById('debt-installments').value);
             const frequency = document.getElementById('debt-frequency').value;
             
-            // Guardamos "months" también para retrocompatibilidad por si acaso, aunque la UI usará installments
             const months = installments; 
             
             if (editingDebtId) {
@@ -1102,7 +1117,6 @@
             }
 
             container.innerHTML = window.appData.debts.map(d => {
-                // Compatibilidad hacia atrás
                 const numPlazos = d.installments || d.months;
                 const freq = d.frequency || 'monthly';
                 const freqLabel = freq === 'monthly' ? '/mes' : '/qna';
@@ -1416,6 +1430,28 @@
             const bar = document.getElementById('balance-progress');
             bar.className = `h-full w-0 transition-all duration-700 ease-out shadow-[0_0_15px_rgba(255,255,255,0.8)] ${percent > 90 ? 'bg-alert' : (percent > 60 ? 'bg-yellow-400' : 'bg-white')}`;
 
+            // --- ACTUALIZAR RESUMEN FINANCIERO (Dashboard) ---
+            let totalDebtRemaining = 0;
+            window.appData.debts.forEach(d => {
+                const numPlazos = d.installments || d.months;
+                const paidCount = d.payments.filter(Boolean).length;
+                const installmentAmount = d.totalAmount / numPlazos;
+                totalDebtRemaining += (d.totalAmount - (paidCount * installmentAmount));
+            });
+            document.getElementById('dashboard-total-debt').textContent = formatCurrency(totalDebtRemaining);
+
+            let loansNet = 0;
+            window.appData.loans.forEach(l => {
+                const amt = parseFloat(l.amount);
+                if(l.type === 'lent') loansNet += amt;
+                else loansNet -= amt;
+            });
+            const lnEl = document.getElementById('dashboard-loans-net');
+            lnEl.textContent = formatCurrency(loansNet);
+            if(loansNet < 0) lnEl.classList.add('text-brand');
+            else lnEl.classList.remove('text-brand');
+            // ------------------------------------------------
+
             const listEl = document.getElementById('recent-list');
             const displayTx = monthlyTx;
             
@@ -1546,44 +1582,60 @@
         }
 
         function renderFixed() {
-            const list = document.getElementById('fixed-list');
+            const container = document.getElementById('fixed-container');
             if(window.appData.fixed.length === 0) {
-                list.innerHTML = '<div class="text-center text-text-mute py-4 col-span-full text-xs italic font-medium">No has configurado pagos fijos</div>';
+                container.innerHTML = '<div class="text-center text-text-mute py-4 col-span-full text-xs italic font-medium">No has configurado pagos fijos</div>';
                 return;
             }
 
-            const fixedHTML = window.appData.fixed.map(f => {
-                const isPaid = isFixedPaidThisMonth(f.id);
-                const isIgnored = f.ignoreBudget;
-                
-                const bgClass = isPaid ? "bg-emerald-900/10 border-emerald-900/30" : "bg-card border-border";
-                const textClass = isPaid ? "text-money" : (isIgnored ? "text-text-mute line-through" : "text-text");
-                
-                const eyeIcon = isIgnored ? 'ph-eye-slash' : 'ph-eye';
-                const eyeColor = isIgnored ? 'text-text-mute' : 'text-blue-500';
-                
-                const actionBtn = isPaid 
-                    ? `<div class="w-8 h-8 rounded-lg flex items-center justify-center text-money bg-emerald-900/20"><i class="ph-bold ph-check-circle text-xl"></i></div>`
-                    : `<button onclick="payFixed('${f.id}')" class="w-8 h-8 rounded-lg bg-input-bg flex items-center justify-center text-text-mute hover:text-white hover:bg-white/10 transition-all border border-border"><i class="ph-bold ph-check"></i></button>`;
+            const sortedFixed = [...window.appData.fixed].sort((a,b) => parseInt(a.day) - parseInt(b.day));
+            
+            // Separar en Q1 y Q2
+            const q1 = sortedFixed.filter(f => parseInt(f.day) <= 15);
+            const q2 = sortedFixed.filter(f => parseInt(f.day) > 15);
+
+            const renderGroup = (items, title) => {
+                if (items.length === 0) return '';
+                const itemsHtml = items.map(f => {
+                    const isPaid = isFixedPaidThisMonth(f.id);
+                    const isIgnored = f.ignoreBudget;
+                    
+                    const bgClass = isPaid ? "bg-emerald-900/10 border-emerald-900/30" : "bg-card border-border";
+                    const textClass = isPaid ? "text-money" : (isIgnored ? "text-text-mute line-through" : "text-text");
+                    const eyeIcon = isIgnored ? 'ph-eye-slash' : 'ph-eye';
+                    const eyeColor = isIgnored ? 'text-text-mute' : 'text-blue-500';
+                    const actionBtn = isPaid 
+                        ? `<div class="w-8 h-8 rounded-lg flex items-center justify-center text-money bg-emerald-900/20"><i class="ph-bold ph-check-circle text-xl"></i></div>`
+                        : `<button onclick="payFixed('${f.id}')" class="w-8 h-8 rounded-lg bg-input-bg flex items-center justify-center text-text-mute hover:text-white hover:bg-white/10 transition-all border border-border"><i class="ph-bold ph-check"></i></button>`;
+
+                    return `
+                    <div class="${bgClass} border p-3 rounded-xl flex justify-between items-center transition-all shadow-sm">
+                        <div>
+                            <p class="font-bold ${textClass} text-xs mb-0.5 uppercase tracking-wide">${f.title}</p>
+                            <p class="text-[10px] text-text-mute font-bold uppercase flex items-center gap-1">
+                                 <i class="ph-bold ph-calendar-blank"></i> Día ${f.day} • ${formatCurrency(f.amount)}
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="toggleFixedIgnore('${f.id}', ${!!isIgnored})" class="w-8 h-8 rounded-lg flex items-center justify-center ${eyeColor} hover:bg-white/5 transition-colors"><i class="ph-bold ${eyeIcon}"></i></button>
+                            ${actionBtn}
+                            <button onclick="deleteFixed('${f.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-text-mute hover:text-alert hover:bg-alert/10 transition-colors"><i class="ph-bold ph-trash"></i></button>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
 
                 return `
-                <div class="${bgClass} border p-3 rounded-xl flex justify-between items-center transition-all shadow-sm">
                     <div>
-                        <p class="font-bold ${textClass} text-xs mb-0.5 uppercase tracking-wide">${f.title}</p>
-                        <p class="text-[10px] text-text-mute font-bold uppercase flex items-center gap-1">
-                             <i class="ph-bold ph-calendar-blank"></i> Día ${f.day} • ${formatCurrency(f.amount)}
-                        </p>
+                        <h4 class="text-[10px] font-black text-text-mute uppercase mb-2 tracking-widest pl-1 border-l-2 border-brand/50">${title}</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            ${itemsHtml}
+                        </div>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="toggleFixedIgnore('${f.id}', ${!!isIgnored})" class="w-8 h-8 rounded-lg flex items-center justify-center ${eyeColor} hover:bg-white/5 transition-colors"><i class="ph-bold ${eyeIcon}"></i></button>
-                        ${actionBtn}
-                        <button onclick="deleteFixed('${f.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-text-mute hover:text-alert hover:bg-alert/10 transition-colors"><i class="ph-bold ph-trash"></i></button>
-                    </div>
-                </div>
                 `;
-            }).join('');
+            };
 
-            list.innerHTML = fixedHTML;
+            container.innerHTML = renderGroup(q1, '1ra Quincena (1-15)') + renderGroup(q2, '2da Quincena (16-31)');
         }
 
         function renderLoans() {
