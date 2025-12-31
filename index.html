@@ -71,13 +71,15 @@
             --money: #16a34a;
             --alert: #b91c1c;
             --warn: #d97706;
-            --header-bg: rgba(0, 0, 0, 0.9);
+            --header-bg: rgba(0, 0, 0, 0.85);
         }
 
         * { -webkit-tap-highlight-color: transparent; outline: none; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
         body { overflow-x: hidden; background-color: var(--bg); color: var(--text); }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Utility para ocultar scrollbars pero permitir scroll */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         .animate-pulse-custom { animation: pulse 2s infinite; }
@@ -134,8 +136,8 @@
         .modal-overlay.is-open { display: flex; }
         .modal-content { background: var(--card); width: 100%; max-width: 400px; border-radius: 20px; border: 1px solid var(--border); padding: 24px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.7); position: relative; }
 
-        .chip { border: 1px solid var(--border); background: var(--input-bg); color: var(--text-mute); padding: 8px 14px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-        .chip.active { background: var(--text); color: var(--bg); border-color: var(--text); transform: scale(1.05); }
+        .chip { border: 1px solid var(--border); background: var(--input-bg); color: var(--text-mute); padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .chip.active { background: var(--text); color: var(--bg); border-color: var(--text); transform: scale(1.02); }
 
         #toast { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease; }
         
@@ -149,6 +151,34 @@
             background: var(--money); border-color: var(--money); color: white; box-shadow: 0 0 10px rgba(22, 163, 74, 0.4);
         }
         .debt-bubble:hover { transform: scale(1.1); }
+
+        /* Timeline Styles for History */
+        .timeline-line {
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--border) 0%, transparent 100%);
+            z-index: 0;
+        }
+        .timeline-item { position: relative; padding-left: 50px; margin-bottom: 24px; }
+        .timeline-dot {
+            position: absolute; left: 18px; top: 0;
+            width: 14px; height: 14px; border-radius: 50%;
+            background: var(--card); border: 2px solid var(--border);
+            z-index: 10;
+        }
+        .timeline-dot.income { border-color: var(--money); box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.1); }
+        .timeline-dot.expense { border-color: var(--brand); box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1); }
+        
+        /* Sticky header fix for History */
+        .sticky-date {
+            position: sticky; top: 70px; z-index: 10;
+            display: inline-block;
+            backdrop-filter: blur(8px);
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body class="bg-bg text-text font-sans selection:bg-brand selection:text-white flex flex-col h-[100dvh] overflow-hidden">
@@ -217,31 +247,33 @@
         </footer>
     </div>
     
-    <!-- HEADER APP -->
-    <nav id="global-nav" class="bg-black/80 backdrop-blur-xl border-b border-border fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 py-3 shadow-sm transition-all h-[64px] hidden">
+    <!-- HEADER APP MEJORADO -->
+    <nav id="global-nav" class="bg-black/90 backdrop-blur-md border-b border-white/5 fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 py-0 h-[60px] shadow-lg transition-all hidden">
         <div class="flex items-center gap-3">
-             <div class="w-9 h-9 bg-input-bg rounded-lg flex items-center justify-center text-brand border border-border">
-                <i class="ph-fill ph-wallet text-xl"></i>
+             <div class="w-8 h-8 bg-gradient-to-br from-card to-input-bg rounded-full flex items-center justify-center text-brand border border-white/10 shadow-inner">
+                <i class="ph-fill ph-wallet text-lg"></i>
             </div>
             <div>
-                <h1 class="text-text font-black text-sm uppercase tracking-wide leading-tight">Finanzas</h1>
-                <p class="text-[10px] text-text-mute font-mono font-bold" id="current-date-header">...</p>
+                <h1 class="text-white font-black text-xs uppercase tracking-widest leading-none">God's Plan</h1>
+                <p class="text-[9px] text-text-mute font-medium mt-0.5" id="current-view-title">Finanzas</p>
             </div>
         </div>
         
-        <!-- Menú Desktop (Oculto en móvil) -->
-        <div class="hidden md:flex gap-1 bg-input-bg p-1 rounded-xl border border-border">
+        <div class="flex items-center gap-3">
+            <p class="text-[10px] text-text-mute font-mono font-bold border border-white/10 px-2 py-1 rounded-md bg-white/5" id="current-date-header">...</p>
+        </div>
+
+        <!-- Menú Desktop -->
+        <div class="hidden md:flex gap-1 absolute left-1/2 -translate-x-1/2 bg-input-bg/50 p-1 rounded-xl border border-white/10 backdrop-blur-sm">
             <button id="desktop-nav-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-lg text-xs font-bold text-white bg-bg shadow-sm transition-all">Panel</button>
             <button id="desktop-nav-history" onclick="switchTab('history')" class="px-4 py-2 rounded-lg text-xs font-bold text-text-mute hover:text-white transition-all">Historial</button>
             <button id="desktop-nav-payments" onclick="switchTab('payments')" class="px-4 py-2 rounded-lg text-xs font-bold text-text-mute hover:text-white transition-all">Pagos</button>
             <button id="desktop-nav-settings" onclick="switchTab('settings')" class="px-4 py-2 rounded-lg text-xs font-bold text-text-mute hover:text-white transition-all">Ajustes</button>
         </div>
-
-        <button onclick="window.authApp.logout()" class="md:hidden text-text-mute hover:text-alert transition-colors"><i class="ph-bold ph-sign-out text-xl"></i></button>
     </nav>
 
     <!-- Contenido Principal -->
-    <main id="main-container" class="flex-1 overflow-y-auto p-4 md:px-6 md:pb-6 md:pt-32 pb-28 pt-24 relative hidden scroll-smooth no-scrollbar w-full max-w-[900px] mx-auto">
+    <main id="main-container" class="flex-1 overflow-y-auto p-4 md:px-6 md:pb-6 pt-20 pb-28 relative hidden scroll-smooth w-full max-w-[900px] mx-auto hide-scrollbar">
         
         <!-- DASHBOARD -->
         <section id="view-dashboard" class="space-y-6 animate-fade-in">
@@ -371,17 +403,20 @@
 
         </section>
 
-        <!-- HISTORIAL -->
-        <section id="view-history" class="hidden space-y-4 animate-fade-in">
-            <div class="flex items-center justify-between sticky top-0 bg-bg/90 backdrop-blur-md z-20 py-4 border-b border-border">
-                <h2 class="text-lg font-black text-text uppercase tracking-wide">Historial</h2>
-                 <div class="flex gap-2">
-                    <button onclick="filterHistory('all')" class="filter-btn active chip" data-filter="all">Todos</button>
-                    <button onclick="filterHistory('income')" class="filter-btn chip" data-filter="income">Ingresos</button>
-                    <button onclick="filterHistory('expense')" class="filter-btn chip" data-filter="expense">Gastos</button>
-                </div>
+        <!-- HISTORIAL MEJORADO -->
+        <section id="view-history" class="hidden animate-fade-in relative min-h-screen pb-10">
+            <!-- Sticky Filter Bar -->
+            <div class="sticky top-0 bg-bg/95 backdrop-blur-xl z-20 py-3 border-b border-border mb-6 -mx-4 px-4 flex items-center gap-3 overflow-x-auto hide-scrollbar">
+                <button onclick="filterHistory('all')" class="filter-btn active chip shrink-0" data-filter="all">Todos</button>
+                <button onclick="filterHistory('income')" class="filter-btn chip shrink-0" data-filter="income">Ingresos</button>
+                <button onclick="filterHistory('expense')" class="filter-btn chip shrink-0" data-filter="expense">Gastos</button>
+                <div class="w-4 shrink-0"></div> <!-- Spacer for scroll -->
             </div>
-            <div id="full-history-list" class="space-y-4 pb-6"></div>
+            
+            <div id="full-history-list" class="relative">
+                <div class="timeline-line"></div>
+                <!-- Content injected via JS -->
+            </div>
         </section>
 
         <!-- PAGOS Y DEUDAS -->
@@ -394,12 +429,6 @@
                     <button onclick="openDebtModal()" class="bg-input-bg border border-border hover:bg-white/5 text-text px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-2 transition-colors">
                         <i class="ph-bold ph-plus"></i> Nuevo
                     </button>
-                </div>
-                <div class="bg-blue-900/10 border border-blue-500/20 p-4 rounded-xl text-xs text-blue-200 flex gap-3">
-                    <i class="ph-fill ph-check-circle text-lg shrink-0"></i>
-                    <div class="font-medium">
-                        Control visual de pagos a meses/quincenas. Toca los círculos para marcar el mes como pagado.
-                    </div>
                 </div>
                 <div id="debts-list" class="grid grid-cols-1 gap-4">
                     <!-- Deudas aquí -->
@@ -668,24 +697,14 @@
                       <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Concepto (ej. iPhone)</label>
                       <input type="text" id="debt-title" class="input-gp" required>
                  </div>
-                 
-                 <div class="mb-4">
-                    <label class="text-[10px] uppercase font-bold text-text-mute block mb-2">Frecuencia</label>
-                    <div class="flex bg-input-bg rounded-xl p-1 border border-border">
-                        <button type="button" onclick="setDebtFrequency('monthly')" id="btn-freq-monthly" class="flex-1 py-2 text-xs font-bold rounded-lg bg-card text-brand transition-all shadow-sm">MESES</button>
-                        <button type="button" onclick="setDebtFrequency('biweekly')" id="btn-freq-biweekly" class="flex-1 py-2 text-xs font-bold text-text-mute transition-all">QUINCENAS</button>
-                    </div>
-                    <input type="hidden" id="debt-frequency" value="monthly">
-                </div>
-
                  <div class="grid grid-cols-2 gap-4">
                       <div>
                         <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Monto Total</label>
                         <input type="number" id="debt-amount" step="0.01" class="input-gp" placeholder="0.00" required>
                       </div>
                       <div>
-                        <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">No. de Pagos</label>
-                        <input type="number" id="debt-installments" class="input-gp" placeholder="12" required>
+                        <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Meses</label>
+                        <input type="number" id="debt-months" class="input-gp" placeholder="12" required>
                       </div>
                  </div>
                  <button type="submit" class="w-full bg-brand text-white py-3 rounded-xl font-bold text-xs hover:bg-red-600 shadow-lg shadow-brand/20 transition-colors uppercase tracking-widest">GUARDAR</button>
@@ -1004,56 +1023,35 @@
                 const d = window.appData.debts.find(x => x.id === id);
                 document.getElementById('debt-title').value = d.title;
                 document.getElementById('debt-amount').value = d.totalAmount;
-                document.getElementById('debt-installments').value = d.installments || d.months;
-                
-                const freq = d.frequency || 'monthly';
-                setDebtFrequency(freq);
-
+                document.getElementById('debt-months').value = d.months;
                 document.getElementById('btn-delete-debt').classList.remove('hidden');
             } else {
                 document.getElementById('debt-form').reset();
-                setDebtFrequency('monthly');
                 document.getElementById('btn-delete-debt').classList.add('hidden');
             }
             openModal('debt-modal');
-        };
-
-        window.setDebtFrequency = function(freq) {
-            const btnM = document.getElementById('btn-freq-monthly');
-            const btnB = document.getElementById('btn-freq-biweekly');
-            document.getElementById('debt-frequency').value = freq;
-
-            if (freq === 'monthly') {
-                btnM.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-card text-brand transition-all shadow-sm";
-                btnB.className = "flex-1 py-2 text-xs font-bold text-text-mute transition-all";
-            } else {
-                btnB.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-card text-blue-500 transition-all shadow-sm";
-                btnM.className = "flex-1 py-2 text-xs font-bold text-text-mute transition-all";
-            }
         };
 
         window.saveDebt = async function(e) {
             e.preventDefault();
             const title = document.getElementById('debt-title').value;
             const totalAmount = parseFloat(document.getElementById('debt-amount').value);
-            const installments = parseInt(document.getElementById('debt-installments').value);
-            const frequency = document.getElementById('debt-frequency').value;
+            const months = parseInt(document.getElementById('debt-months').value);
             
             if (editingDebtId) {
                 const old = window.appData.debts.find(x => x.id === editingDebtId);
-                const oldInstallments = old.installments || old.months;
                 let newPayments = old.payments;
-                if (installments !== oldInstallments) {
-                    newPayments = new Array(installments).fill(false);
+                if (months !== old.months) {
+                    newPayments = new Array(months).fill(false);
                 }
                 
                 await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'debts', editingDebtId), {
-                    title, totalAmount, installments, frequency, payments: newPayments
+                    title, totalAmount, months, payments: newPayments
                 });
             } else {
-                const payments = new Array(installments).fill(false);
+                const payments = new Array(months).fill(false);
                 await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'debts'), {
-                    title, totalAmount, installments, frequency, payments, createdAt: new Date().toISOString()
+                    title, totalAmount, months, payments, createdAt: new Date().toISOString()
                 });
             }
             closeModal('debt-modal');
@@ -1089,18 +1087,14 @@
             }
 
             container.innerHTML = window.appData.debts.map(d => {
-                const count = d.installments || d.months;
-                const freq = d.frequency || 'monthly';
-                const periodicAmount = d.totalAmount / count;
+                const monthly = d.totalAmount / d.months;
                 const paidCount = d.payments.filter(Boolean).length;
-                const paidAmount = paidCount * periodicAmount;
+                const paidAmount = paidCount * monthly;
                 const remaining = d.totalAmount - paidAmount;
-                const progress = Math.round((paidCount / count) * 100);
-                
-                const suffix = freq === 'biweekly' ? '/qnc' : '/mes';
+                const progress = Math.round((paidCount / d.months) * 100);
 
                 let bubblesHTML = '';
-                for(let i=0; i < count; i++) {
+                for(let i=0; i < d.months; i++) {
                     const isPaid = d.payments[i];
                     bubblesHTML += `<div onclick="event.stopPropagation(); toggleDebtPayment('${d.id}', ${i})" class="debt-bubble ${isPaid ? 'paid' : ''}">${i + 1}</div>`;
                 }
@@ -1110,7 +1104,7 @@
                     <div class="flex justify-between items-start mb-4" onclick="openDebtModal('${d.id}')">
                         <div>
                             <h3 class="font-bold text-text uppercase tracking-wide cursor-pointer hover:text-brand transition-colors">${d.title}</h3>
-                            <p class="text-[10px] text-text-mute font-medium">Pago sugerido: ${formatCurrency(periodicAmount)}${suffix}</p>
+                            <p class="text-[10px] text-text-mute font-medium">Pago sugerido: ${formatCurrency(monthly)}/mes</p>
                         </div>
                         <div class="text-right">
                             <p class="font-black text-brand text-lg tracking-tight">${formatCurrency(remaining)}</p>
@@ -1465,13 +1459,14 @@
             const filter = activeBtn ? activeBtn.dataset.filter : 'all';
             
             const list = document.getElementById('full-history-list');
-            list.innerHTML = '';
+            // Mantener la línea de tiempo
+            list.innerHTML = '<div class="timeline-line"></div>';
             
             let txs = [...window.appData.transactions].sort((a,b) => new Date(b.date) - new Date(a.date));
             if(filter !== 'all') txs = txs.filter(t => t.type === filter);
             
             if(txs.length === 0) {
-                list.innerHTML = '<div class="text-center text-text-mute py-8 text-xs flex flex-col items-center gap-2"><i class="ph-bold ph-ghost text-2xl"></i><span class="font-medium">Sin registros aún</span></div>';
+                list.innerHTML += '<div class="text-center text-text-mute py-8 text-xs flex flex-col items-center gap-2"><i class="ph-bold ph-ghost text-2xl"></i><span class="font-medium">Sin registros aún</span></div>';
                 return;
             }
 
@@ -1490,19 +1485,40 @@
                 const today = new Date(); today.setHours(0,0,0,0);
                 const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1); yesterday.setHours(0,0,0,0);
                 
-                let label = dateObj.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+                let label = dateObj.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
                 if(dateObj.getTime() === today.getTime()) label = "Hoy";
                 else if(dateObj.getTime() === yesterday.getTime()) label = "Ayer";
-                label = label.charAt(0).toUpperCase() + label.slice(1);
+                label = label.toUpperCase();
 
-                const txItemsHTML = grouped[date].map(t => createTxHTML(t)).join('');
+                const txItemsHTML = grouped[date].map(t => {
+                    const isInc = t.type === 'income';
+                    const catObj = [...CATEGORIES.expense, ...CATEGORIES.income].find(c => c.id === t.category);
+                    const icon = catObj ? catObj.icon : 'ph-circle';
+                    
+                    return `
+                    <div class="timeline-item group cursor-pointer" onclick="editTransaction('${t.id}')">
+                        <div class="timeline-dot ${t.type}"></div>
+                        <div class="flex justify-between items-start pr-2">
+                            <div>
+                                <h4 class="text-sm font-bold text-text group-hover:text-white transition-colors">${t.title}</h4>
+                                <p class="text-[10px] text-text-mute font-medium uppercase">${t.category}</p>
+                            </div>
+                            <span class="font-bold text-xs ${isInc ? 'text-money' : 'text-text'}">
+                                ${isInc ? '+' : '-'}${formatCurrency(t.amount)}
+                            </span>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
                 
                 groupDiv.innerHTML = `
-                    <div class="sticky top-14 bg-bg/95 backdrop-blur-sm z-10 py-2 mb-2 border-b border-border">
-                        <h3 class="text-[10px] font-black text-text-mute uppercase tracking-widest pl-1 flex items-center gap-2"><i class="ph-fill ph-calendar-blank"></i> ${label}</h3>
-                    </div>
-                    <div class="space-y-2">
-                        ${txItemsHTML}
+                    <div class="mb-6 relative">
+                         <span class="sticky-date bg-input-bg border border-border px-3 py-1 text-[10px] font-black uppercase text-text-mute mb-4 ml-1 shadow-sm">
+                            ${label}
+                         </span>
+                         <div class="mt-4">
+                            ${txItemsHTML}
+                         </div>
                     </div>
                 `;
                 list.appendChild(groupDiv);
@@ -1793,6 +1809,15 @@
             document.querySelectorAll('section[id^="view-"]').forEach(el => el.classList.add('hidden'));
             document.getElementById(`view-${id}`).classList.remove('hidden');
             
+            // Título dinámico
+            const titles = {
+                'dashboard': 'Finanzas',
+                'history': 'Historial',
+                'payments': 'Pagos y Deudas',
+                'settings': 'Ajustes'
+            };
+            document.getElementById('current-view-title').textContent = titles[id] || 'Finanzas';
+
             // LOGICA PARA ACTUALIZAR NAVEGACION
             const tabs = ['dashboard', 'history', 'payments', 'settings'];
             
