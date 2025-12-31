@@ -398,7 +398,7 @@
                 <div class="bg-blue-900/10 border border-blue-500/20 p-4 rounded-xl text-xs text-blue-200 flex gap-3">
                     <i class="ph-fill ph-check-circle text-lg shrink-0"></i>
                     <div class="font-medium">
-                        Control visual de pagos a meses. Toca los círculos para marcar el mes como pagado.
+                        Control visual de pagos a meses/quincenas. Toca los círculos para marcar el mes como pagado.
                     </div>
                 </div>
                 <div id="debts-list" class="grid grid-cols-1 gap-4">
@@ -668,14 +668,24 @@
                       <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Concepto (ej. iPhone)</label>
                       <input type="text" id="debt-title" class="input-gp" required>
                  </div>
+                 
+                 <div class="mb-4">
+                    <label class="text-[10px] uppercase font-bold text-text-mute block mb-2">Frecuencia</label>
+                    <div class="flex bg-input-bg rounded-xl p-1 border border-border">
+                        <button type="button" onclick="setDebtFrequency('monthly')" id="btn-freq-monthly" class="flex-1 py-2 text-xs font-bold rounded-lg bg-card text-brand transition-all shadow-sm">MESES</button>
+                        <button type="button" onclick="setDebtFrequency('biweekly')" id="btn-freq-biweekly" class="flex-1 py-2 text-xs font-bold text-text-mute transition-all">QUINCENAS</button>
+                    </div>
+                    <input type="hidden" id="debt-frequency" value="monthly">
+                </div>
+
                  <div class="grid grid-cols-2 gap-4">
                       <div>
                         <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Monto Total</label>
                         <input type="number" id="debt-amount" step="0.01" class="input-gp" placeholder="0.00" required>
                       </div>
                       <div>
-                        <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">Meses</label>
-                        <input type="number" id="debt-months" class="input-gp" placeholder="12" required>
+                        <label class="text-[10px] uppercase font-bold text-text-mute block mb-1">No. de Pagos</label>
+                        <input type="number" id="debt-installments" class="input-gp" placeholder="12" required>
                       </div>
                  </div>
                  <button type="submit" class="w-full bg-brand text-white py-3 rounded-xl font-bold text-xs hover:bg-red-600 shadow-lg shadow-brand/20 transition-colors uppercase tracking-widest">GUARDAR</button>
@@ -994,37 +1004,56 @@
                 const d = window.appData.debts.find(x => x.id === id);
                 document.getElementById('debt-title').value = d.title;
                 document.getElementById('debt-amount').value = d.totalAmount;
-                document.getElementById('debt-months').value = d.months;
+                document.getElementById('debt-installments').value = d.installments || d.months;
+                
+                const freq = d.frequency || 'monthly';
+                setDebtFrequency(freq);
+
                 document.getElementById('btn-delete-debt').classList.remove('hidden');
             } else {
                 document.getElementById('debt-form').reset();
+                setDebtFrequency('monthly');
                 document.getElementById('btn-delete-debt').classList.add('hidden');
             }
             openModal('debt-modal');
+        };
+
+        window.setDebtFrequency = function(freq) {
+            const btnM = document.getElementById('btn-freq-monthly');
+            const btnB = document.getElementById('btn-freq-biweekly');
+            document.getElementById('debt-frequency').value = freq;
+
+            if (freq === 'monthly') {
+                btnM.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-card text-brand transition-all shadow-sm";
+                btnB.className = "flex-1 py-2 text-xs font-bold text-text-mute transition-all";
+            } else {
+                btnB.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-card text-blue-500 transition-all shadow-sm";
+                btnM.className = "flex-1 py-2 text-xs font-bold text-text-mute transition-all";
+            }
         };
 
         window.saveDebt = async function(e) {
             e.preventDefault();
             const title = document.getElementById('debt-title').value;
             const totalAmount = parseFloat(document.getElementById('debt-amount').value);
-            const months = parseInt(document.getElementById('debt-months').value);
+            const installments = parseInt(document.getElementById('debt-installments').value);
+            const frequency = document.getElementById('debt-frequency').value;
             
             if (editingDebtId) {
-                // Si editamos, actualizamos campos básicos. Si cambian los meses, tendríamos que reajustar el array de pagos, 
-                // pero por simplicidad, asumimos que solo se edita el nombre o monto, o se resetea si cambian los meses.
                 const old = window.appData.debts.find(x => x.id === editingDebtId);
+                const oldInstallments = old.installments || old.months;
                 let newPayments = old.payments;
-                if (months !== old.months) {
-                    newPayments = new Array(months).fill(false);
+                if (installments !== oldInstallments) {
+                    newPayments = new Array(installments).fill(false);
                 }
                 
                 await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'debts', editingDebtId), {
-                    title, totalAmount, months, payments: newPayments
+                    title, totalAmount, installments, frequency, payments: newPayments
                 });
             } else {
-                const payments = new Array(months).fill(false);
+                const payments = new Array(installments).fill(false);
                 await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'debts'), {
-                    title, totalAmount, months, payments, createdAt: new Date().toISOString()
+                    title, totalAmount, installments, frequency, payments, createdAt: new Date().toISOString()
                 });
             }
             closeModal('debt-modal');
@@ -1050,7 +1079,6 @@
             await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'debts', debtId), {
                 payments: newPayments
             });
-            // Opcional: Podríamos preguntar si quiere agregar el gasto al historial, pero por ahora solo es visual.
         };
 
         function renderDebts() {
@@ -1061,14 +1089,18 @@
             }
 
             container.innerHTML = window.appData.debts.map(d => {
-                const monthly = d.totalAmount / d.months;
+                const count = d.installments || d.months;
+                const freq = d.frequency || 'monthly';
+                const periodicAmount = d.totalAmount / count;
                 const paidCount = d.payments.filter(Boolean).length;
-                const paidAmount = paidCount * monthly;
+                const paidAmount = paidCount * periodicAmount;
                 const remaining = d.totalAmount - paidAmount;
-                const progress = Math.round((paidCount / d.months) * 100);
+                const progress = Math.round((paidCount / count) * 100);
+                
+                const suffix = freq === 'biweekly' ? '/qnc' : '/mes';
 
                 let bubblesHTML = '';
-                for(let i=0; i < d.months; i++) {
+                for(let i=0; i < count; i++) {
                     const isPaid = d.payments[i];
                     bubblesHTML += `<div onclick="event.stopPropagation(); toggleDebtPayment('${d.id}', ${i})" class="debt-bubble ${isPaid ? 'paid' : ''}">${i + 1}</div>`;
                 }
@@ -1078,7 +1110,7 @@
                     <div class="flex justify-between items-start mb-4" onclick="openDebtModal('${d.id}')">
                         <div>
                             <h3 class="font-bold text-text uppercase tracking-wide cursor-pointer hover:text-brand transition-colors">${d.title}</h3>
-                            <p class="text-[10px] text-text-mute font-medium">Pago sugerido: ${formatCurrency(monthly)}/mes</p>
+                            <p class="text-[10px] text-text-mute font-medium">Pago sugerido: ${formatCurrency(periodicAmount)}${suffix}</p>
                         </div>
                         <div class="text-right">
                             <p class="font-black text-brand text-lg tracking-tight">${formatCurrency(remaining)}</p>
