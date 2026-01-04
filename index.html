@@ -179,6 +179,15 @@
             backdrop-filter: blur(8px);
             border-radius: 8px;
         }
+
+        /* Toggle switch for Horizon */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #68D391;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #68D391;
+        }
     </style>
 </head>
 <body class="bg-bg text-text font-sans selection:bg-brand selection:text-white flex flex-col h-[100dvh] overflow-hidden">
@@ -243,7 +252,7 @@
             </div>
         </div>
         <footer class="absolute bottom-4 left-0 w-full text-center pointer-events-none opacity-30">
-            <p class="text-[10px] font-mono tracking-[0.5em] text-white">SYSTEM v2.0 // SECURE</p>
+            <p class="text-[10px] font-mono tracking-[0.5em] text-white">SYSTEM v2.2 // HORIZON</p>
         </footer>
     </div>
     
@@ -292,12 +301,23 @@
                             </div>
                         </div>
                         <p class="text-sm text-text-mute leading-relaxed mb-4 font-medium" id="formula-explanation">Analizando tus finanzas...</p>
+                        
+                        <!-- CONTROLES HORIZONTE (OCULTO POR DEFECTO) -->
+                        <div id="horizon-controls" class="hidden mb-4 p-2 bg-blue-900/10 border border-blue-500/20 rounded-xl flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i class="ph-fill ph-binoculars text-blue-400"></i>
+                                <span class="text-[10px] font-bold text-blue-200 uppercase">Ver Siguiente Ciclo</span>
+                            </div>
+                            <button onclick="toggleHorizon()" id="btn-horizon-toggle" class="bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 px-3 py-1 rounded-lg text-[10px] font-black uppercase transition-colors border border-blue-500/30">
+                                ACTIVAR
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="pt-4 border-t border-border mt-auto">
                         <div class="flex justify-between items-end">
                             <div>
-                                <p class="text-[10px] text-text-mute uppercase font-black mb-1">Límite Diario</p>
+                                <p class="text-[10px] text-text-mute uppercase font-black mb-1" id="daily-limit-label">Límite Diario</p>
                                 <span class="font-black text-3xl text-text tracking-tight" id="formula-daily">$0.00</span>
                             </div>
                             <div class="text-right">
@@ -311,7 +331,7 @@
                 <!-- Botones de Acción (SOLO PC - hidden en móvil, grid en md) -->
                 <div class="hidden md:grid grid-rows-2 gap-4 h-full">
                     <button onclick="openAddModal('income')" class="bg-card border border-border hover:bg-input-bg rounded-2xl text-money font-black text-sm flex items-center justify-center gap-3 transition-all group relative overflow-hidden">
-                         <div class="absolute left-0 top-0 w-1 h-full bg-money"></div>
+                          <div class="absolute left-0 top-0 w-1 h-full bg-money"></div>
                         <div class="w-10 h-10 rounded-xl bg-green-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                             <i class="ph-bold ph-arrow-down-left text-xl"></i>
                         </div>
@@ -542,6 +562,16 @@
                         <label class="text-[10px] text-text-mute font-black uppercase block mb-1">Día 2</label>
                         <select id="payday-2-select" class="input-gp bg-input-bg text-xs py-2"></select>
                     </div>
+                </div>
+
+                <!-- NUEVO: INGRESO BASE PARA LA FÓRMULA HORIZONTE -->
+                <div class="pt-4 border-t border-border">
+                    <label class="text-[10px] text-text-mute font-black uppercase block mb-1">Ingreso Base Estimado (Para proyecciones)</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-mute font-bold">$</span>
+                        <input type="number" id="base-income-input" class="input-gp pl-8" placeholder="Ej. 10000">
+                    </div>
+                    <p class="text-[9px] text-text-mute mt-1">Se usa para calcular el límite diario cuando se empalman quincenas.</p>
                 </div>
                 
                 <button onclick="saveSettings()" class="w-full bg-brand text-white py-3 rounded-xl font-bold text-xs hover:bg-red-600 mt-2 shadow-lg shadow-brand/20 transition-colors uppercase tracking-widest">GUARDAR</button>
@@ -792,7 +822,7 @@
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-cUzYmh5G9y_W2RXbO1Uma4DlKKmnnss",
-            authDomain: "odsplan-adherencia.firebaseapp.com",
+            authDomain: "godsplan-adherencia.firebaseapp.com",
             projectId: "godsplan-adherencia",
             storageBucket: "godsplan-adherencia.firebasestorage.app",
             messagingSenderId: "660801277434",
@@ -809,13 +839,14 @@
         let editingTransactionId = null;
         let editingLoanId = null; 
         let editingDebtId = null;
+        let horizonModeActive = false; // State for the Horizon Logic
 
         window.appData = {
             transactions: [],
             fixed: [],
             loans: [], 
             debts: [],
-            settings: { frequency: 'biweekly', payday: null, savingsPercentage: 0, simulationMode: false }
+            settings: { frequency: 'biweekly', payday: null, savingsPercentage: 0, simulationMode: false, baseIncome: 0 }
         };
 
         // --- AUTH ---
@@ -1169,10 +1200,6 @@
             }).join('');
         }
 
-
-        // --- FIN LOGICA DEUDAS ---
-
-
         window.openLoanModal = function() {
             editingLoanId = null; // Resetear edición
             document.getElementById('loan-modal-title').textContent = "Nuevo Préstamo";
@@ -1241,7 +1268,6 @@
              if(confirm('¿Borrar?')) {
                 await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'loans', id));
                 showToast('Eliminado');
-                // Si estaba abierto el modal en modo edición para este ID, cerrarlo
                 if(editingLoanId === id) closeModal('loans-modal');
              }
         };
@@ -1251,12 +1277,12 @@
             const payday = document.getElementById('payday-select').value;
             const payday1 = document.getElementById('payday-1-select').value;
             const payday2 = document.getElementById('payday-2-select').value;
-            // Nuevo: porcentaje de ahorro (0, 5, 10, 15)
             const savingsPercentage = document.getElementById('savings-percent').value;
             const simulationMode = document.getElementById('toggle-simulation').checked;
+            const baseIncome = parseFloat(document.getElementById('base-income-input').value) || 0;
             
             await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'config'), { 
-                frequency: freq, payday, payday1, payday2, savingsPercentage: parseInt(savingsPercentage), simulationMode
+                frequency: freq, payday, payday1, payday2, savingsPercentage: parseInt(savingsPercentage), simulationMode, baseIncome
             }, { merge: true });
             showToast('Guardado');
         };
@@ -1331,6 +1357,22 @@
                 showToast('Datos Importados');
             };
             reader.readAsText(file);
+        }
+        
+        window.toggleHorizon = function() {
+            horizonModeActive = !horizonModeActive;
+            const btn = document.getElementById('btn-horizon-toggle');
+            if(horizonModeActive) {
+                btn.textContent = "DESACTIVAR";
+                btn.classList.remove('bg-blue-500/20', 'text-blue-300');
+                btn.classList.add('bg-blue-500', 'text-white');
+            } else {
+                btn.textContent = "ACTIVAR";
+                btn.classList.add('bg-blue-500/20', 'text-blue-300');
+                btn.classList.remove('bg-blue-500', 'text-white');
+            }
+            // Trigger recalculation
+            renderDashboard();
         }
 
         initAuth();
@@ -1536,7 +1578,6 @@
             const filter = activeBtn ? activeBtn.dataset.filter : 'all';
             
             const list = document.getElementById('full-history-list');
-            // Mantener la línea de tiempo
             list.innerHTML = '<div class="timeline-line"></div>';
             
             let txs = [...window.appData.transactions].sort((a,b) => new Date(b.date) - new Date(a.date));
@@ -1659,55 +1700,6 @@
             container.innerHTML = renderGroup(q1, '1ra Quincena (1-15)') + renderGroup(q2, '2da Quincena (16-31)');
         }
 
-        function renderLoans() {
-            const list = document.getElementById('loans-list');
-            const loans = window.appData.loans || [];
-
-            let owedToMe = 0;
-            let iOwe = 0;
-
-            loans.forEach(l => {
-                const val = parseFloat(l.amount) || 0;
-                if(l.type === 'lent') owedToMe += val;
-                else iOwe += val;
-            });
-
-            document.getElementById('loans-owed-to-me').textContent = formatCurrency(owedToMe);
-            document.getElementById('loans-i-owe').textContent = formatCurrency(iOwe);
-
-            if(loans.length === 0) {
-                list.innerHTML = '<div class="text-center text-text-mute py-4 col-span-full text-xs italic font-medium">Sin préstamos activos</div>';
-                return;
-            }
-
-            const html = loans.map(l => {
-                const isLent = l.type === 'lent'; 
-                const icon = isLent ? 'ph-arrow-up-right' : 'ph-arrow-down-left';
-                const color = isLent ? 'text-money' : 'text-brand';
-                const bgIcon = isLent ? 'bg-emerald-900/20' : 'bg-red-900/20';
-
-                return `
-                <div class="bg-card border border-border p-3 rounded-xl flex justify-between items-center shadow-sm cursor-pointer hover:bg-input-bg transition-colors group" onclick="editLoan('${l.id}')">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-lg ${bgIcon} flex items-center justify-center ${color} shrink-0 border border-border group-hover:border-white/20 transition-colors">
-                            <i class="ph-bold ${icon} text-lg"></i>
-                        </div>
-                        <div>
-                            <p class="font-bold text-text text-xs uppercase tracking-wide group-hover:text-white transition-colors">${l.person}</p>
-                            <p class="text-[10px] text-text-mute font-bold uppercase">${l.date}</p>
-                        </div>
-                    </div>
-                      <div class="flex items-center gap-3">
-                        <p class="font-black ${color} text-xs">${formatCurrency(l.amount)}</p>
-                        <button onclick="event.stopPropagation(); deleteLoan('${l.id}')" class="text-text-mute hover:text-alert transition-colors p-1"><i class="ph-bold ph-trash"></i></button>
-                    </div>
-                </div>
-                `;
-            }).join('');
-
-            list.innerHTML = html;
-        }
-
         function getPendingFixedAmount(targetDate) {
             let pending = 0;
             let cursor = new Date();
@@ -1732,6 +1724,31 @@
                     }
                 });
 
+                cursor.setDate(cursor.getDate() + 1);
+            }
+            return pending;
+        }
+
+        // --- CALCULO DE GASTOS FIJOS DEL SIGUIENTE CICLO ---
+        function getNextCycleFixedAmount(nextPayday, cycleLengthDays) {
+            let pending = 0;
+            
+            // Start checking from Next Payday
+            let cursor = new Date(nextPayday);
+            cursor.setHours(0,0,0,0);
+            
+            // End checking at end of next cycle
+            let end = new Date(cursor);
+            end.setDate(end.getDate() + cycleLengthDays);
+            
+            while (cursor < end) {
+                const dayNum = cursor.getDate();
+                window.appData.fixed.forEach(f => {
+                    if (f.ignoreBudget) return;
+                    if (parseInt(f.day) === dayNum) {
+                        pending += parseFloat(f.amount);
+                    }
+                });
                 cursor.setDate(cursor.getDate() + 1);
             }
             return pending;
@@ -1762,6 +1779,16 @@
             
             badge.textContent = diff <= 0 ? "Hoy Cobras" : `${diff} Días`;
             
+            // --- HORIZON TOGGLE VISIBILITY ---
+            const horizonControls = document.getElementById('horizon-controls');
+            if (diff <= 1) {
+                horizonControls.classList.remove('hidden');
+            } else {
+                horizonControls.classList.add('hidden');
+                // Si salimos de la zona de peligro, desactivar horizonte
+                if (horizonModeActive) toggleHorizon();
+            }
+
             updateDailyFormula(currentDisplayBalance, diff, nextDate);
         }
 
@@ -1831,35 +1858,63 @@
                 }
             });
 
+            // GASTOS FIJOS RESTANTES DE ESTE PERIODO
             const calcLimitDate = new Date(nextPaydayDate);
             calcLimitDate.setDate(calcLimitDate.getDate() - 1);
-            
             const pendingFixedSum = getPendingFixedAmount(calcLimitDate);
-
-            // Como currentBalance es lo que ME QUEDA, y spentToday es lo que GASTE,
-            // Mi "Saldo Inicial del Día" en teoría era currentBalance + spentToday.
-            // Pero currentBalance ya tiene el ahorro descontado.
-            // Asi que el cálculo se hace sobre la base descontada.
             
+            // FÓRMULA BASE
             const startOfDayBalance = currentBalance + spentToday;
             const effectiveStartBalance = startOfDayBalance - pendingFixedSum;
-            
-            const divisor = daysLeft <= 0 ? 1 : daysLeft;
-            
-            let budgetForToday = effectiveStartBalance / divisor;
-            const remainingToday = budgetForToday - spentToday;
-            
+            const dailyLabel = document.getElementById('formula-daily');
             const explEl = document.getElementById('formula-explanation');
+            const daysLabelEl = document.getElementById('formula-days-left');
 
-            explEl.innerHTML = `Base: <strong class="text-white">${formatCurrency(budgetForToday)}</strong> • Gastado: <strong class="text-text-mute">-${formatCurrency(spentToday)}</strong>`;
-            
-            const remainingEl = document.getElementById('formula-daily');
-            remainingEl.textContent = formatCurrency(remainingToday);
-            
-            if(remainingToday < 0) remainingEl.classList.add('text-alert');
-            else remainingEl.classList.remove('text-alert');
+            // --- LÓGICA DE HORIZONTE ACTIVADA ---
+            if (horizonModeActive && daysLeft <= 1) {
+                // 1. Obtener Ingreso Base (Settings)
+                const baseIncome = window.appData.settings.baseIncome || 0;
+                
+                if (baseIncome === 0) {
+                    explEl.innerHTML = `<span class="text-orange-400">¡Alerta! Configura tu "Ingreso Base" en Ajustes para usar esta función.</span>`;
+                    dailyLabel.textContent = "---";
+                    return;
+                }
 
-            document.getElementById('formula-days-left').textContent = `Fijos: -${formatCurrency(pendingFixedSum)}`;
+                // 2. Determinar duración del siguiente ciclo
+                const cycleDays = window.appData.settings.frequency === 'monthly' ? 30 : 15;
+                const totalDays = daysLeft + cycleDays;
+                
+                // 3. Gastos Fijos del Siguiente Ciclo
+                const nextCycleFixed = getNextCycleFixedAmount(nextPaydayDate, cycleDays);
+                
+                // 4. FÓRMULA HORIZONTE
+                // (Saldo Actual + Saldo Futuro - Fijos Futuros) / (Días Restantes + Días Nuevo Ciclo)
+                // Usamos effectiveStartBalance porque ya descontamos los fijos de ESTE ciclo.
+                const totalPool = effectiveStartBalance + baseIncome - nextCycleFixed;
+                const horizonBudget = totalPool / totalDays;
+                const remainingToday = horizonBudget - spentToday;
+                
+                explEl.innerHTML = `<span class="text-blue-300 font-bold">Modo Horizonte</span> • Fondo: ${formatCurrency(totalPool)} / ${totalDays} días`;
+                dailyLabel.textContent = formatCurrency(remainingToday);
+                daysLabelEl.textContent = `Fijos Futuros: -${formatCurrency(nextCycleFixed)}`;
+                
+                if(remainingToday < 0) dailyLabel.classList.add('text-alert');
+                else dailyLabel.classList.remove('text-alert');
+
+            } else {
+                // --- FÓRMULA ESTÁNDAR ---
+                const divisor = daysLeft <= 0 ? 1 : daysLeft;
+                let budgetForToday = effectiveStartBalance / divisor;
+                const remainingToday = budgetForToday - spentToday;
+                
+                explEl.innerHTML = `Base: <strong class="text-white">${formatCurrency(budgetForToday)}</strong> • Gastado: <strong class="text-text-mute">-${formatCurrency(spentToday)}</strong>`;
+                dailyLabel.textContent = formatCurrency(remainingToday);
+                daysLabelEl.textContent = `Fijos: -${formatCurrency(pendingFixedSum)}`;
+                
+                if(remainingToday < 0) dailyLabel.classList.add('text-alert');
+                else dailyLabel.classList.remove('text-alert');
+            }
         }
 
         function runSimulation() {
@@ -2000,6 +2055,10 @@
             
             const toggleSim = document.getElementById('toggle-simulation');
             if(toggleSim && s.simulationMode !== undefined) toggleSim.checked = s.simulationMode;
+            
+            // NUEVO: BASE INCOME
+            const baseInc = document.getElementById('base-income-input');
+            if(baseInc && s.baseIncome !== undefined) baseInc.value = s.baseIncome;
 
             togglePaydayInput();
         }
