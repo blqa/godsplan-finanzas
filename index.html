@@ -286,7 +286,10 @@
                             <p class="text-xs font-black text-violet-400 uppercase tracking-widest flex items-center gap-2">
                                 <i class="ph-fill ph-calculator"></i> PLAN DEL DÍA
                             </p>
-                            <span id="payday-badge" class="text-[10px] bg-violet-900/20 text-violet-300 px-2 py-0.5 rounded border border-violet-500/20 font-bold uppercase">...</span>
+                            <div class="flex items-center gap-2">
+                                <i id="savings-active-icon" class="ph-fill ph-shield-check text-emerald-500 text-lg hidden" title="Ahorro Protegido"></i>
+                                <span id="payday-badge" class="text-[10px] bg-violet-900/20 text-violet-300 px-2 py-0.5 rounded border border-violet-500/20 font-bold uppercase">...</span>
+                            </div>
                         </div>
                         <p class="text-sm text-text-mute leading-relaxed mb-4 font-medium" id="formula-explanation">Analizando tus finanzas...</p>
                     </div>
@@ -331,7 +334,7 @@
                 </div>
 
                 <div class="flex justify-between items-start mb-4 relative z-10">
-                    <span class="text-xs font-black text-text-mute uppercase tracking-widest flex items-center gap-2"><i class="ph-bold ph-coins"></i> Disponible Real</span>
+                    <span class="text-xs font-black text-text-mute uppercase tracking-widest flex items-center gap-2"><i class="ph-bold ph-coins"></i> Disponible (Visible)</span>
                     <button onclick="openAdjustModal()" class="text-text-mute hover:text-white text-[0.65rem] font-bold bg-bg/50 px-2 py-1 rounded border border-border transition-colors uppercase tracking-wider">Ajustar</button>
                 </div>
                 
@@ -546,13 +549,21 @@
             
              <div class="bg-card border border-border p-6 rounded-2xl space-y-4">
                   <h3 class="font-bold text-text text-sm flex items-center gap-2 uppercase tracking-wide"><i class="ph-bold ph-faders text-brand"></i> Extras</h3>
-                  <label class="flex items-center justify-between cursor-pointer p-2 hover:bg-input-bg rounded-lg transition-colors">
-                    <div>
-                         <span class="text-sm text-text font-bold">Modo "Ahorro Forzoso"</span>
-                         <p class="text-[10px] text-text-mute font-medium">Oculta el 10% de tu saldo real.</p>
-                    </div>
-                    <input type="checkbox" id="toggle-forced-savings" class="accent-brand w-5 h-5" onchange="saveSettings()">
-                </label>
+                  
+                  <!-- NUEVO SELECTOR DE AHORRO -->
+                  <div class="flex items-center justify-between p-2 hover:bg-input-bg rounded-lg transition-colors">
+                     <div>
+                          <span class="text-sm text-text font-bold">Modo "Ahorro Forzoso"</span>
+                          <p class="text-[10px] text-text-mute font-medium">Oculta un porcentaje de tu saldo.</p>
+                     </div>
+                     <select id="savings-percent" class="input-gp w-28 px-2 py-1 text-xs bg-input-bg text-right h-8 flex items-center" onchange="saveSettings()">
+                         <option value="0">Off</option>
+                         <option value="5">5%</option>
+                         <option value="10">10%</option>
+                         <option value="15">15%</option>
+                     </select>
+                 </div>
+
                 <div class="border-t border-border"></div>
                 <label class="flex items-center justify-between cursor-pointer p-2 hover:bg-input-bg rounded-lg transition-colors">
                     <div>
@@ -804,7 +815,7 @@
             fixed: [],
             loans: [], 
             debts: [],
-            settings: { frequency: 'biweekly', payday: null, forcedSavings: false, simulationMode: false }
+            settings: { frequency: 'biweekly', payday: null, savingsPercentage: 0, simulationMode: false }
         };
 
         // --- AUTH ---
@@ -1240,11 +1251,12 @@
             const payday = document.getElementById('payday-select').value;
             const payday1 = document.getElementById('payday-1-select').value;
             const payday2 = document.getElementById('payday-2-select').value;
-            const forcedSavings = document.getElementById('toggle-forced-savings').checked;
+            // Nuevo: porcentaje de ahorro (0, 5, 10, 15)
+            const savingsPercentage = document.getElementById('savings-percent').value;
             const simulationMode = document.getElementById('toggle-simulation').checked;
             
             await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'config'), { 
-                frequency: freq, payday, payday1, payday2, forcedSavings, simulationMode
+                frequency: freq, payday, payday1, payday2, savingsPercentage: parseInt(savingsPercentage), simulationMode
             }, { merge: true });
             showToast('Guardado');
         };
@@ -1404,13 +1416,20 @@
 
             const showInc = incM;
             const showExp = expM;
-            let bal = totalBalanceReal; 
+            
+            // --- APLICAR PORCENTAJE DE AHORRO AL BALANCE VISIBLE ---
+            const savingsPct = parseInt(window.appData.settings.savingsPercentage) || 0;
+            let displayBalance = totalBalanceReal; 
 
-            if (window.appData.settings.forcedSavings) {
-                bal = bal * 0.90; 
+            if (savingsPct > 0) {
+                // Descontar porcentaje
+                displayBalance = displayBalance * (1 - (savingsPct / 100));
+                document.getElementById('savings-active-icon').classList.remove('hidden');
+            } else {
+                document.getElementById('savings-active-icon').classList.add('hidden');
             }
 
-            document.getElementById('total-balance').textContent = formatCurrency(bal);
+            document.getElementById('total-balance').textContent = formatCurrency(displayBalance);
             document.getElementById('total-income').textContent = formatCurrency(showInc);
             document.getElementById('total-expense').textContent = formatCurrency(showExp);
 
@@ -1464,7 +1483,9 @@
                 listEl.innerHTML = listHTML;
             }
             
-            updatePaydayInfo(totalBalanceReal);
+            // IMPORTANTE: Pasamos el displayBalance (el que ya tiene el ahorro descontado)
+            // para que la fórmula del día calcule en base a lo "seguro" para gastar.
+            updatePaydayInfo(displayBalance);
 
             const simContainer = document.getElementById('simulation-container');
             if (window.appData.settings.simulationMode) {
@@ -1483,7 +1504,7 @@
             if (t.date) {
                 const d = new Date(t.date);
                 if (!isNaN(d.getTime())) {
-                       dateDisplay = d.getDate() + '/' + (d.getMonth()+1);
+                        dateDisplay = d.getDate() + '/' + (d.getMonth()+1);
                 }
             }
             
@@ -1716,7 +1737,8 @@
             return pending;
         }
 
-        function updatePaydayInfo(totalBalance) {
+        function updatePaydayInfo(currentDisplayBalance) {
+            // currentDisplayBalance = El saldo ya con el ahorro descontado.
             const set = window.appData.settings;
             const badge = document.getElementById('payday-badge');
             
@@ -1740,7 +1762,7 @@
             
             badge.textContent = diff <= 0 ? "Hoy Cobras" : `${diff} Días`;
             
-            updateDailyFormula(totalBalance, diff, nextDate);
+            updateDailyFormula(currentDisplayBalance, diff, nextDate);
         }
 
         function getNextPayday() {
@@ -1793,6 +1815,8 @@
         }
 
         function updateDailyFormula(currentBalance, daysLeft, nextPaydayDate) {
+            // Nota: currentBalance es el saldo "Seguro" (Visible), ya sin el ahorro.
+            
             let spentToday = 0;
             const todayDate = new Date();
             todayDate.setHours(0,0,0,0);
@@ -1812,6 +1836,11 @@
             
             const pendingFixedSum = getPendingFixedAmount(calcLimitDate);
 
+            // Como currentBalance es lo que ME QUEDA, y spentToday es lo que GASTE,
+            // Mi "Saldo Inicial del Día" en teoría era currentBalance + spentToday.
+            // Pero currentBalance ya tiene el ahorro descontado.
+            // Asi que el cálculo se hace sobre la base descontada.
+            
             const startOfDayBalance = currentBalance + spentToday;
             const effectiveStartBalance = startOfDayBalance - pendingFixedSum;
             
@@ -1965,8 +1994,9 @@
             const selP1 = document.getElementById('payday-1-select'); if(selP1 && s.payday1) selP1.value = s.payday1;
             const selP2 = document.getElementById('payday-2-select'); if(selP2 && s.payday2) selP2.value = s.payday2;
             
-            const toggle = document.getElementById('toggle-forced-savings');
-            if(toggle && s.forcedSavings !== undefined) toggle.checked = s.forcedSavings;
+            // NUEVO: SETUP DEL SELECTOR DE AHORRO
+            const savingsSel = document.getElementById('savings-percent');
+            if(savingsSel && s.savingsPercentage !== undefined) savingsSel.value = s.savingsPercentage;
             
             const toggleSim = document.getElementById('toggle-simulation');
             if(toggleSim && s.simulationMode !== undefined) toggleSim.checked = s.simulationMode;
