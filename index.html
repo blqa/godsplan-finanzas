@@ -839,7 +839,7 @@
         let editingTransactionId = null;
         let editingLoanId = null; 
         let editingDebtId = null;
-        let horizonModeActive = false; // State for the Horizon Logic
+        window.horizonModeActive = false; // State for the Horizon Logic - MOVED TO WINDOW
 
         window.appData = {
             transactions: [],
@@ -957,7 +957,7 @@
 
             listeners.push(onSnapshot(collection(db, 'artifacts', appId, 'users', userId, 'loans'), (snap) => {
                 window.appData.loans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderLoans(); renderDashboard();
+                window.renderLoans(); renderDashboard(); // Explicit window call
             }));
 
              listeners.push(onSnapshot(collection(db, 'artifacts', appId, 'users', userId, 'debts'), (snap) => {
@@ -1360,9 +1360,9 @@
         }
         
         window.toggleHorizon = function() {
-            horizonModeActive = !horizonModeActive;
+            window.horizonModeActive = !window.horizonModeActive;
             const btn = document.getElementById('btn-horizon-toggle');
-            if(horizonModeActive) {
+            if(window.horizonModeActive) {
                 btn.textContent = "DESACTIVAR";
                 btn.classList.remove('bg-blue-500/20', 'text-blue-300');
                 btn.classList.add('bg-blue-500', 'text-white');
@@ -1700,6 +1700,56 @@
             container.innerHTML = renderGroup(q1, '1ra Quincena (1-15)') + renderGroup(q2, '2da Quincena (16-31)');
         }
 
+        // --- NEW RENDER LOANS FUNCTION ---
+        function renderLoans() {
+            const list = document.getElementById('loans-list');
+            const loans = window.appData.loans || [];
+
+            let owedToMe = 0;
+            let iOwe = 0;
+
+            loans.forEach(l => {
+                const val = parseFloat(l.amount) || 0;
+                if(l.type === 'lent') owedToMe += val;
+                else iOwe += val;
+            });
+
+            document.getElementById('loans-owed-to-me').textContent = formatCurrency(owedToMe);
+            document.getElementById('loans-i-owe').textContent = formatCurrency(iOwe);
+
+            if(loans.length === 0) {
+                list.innerHTML = '<div class="text-center text-text-mute py-4 col-span-full text-xs italic font-medium">Sin préstamos activos</div>';
+                return;
+            }
+
+            const html = loans.map(l => {
+                const isLent = l.type === 'lent'; 
+                const icon = isLent ? 'ph-arrow-up-right' : 'ph-arrow-down-left';
+                const color = isLent ? 'text-money' : 'text-brand';
+                const bgIcon = isLent ? 'bg-emerald-900/20' : 'bg-red-900/20';
+
+                return `
+                <div class="bg-card border border-border p-3 rounded-xl flex justify-between items-center shadow-sm cursor-pointer hover:bg-input-bg transition-colors group" onclick="editLoan('${l.id}')">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg ${bgIcon} flex items-center justify-center ${color} shrink-0 border border-border group-hover:border-white/20 transition-colors">
+                            <i class="ph-bold ${icon} text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-text text-xs uppercase tracking-wide group-hover:text-white transition-colors">${l.person}</p>
+                            <p class="text-[10px] text-text-mute font-bold uppercase">${l.date}</p>
+                        </div>
+                    </div>
+                      <div class="flex items-center gap-3">
+                        <p class="font-black ${color} text-xs">${formatCurrency(l.amount)}</p>
+                        <button onclick="event.stopPropagation(); deleteLoan('${l.id}')" class="text-text-mute hover:text-alert transition-colors p-1"><i class="ph-bold ph-trash"></i></button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            list.innerHTML = html;
+        }
+
         function getPendingFixedAmount(targetDate) {
             let pending = 0;
             let cursor = new Date();
@@ -1786,7 +1836,7 @@
             } else {
                 horizonControls.classList.add('hidden');
                 // Si salimos de la zona de peligro, desactivar horizonte
-                if (horizonModeActive) toggleHorizon();
+                if (window.horizonModeActive) toggleHorizon();
             }
 
             updateDailyFormula(currentDisplayBalance, diff, nextDate);
@@ -1871,7 +1921,7 @@
             const daysLabelEl = document.getElementById('formula-days-left');
 
             // --- LÓGICA DE HORIZONTE ACTIVADA ---
-            if (horizonModeActive && daysLeft <= 1) {
+            if (window.horizonModeActive && daysLeft <= 1) {
                 // 1. Obtener Ingreso Base (Settings)
                 const baseIncome = window.appData.settings.baseIncome || 0;
                 
