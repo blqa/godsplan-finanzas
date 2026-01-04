@@ -396,37 +396,6 @@
                 </div>
             </div>
 
-            <!-- SIMULADOR (Oculto por defecto) -->
-            <div id="simulation-container" class="hidden bg-blue-900/10 border border-blue-500/20 rounded-2xl p-6 relative overflow-hidden">
-                <div class="relative z-10">
-                    <div class="flex items-center gap-2 mb-4 border-b border-blue-500/20 pb-3">
-                        <i class="ph-fill ph-magic-wand text-blue-400 text-xl"></i>
-                        <h3 class="text-sm font-black text-blue-100 uppercase tracking-wide">Simulador de Futuro</h3>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="text-[10px] uppercase font-bold text-blue-300/70 block mb-1">Fecha Futura</label>
-                                    <input type="date" id="sim-date" class="input-gp bg-black/40 border-blue-500/30 text-xs py-2" onchange="runSimulation()">
-                                </div>
-                                <div>
-                                    <label class="text-[10px] uppercase font-bold text-blue-300/70 block mb-1">Monto a Recibir</label>
-                                    <input type="number" id="sim-amount" class="input-gp bg-black/40 border-blue-500/30 text-xs py-2" placeholder="0.00" oninput="runSimulation()">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-black/40 rounded-xl p-4 flex flex-col justify-center border border-blue-900/30 text-center">
-                            <p class="text-xs text-blue-300/70 mb-1 font-bold uppercase">Nuevo límite diario proyectado</p>
-                            <p class="text-3xl font-black text-blue-400 tracking-tight" id="sim-result">$0.00</p>
-                            <p class="text-[10px] text-text-mute mt-1 font-mono" id="sim-details">Esperando datos...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Lista Reciente -->
             <div>
                  <div class="flex justify-between items-center mb-4 px-1 border-b border-border pb-2">
@@ -582,26 +551,17 @@
                   
                   <!-- NUEVO SELECTOR DE AHORRO -->
                   <div class="flex items-center justify-between p-2 hover:bg-input-bg rounded-lg transition-colors">
-                     <div>
+                      <div>
                           <span class="text-sm text-text font-bold">Modo "Ahorro Forzoso"</span>
                           <p class="text-[10px] text-text-mute font-medium">Oculta un porcentaje de tu saldo.</p>
-                     </div>
-                     <select id="savings-percent" class="input-gp w-28 px-2 py-1 text-xs bg-input-bg text-right h-8 flex items-center" onchange="saveSettings()">
-                         <option value="0">Off</option>
-                         <option value="5">5%</option>
-                         <option value="10">10%</option>
-                         <option value="15">15%</option>
-                     </select>
-                 </div>
-
-                <div class="border-t border-border"></div>
-                <label class="flex items-center justify-between cursor-pointer p-2 hover:bg-input-bg rounded-lg transition-colors">
-                    <div>
-                        <span class="text-sm text-text font-bold">Habilitar Simulador</span>
-                        <p class="text-[10px] text-text-mute font-medium">Calculadora para ingresos futuros.</p>
-                    </div>
-                    <input type="checkbox" id="toggle-simulation" class="accent-brand w-5 h-5" onchange="saveSettings()">
-                </label>
+                      </div>
+                      <select id="savings-percent" class="input-gp w-28 px-2 py-1 text-xs bg-input-bg text-right h-8 flex items-center" onchange="saveSettings()">
+                          <option value="0">Off</option>
+                          <option value="5">5%</option>
+                          <option value="10">10%</option>
+                          <option value="15">15%</option>
+                      </select>
+                  </div>
              </div>
 
             <div class="bg-card border border-border p-6 rounded-2xl">
@@ -846,7 +806,7 @@
             fixed: [],
             loans: [], 
             debts: [],
-            settings: { frequency: 'biweekly', payday: null, savingsPercentage: 0, simulationMode: false, baseIncome: 0 }
+            settings: { frequency: 'biweekly', payday: null, savingsPercentage: 0, baseIncome: 0 }
         };
 
         // --- AUTH ---
@@ -1278,11 +1238,10 @@
             const payday1 = document.getElementById('payday-1-select').value;
             const payday2 = document.getElementById('payday-2-select').value;
             const savingsPercentage = document.getElementById('savings-percent').value;
-            const simulationMode = document.getElementById('toggle-simulation').checked;
             const baseIncome = parseFloat(document.getElementById('base-income-input').value) || 0;
             
             await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'config'), { 
-                frequency: freq, payday, payday1, payday2, savingsPercentage: parseInt(savingsPercentage), simulationMode, baseIncome
+                frequency: freq, payday, payday1, payday2, savingsPercentage: parseInt(savingsPercentage), baseIncome
             }, { merge: true });
             showToast('Guardado');
         };
@@ -1528,13 +1487,6 @@
             // IMPORTANTE: Pasamos el displayBalance (el que ya tiene el ahorro descontado)
             // para que la fórmula del día calcule en base a lo "seguro" para gastar.
             updatePaydayInfo(displayBalance);
-
-            const simContainer = document.getElementById('simulation-container');
-            if (window.appData.settings.simulationMode) {
-                simContainer.classList.remove('hidden');
-            } else {
-                simContainer.classList.add('hidden');
-            }
         }
 
         function createTxHTML(t) {
@@ -1967,49 +1919,6 @@
             }
         }
 
-        function runSimulation() {
-            const dateInput = document.getElementById('sim-date').value;
-            const amountInput = parseFloat(document.getElementById('sim-amount').value);
-            const resultEl = document.getElementById('sim-result');
-            const detailsEl = document.getElementById('sim-details');
-            
-            if (!dateInput || isNaN(amountInput)) {
-                resultEl.textContent = "$0.00";
-                detailsEl.textContent = "Ingresa fecha y monto futuro.";
-                return;
-            }
-
-            const futureDate = new Date(dateInput + 'T00:00:00'); 
-            const today = new Date();
-            today.setHours(0,0,0,0);
-
-            const diffTime = futureDate - today;
-            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-            if (diffDays <= 0) diffDays = 1; 
-
-            let currentBalance = 0;
-            window.appData.transactions.forEach(t => {
-                const val = Math.round(t.amount * 100);
-                if (t.type === 'income') currentBalance += val;
-                else currentBalance -= val;
-            });
-            currentBalance = currentBalance / 100;
-
-            const pendingFixed = getPendingFixedAmount(futureDate);
-
-            const totalPool = currentBalance + amountInput - pendingFixed;
-            const dailyBudget = totalPool / diffDays;
-
-            resultEl.textContent = formatCurrency(dailyBudget);
-            if(dailyBudget < 0) resultEl.classList.add('text-alert');
-            else resultEl.classList.remove('text-alert');
-
-            detailsEl.innerHTML = `
-                Días: <strong>${diffDays}</strong><br>
-                (Saldo: ${formatCurrency(currentBalance)} + Futuro: ${formatCurrency(amountInput)} - Fijos: ${formatCurrency(pendingFixed)}) / ${diffDays}
-            `;
-        }
-
         function switchTab(id) {
             // Ocultar todas las secciones
             document.querySelectorAll('section[id^="view-"]').forEach(el => el.classList.add('hidden'));
@@ -2102,9 +2011,6 @@
             // NUEVO: SETUP DEL SELECTOR DE AHORRO
             const savingsSel = document.getElementById('savings-percent');
             if(savingsSel && s.savingsPercentage !== undefined) savingsSel.value = s.savingsPercentage;
-            
-            const toggleSim = document.getElementById('toggle-simulation');
-            if(toggleSim && s.simulationMode !== undefined) toggleSim.checked = s.simulationMode;
             
             // NUEVO: BASE INCOME
             const baseInc = document.getElementById('base-income-input');
