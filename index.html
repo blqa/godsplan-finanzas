@@ -576,6 +576,21 @@
         </section>
     </main>
 
+    <!-- MENÚ DE ACCIONES MÓVIL (NUEVO PARA SELECCIONAR INGRESO/GASTO) -->
+    <div id="mobile-action-menu" class="fixed inset-0 z-[1500] bg-black/90 backdrop-blur-sm hidden flex-col justify-end pb-24 px-4" onclick="toggleMobileMenu()">
+        <div class="flex flex-col gap-3 animate-slide-up">
+            <button onclick="event.stopPropagation(); openAddModal('income'); toggleMobileMenu()" class="w-full bg-[#0a2010] border border-green-900 text-green-400 p-4 rounded-xl font-bold flex items-center justify-between hover:bg-green-900/30 transition-all shadow-[0_0_20px_rgba(22,163,74,0.1)]">
+                <span class="tracking-widest">REGISTRAR INGRESO</span>
+                <i class="ph-fill ph-arrow-down-left text-xl"></i>
+            </button>
+            <button onclick="event.stopPropagation(); openAddModal('expense'); toggleMobileMenu()" class="w-full bg-[#200a0a] border border-red-900 text-red-400 p-4 rounded-xl font-bold flex items-center justify-between hover:bg-red-900/30 transition-all shadow-[0_0_20px_rgba(220,38,38,0.1)]">
+                <span class="tracking-widest">REGISTRAR GASTO</span>
+                <i class="ph-fill ph-minus text-xl"></i>
+            </button>
+            <p class="text-center text-[10px] text-text-mute font-mono pt-2">Toca para cancelar</p>
+        </div>
+    </div>
+
     <!-- Barra Inferior Móvil (Estilo Adherencia) -->
     <nav class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] bg-card/90 backdrop-blur-xl border border-border rounded-2xl h-16 grid grid-cols-5 z-40 shadow-2xl items-center px-2" id="bottom-nav">
         <button onclick="switchTab('dashboard')" class="nav-btn flex flex-col items-center justify-center text-white transition-colors gap-1" id="nav-dashboard">
@@ -585,9 +600,9 @@
              <i class="ph-fill ph-list-dashes text-2xl"></i>
         </button>
         
-        <!-- Botón Central Flotante -->
+        <!-- Botón Central Flotante MODIFICADO PARA ABRIR MENÚ -->
         <div class="relative flex justify-center items-center pointer-events-none -top-6">
-            <button onclick="openAddModal('expense')" class="pointer-events-auto w-14 h-14 bg-brand rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(220,38,38,0.5)] hover:scale-105 active:scale-95 transition-transform border-4 border-bg">
+            <button onclick="toggleMobileMenu()" class="pointer-events-auto w-14 h-14 bg-brand rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(220,38,38,0.5)] hover:scale-105 active:scale-95 transition-transform border-4 border-bg">
                 <i class="ph-bold ph-plus text-2xl"></i>
             </button>
         </div>
@@ -1332,6 +1347,18 @@
             }
             // Trigger recalculation
             renderDashboard();
+        }
+        
+        // --- NUEVA FUNCIÓN PARA MENÚ MÓVIL ---
+        window.toggleMobileMenu = function() {
+            const m = document.getElementById('mobile-action-menu');
+            if(m.classList.contains('hidden')) {
+                m.classList.remove('hidden');
+                m.classList.add('flex');
+            } else {
+                m.classList.add('hidden');
+                m.classList.remove('flex');
+            }
         }
 
         initAuth();
