@@ -656,6 +656,12 @@
                         <input type="datetime-local" id="t-date" class="input-gp bg-bg border-border" required>
                     </div>
                 </div>
+                
+                <!-- NEW CHECKBOX -->
+                <label class="flex items-center gap-3 p-3 bg-input-bg border border-border rounded-xl cursor-pointer hover:border-brand transition-colors mb-6">
+                    <input type="checkbox" id="t-include-daily" class="accent-brand w-4 h-4" checked>
+                    <span class="text-xs text-text font-bold">Descontar del Plan Diario</span>
+                </label>
 
                 <div class="grid grid-cols-2 gap-3">
                     <button type="button" id="btn-delete-tx" onclick="deleteCurrentTransaction()" class="hidden py-3 border border-alert bg-alert/10 text-alert font-bold text-xs rounded-xl hover:bg-alert/20 transition-colors uppercase">ELIMINAR</button>
@@ -955,6 +961,9 @@
             document.getElementById('btn-save-tx').classList.add('col-span-2');
             document.getElementById('transaction-form').reset();
             
+            // Default Include = true (ignore = false)
+            document.getElementById('t-include-daily').checked = true; 
+            
             const now = new Date();
             const localIso = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
             document.getElementById('t-date').value = localIso;
@@ -976,8 +985,13 @@
             const category = document.getElementById('t-category').value || 'General';
             const date = document.getElementById('t-date').value; 
             const fixedPaymentId = document.getElementById('t-fixed-id').value;
+            const includeInDaily = document.getElementById('t-include-daily').checked;
 
-            const txData = { type, amount, title, category, date, createdAt: new Date().toISOString() };
+            const txData = { 
+                type, amount, title, category, date, 
+                createdAt: new Date().toISOString(),
+                ignoreDaily: !includeInDaily // Save negation
+            };
             if(fixedPaymentId) txData.fixedPaymentId = fixedPaymentId;
 
             try {
@@ -1019,6 +1033,7 @@
             
             document.getElementById(tx.type === 'expense' ? 'radio-expense' : 'radio-income').checked = true;
             document.getElementById('t-fixed-id').value = tx.fixedPaymentId || '';
+            document.getElementById('t-include-daily').checked = !tx.ignoreDaily; // Load state
             
             renderCategoryChips(tx.type);
             selectChip(tx.category);
@@ -1878,7 +1893,7 @@
             todayDate.setHours(0,0,0,0);
             
             window.appData.transactions.forEach(t => {
-                if(t.type === 'expense' && t.date) {
+                if(t.type === 'expense' && t.date && !t.ignoreDaily) {
                       const tDate = new Date(t.date);
                       tDate.setHours(0,0,0,0);
                       if(tDate.getTime() === todayDate.getTime()) {
