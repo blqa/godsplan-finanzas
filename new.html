@@ -223,7 +223,7 @@
                     <span class="text-xs font-black text-muted uppercase tracking-widest flex items-center gap-2">
                         <i class="ph-bold ph-coins text-brand"></i> Efectivo / Débito
                     </span>
-                    <button onclick="App.ui.modals.open('adjust')" class="text-[10px] font-bold text-text bg-bg px-2 py-1 rounded-lg border border-border hover:bg-border transition-colors uppercase tracking-wider">Ajustar</button>
+                    <button onclick="App.ui.modals.openAdjust()" class="text-[10px] font-bold text-text bg-bg px-2 py-1 rounded-lg border border-border hover:bg-border transition-colors uppercase tracking-wider">Ajustar</button>
                 </div>
                 
                 <div class="text-4xl md:text-5xl font-black text-text mb-8 tracking-tight" id="dash-balance">$0.00</div>
@@ -295,7 +295,7 @@
             </div>
         </section>
 
-        <!-- VISTA: TARJETAS TDC (NUEVA PESTAÑA) -->
+        <!-- VISTA: TARJETAS TDC -->
         <section id="view-cards" class="hidden animate-fade-in relative pb-6 space-y-6">
             <div class="flex items-center justify-between border-b border-border pb-3 mb-2">
                 <h2 class="text-lg font-black text-text uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-credit-card text-cc"></i> Mis Tarjetas</h2>
@@ -307,12 +307,10 @@
                 <p class="text-3xl font-black text-brand tracking-tight" id="cards-total-debt">$0.00</p>
             </div>
 
-            <div id="cards-list" class="space-y-6">
-                <!-- Tarjetas Dinámicas -->
-            </div>
+            <div id="cards-list" class="space-y-6"></div>
         </section>
 
-        <!-- VISTA: HISTORIAL (Extracto Bancario) -->
+        <!-- VISTA: HISTORIAL -->
         <section id="view-history" class="hidden animate-fade-in relative pb-6">
             <h2 class="text-lg font-black text-text uppercase tracking-wide border-b border-border pb-3 mb-4">Explorador de Movimientos</h2>
             
@@ -436,7 +434,7 @@
         </section>
     </main>
 
-    <!-- BOTÓN FLOTANTE CENTRAL (NUEVO) -->
+    <!-- BOTÓN FLOTANTE CENTRAL -->
     <button onclick="App.ui.modals.openMobileMenu()" class="fixed bottom-24 right-6 w-14 h-14 bg-brand rounded-full flex items-center justify-center text-white shadow-glow hover:scale-105 active:scale-95 transition-transform z-50">
         <i class="ph-bold ph-plus text-2xl"></i>
     </button>
@@ -467,8 +465,6 @@
     </div>
 
     <!-- MODALES -->
-    
-    <!-- Modal: Transacción (Modificado con Selector de Origen TDC) -->
     <div id="modal-tx" class="modal-overlay">
         <div class="modal-content">
              <div class="flex justify-between items-center mb-6 border-b border-border pb-3">
@@ -491,8 +487,7 @@
                 <div id="m-tx-account-container">
                     <label class="text-[10px] uppercase font-bold text-muted block mb-2">Método de Pago</label>
                     <select id="m-tx-account" class="input-gp">
-                        <option value="main">Efectivo / Cuenta Principal</option>
-                        <!-- Tarjetas dinámicas -->
+                        <option value="main">Efectivo / Débito</option>
                     </select>
                 </div>
 
@@ -529,30 +524,13 @@
              </div>
              <form onsubmit="App.db.saveCC(event)" class="space-y-4">
                 <input type="hidden" id="m-cc-id">
-                
-                <div>
-                    <label class="text-[10px] text-muted font-bold uppercase mb-1 block">Nombre (Ej. Nu, Amex)</label>
-                    <input type="text" id="m-cc-name" class="input-gp" required>
-                </div>
-                <div>
-                    <label class="text-[10px] text-muted font-bold uppercase mb-1 block">Límite de Crédito</label>
-                    <input type="number" id="m-cc-limit" step="0.01" class="input-gp" placeholder="0.00" required>
-                </div>
+                <div><label class="text-[10px] text-muted font-bold uppercase mb-1 block">Nombre (Ej. Nu, Amex)</label><input type="text" id="m-cc-name" class="input-gp" required></div>
+                <div><label class="text-[10px] text-muted font-bold uppercase mb-1 block">Límite de Crédito</label><input type="number" id="m-cc-limit" step="0.01" class="input-gp" placeholder="0.00" required></div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-[10px] text-muted font-bold uppercase mb-1 block">Día de Corte</label>
-                        <select id="m-cc-cutoff" class="input-gp"></select>
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-muted font-bold uppercase mb-1 block">Día de Pago</label>
-                        <select id="m-cc-payment" class="input-gp"></select>
-                    </div>
+                    <div><label class="text-[10px] text-muted font-bold uppercase mb-1 block">Día de Corte</label><select id="m-cc-cutoff" class="input-gp"></select></div>
+                    <div><label class="text-[10px] text-muted font-bold uppercase mb-1 block">Día de Pago</label><select id="m-cc-payment" class="input-gp"></select></div>
                 </div>
-
-                <div class="flex gap-3 pt-2">
-                    <button type="button" id="m-cc-btn-del" onclick="App.db.deleteCC()" class="hidden py-3 px-4 border border-brand text-brand font-bold text-xs rounded-xl uppercase hover:bg-brand/10"><i class="ph-bold ph-trash"></i></button>
-                    <button type="submit" class="flex-1 btn-brand py-3 rounded-xl text-xs">Guardar TDC</button>
-                </div>
+                <div class="flex gap-3 pt-2"><button type="button" id="m-cc-btn-del" onclick="App.db.deleteCC()" class="hidden py-3 px-4 border border-brand text-brand font-bold text-xs rounded-xl uppercase hover:bg-brand/10"><i class="ph-bold ph-trash"></i></button><button type="submit" class="flex-1 btn-brand py-3 rounded-xl text-xs">Guardar TDC</button></div>
              </form>
         </div>
     </div>
@@ -564,12 +542,10 @@
                 <h3 class="font-black text-text uppercase">Abonar a Tarjeta</h3>
                 <button onclick="App.ui.modals.close('pay-cc')" class="text-muted hover:text-text"><i class="ph-bold ph-x text-xl"></i></button>
              </div>
-             <p class="text-sm font-medium text-muted mb-6">Se descontará de tu Efectivo/Débito para liberar línea de crédito en <span id="m-pay-cc-name" class="font-black text-text"></span>.</p>
+             <p class="text-sm font-medium text-muted mb-6">Saldrá de tu Efectivo/Débito para liberar línea de crédito en <span id="m-pay-cc-name" class="font-black text-text"></span>.</p>
              <form onsubmit="App.db.submitPayCC(event)">
                 <input type="hidden" id="m-pay-cc-id">
-                <div class="mb-6">
-                    <input type="number" id="m-pay-cc-amount" step="0.01" class="input-gp text-3xl text-center font-black" placeholder="0.00" required>
-                </div>
+                <div class="mb-6"><input type="number" id="m-pay-cc-amount" step="0.01" class="input-gp text-3xl text-center font-black" placeholder="0.00" required></div>
                 <button type="submit" class="btn-brand w-full py-3 rounded-xl text-xs">Realizar Pago</button>
              </form>
         </div>
@@ -592,8 +568,22 @@
         </div>
     </div>
 
-    <!-- Modales Residuales -->
-    <div id="modal-adjust" class="modal-overlay"><div class="modal-content text-center"><div class="flex justify-between items-center mb-4 border-b border-border pb-3"><h3 class="font-black text-text uppercase">Ajustar Saldo</h3><button onclick="App.ui.modals.close('adjust')" class="text-muted"><i class="ph-bold ph-x text-xl"></i></button></div><p class="text-[10px] uppercase font-bold text-muted mb-1">Saldo en Sistema</p><p class="text-3xl font-black text-text mb-6" id="m-adj-sys">$0.00</p><form onsubmit="App.db.saveAdjust(event)"><div class="mb-6"><label class="text-[10px] uppercase font-bold text-muted block mb-2">Saldo Real Físico/Banco</label><input type="number" id="m-adj-real" step="0.01" class="input-gp text-2xl text-center" placeholder="0.00" required></div><button type="submit" class="btn-brand w-full py-3 rounded-xl text-xs">Aplicar Corrección</button></form></div></div>
+    <!-- Ajustar Saldo Modal -->
+    <div id="modal-adjust" class="modal-overlay">
+        <div class="modal-content text-center">
+            <div class="flex justify-between items-center mb-4 border-b border-border pb-3">
+                <h3 class="font-black text-text uppercase">Ajustar Saldo Real</h3>
+                <button onclick="App.ui.modals.close('adjust')" class="text-muted"><i class="ph-bold ph-x text-xl"></i></button>
+            </div>
+            <p class="text-[10px] uppercase font-bold text-muted mb-1">Saldo en Sistema (Sin descontar ahorro forzoso)</p>
+            <p class="text-3xl font-black text-text mb-6" id="m-adj-sys">$0.00</p>
+            <form onsubmit="App.db.saveAdjust(event)">
+                <div class="mb-6"><label class="text-[10px] uppercase font-bold text-muted block mb-2">Saldo Real Físico/Banco</label><input type="number" id="m-adj-real" step="0.01" class="input-gp text-2xl text-center" placeholder="0.00" required></div>
+                <button type="submit" class="btn-brand w-full py-3 rounded-xl text-xs">Aplicar Corrección</button>
+            </form>
+        </div>
+    </div>
+
     <div id="modal-fixed" class="modal-overlay"><div class="modal-content"><div class="flex justify-between items-center mb-6 border-b border-border pb-3"><h3 class="font-black text-text uppercase">Pago Fijo</h3><button onclick="App.ui.modals.close('fixed')" class="text-muted hover:text-text"><i class="ph-bold ph-x text-xl"></i></button></div><form onsubmit="App.db.saveFixed(event)" class="space-y-4"><input type="text" id="m-fix-title" class="input-gp" placeholder="Servicio (Ej. Renta)" required><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] text-muted font-bold uppercase mb-1 block">Monto</label><input type="number" id="m-fix-amount" step="0.01" class="input-gp" placeholder="0.00" required></div><div><label class="text-[10px] text-muted font-bold uppercase mb-1 block">Día del mes</label><select id="m-fix-day" class="input-gp"></select></div></div><label class="flex items-center gap-3 p-3 bg-bg border border-border rounded-xl cursor-pointer"><input type="checkbox" id="m-fix-ignore" class="w-4 h-4 accent-brand"><span class="text-xs font-bold text-text">No descontar del diario</span></label><button type="submit" class="btn-brand w-full py-3 rounded-xl text-xs mt-2">Guardar</button></form></div></div>
     <div id="modal-debt" class="modal-overlay"><div class="modal-content"><div class="flex justify-between items-center mb-6 border-b border-border pb-3"><h3 class="font-black text-text uppercase">Deuda a Plazos</h3><button onclick="App.ui.modals.close('debt')" class="text-muted hover:text-text"><i class="ph-bold ph-x text-xl"></i></button></div><form onsubmit="App.db.saveDebt(event)" class="space-y-4"><input type="hidden" id="m-debt-id"><input type="text" id="m-debt-title" class="input-gp" placeholder="Concepto (Ej. Celular)" required><div class="grid grid-cols-2 gap-3"><div><label class="text-[10px] text-muted font-bold uppercase mb-1 block">Monto Total</label><input type="number" id="m-debt-amount" step="0.01" class="input-gp" placeholder="0.00" required></div><div><label class="text-[10px] text-muted font-bold uppercase mb-1 block">Plazos</label><input type="number" id="m-debt-installments" class="input-gp" placeholder="12" required></div></div><div class="flex gap-3 pt-2"><button type="button" id="m-debt-btn-del" onclick="App.db.deleteDebt()" class="hidden py-3 px-4 border border-brand text-brand font-bold text-xs rounded-xl uppercase hover:bg-brand/10"><i class="ph-bold ph-trash"></i></button><button type="submit" class="flex-1 btn-brand py-3 rounded-xl text-xs">Guardar</button></div></form></div></div>
     <div id="modal-loan" class="modal-overlay"><div class="modal-content"><div class="flex justify-between items-center mb-6 border-b border-border pb-3"><h3 class="font-black text-text uppercase">Préstamo</h3><button onclick="App.ui.modals.close('loan')" class="text-muted hover:text-text"><i class="ph-bold ph-x text-xl"></i></button></div><form onsubmit="App.db.saveLoan(event)" class="space-y-4"><input type="hidden" id="m-loan-id"><div class="flex bg-bg rounded-xl p-1 border border-border"><button type="button" onclick="App.ui.modals.setLoanType('lent')" id="m-loan-btn-lent" class="flex-1 py-2 text-xs font-bold rounded-lg bg-card text-money shadow-sm transition-all">ME DEBEN</button><button type="button" onclick="App.ui.modals.setLoanType('borrowed')" id="m-loan-btn-borr" class="flex-1 py-2 text-xs font-bold text-muted transition-all">DEBO</button></div><input type="hidden" id="m-loan-type" value="lent"><input type="text" id="m-loan-person" class="input-gp" placeholder="Nombre de la persona" required><input type="number" id="m-loan-amount" step="0.01" class="input-gp" placeholder="Monto $0.00" required><div class="flex gap-3 pt-2"><button type="button" id="m-loan-btn-del" onclick="App.db.deleteLoan()" class="hidden py-3 px-4 border border-brand text-brand font-bold text-xs rounded-xl uppercase hover:bg-brand/10"><i class="ph-bold ph-trash"></i></button><button type="submit" class="flex-1 btn-brand py-3 rounded-xl text-xs">Guardar</button></div></form></div></div>
@@ -668,14 +658,13 @@
                 document.getElementById('dash-widget-debts').style.display = layout.debts !== false ? 'grid' : 'none';
                 document.getElementById('dash-widget-recent').style.display = layout.recent !== false ? 'block' : 'none';
 
-                // Balances Core (Solo Efectivo/Débito)
                 let incTC=0, expTC=0, incMC=0, expMC=0;
                 s.txs.forEach(t => {
                     const c = Math.round(t.amount * 100);
                     const isM = (new Date(t.date).getMonth() === m && new Date(t.date).getFullYear() === y);
                     if(t.type === 'income') { incTC+=c; if(isM) incMC+=c; } 
                     else if (t.type === 'expense' && (!t.accountId || t.accountId === 'main')) { expTC+=c; if(isM) expMC+=c; }
-                    else if (t.type === 'cc-payment') { expTC+=c; if(isM) expMC+=c; } // Pagar tarjeta reduce el efectivo
+                    else if (t.type === 'cc-payment') { expTC+=c; if(isM) expMC+=c; } 
                 });
                 const balReal = (incTC - expTC)/100;
                 const balVisible = balReal * (1 - ((s.settings.savings || 0)/100));
@@ -826,7 +815,7 @@
             },
             renderFixed: () => {
                 const list = document.getElementById('fixed-list'); const fixed = [...App.state.fixed].sort((a,b)=>parseInt(a.day)-parseInt(b.day));
-                if(fixed.length===0) { list.innerHTML = '<div class="text-center bg-card border border-border rounded-3xl p-8"><p class="text-muted text-xs font-bold uppercase tracking-widest">Sin pagos fijos</p></div>'; return;}
+                if(fixed.length===0) { list.innerHTML = '<div class="text-center bg-card border border-border rounded-3xl p-8"><p class="text-muted text-xs font-bold uppercase tracking-widest">Sin pagos fijos configurados</p></div>'; return;}
                 list.innerHTML = fixed.map(f => {
                     const isPaid = App.logic.isFixedPaidThisMonth(f.id); const isIgnored = f.ignoreDaily;
                     const bgClass = isPaid ? "bg-money/10 border-money/30" : "bg-card border-border";
@@ -878,6 +867,20 @@
             modals: {
                 open: (id) => { document.getElementById('modal-'+id).classList.add('is-open'); },
                 close: (id) => { document.getElementById('modal-'+id).classList.remove('is-open'); },
+                openAdjust: () => {
+                    let incTC=0, expTC=0;
+                    App.state.txs.forEach(t => {
+                        const c = Math.round(t.amount * 100);
+                        if(t.type === 'income') incTC+=c;
+                        else if (t.type === 'expense' && (!t.accountId || t.accountId === 'main')) expTC+=c;
+                        else if (t.type === 'cc-payment') expTC+=c;
+                    });
+                    const balReal = (incTC - expTC)/100;
+                    document.getElementById('m-adj-sys').textContent = App.utils.fmtCur(balReal);
+                    document.getElementById('m-adj-sys').dataset.raw = balReal;
+                    document.getElementById('m-adj-real').value = '';
+                    App.ui.modals.open('adjust');
+                },
                 openMobileMenu: () => {
                     const m = document.getElementById('mobile-add-menu'); const c = document.getElementById('mobile-add-content');
                     m.classList.remove('hidden'); m.classList.add('flex'); setTimeout(() => { c.classList.remove('translate-y-10','opacity-0'); }, 10);
@@ -902,18 +905,15 @@
                     const now = new Date(); document.getElementById('m-tx-date').value = new Date(now.getTime() - now.getTimezoneOffset()*60000).toISOString().slice(0,16);
                     document.getElementById('m-tx-ignore').checked = false; document.getElementById('m-tx-btn-del').classList.add('hidden');
                     
-                    // Llenar selector de cuentas
-                    const accSel = document.getElementById('m-tx-account');
-                    let accHtml = '<option value="main">Efectivo / Cuenta Principal</option>';
-                    if(type === 'expense') { App.state.cards.forEach(c => { accHtml += `<option value="${c.id}">💳 ${App.utils.esc(c.name)}</option>`; }); document.getElementById('m-tx-account-container').classList.remove('hidden'); }
-                    else { document.getElementById('m-tx-account-container').classList.add('hidden'); }
+                    const accSel = document.getElementById('m-tx-account'); let accHtml = '<option value="main">Efectivo / Cuenta Principal</option>';
+                    if(type === 'expense') { App.state.cards.forEach(c => { accHtml += `<option value="${c.id}">💳 ${App.utils.esc(c.name)}</option>`; }); document.getElementById('m-tx-account-container').classList.remove('hidden'); } else { document.getElementById('m-tx-account-container').classList.add('hidden'); }
                     accSel.innerHTML = accHtml; accSel.value = 'main';
 
                     App.ui.modals.renderChips(type); App.ui.modals.open('tx');
                 },
                 editTx: (id) => {
                     const t = App.state.txs.find(x=>x.id===id); if(!t) return;
-                    if(t.type === 'cc-payment') { App.utils.toast('Los abonos de tarjeta no se pueden editar directo, elimínalo y crea uno nuevo.'); return; }
+                    if(t.type === 'cc-payment') { App.utils.toast('Los abonos de tarjeta no se editan. Elimínalo y crea uno nuevo.'); return; }
                     
                     document.getElementById('m-tx-id').value = t.id; document.getElementById('m-tx-type').value = t.type; document.getElementById('m-tx-fixedId').value = t.fixedPaymentId||'';
                     document.getElementById('m-tx-title').textContent = 'Editar '+ (t.type==='expense'?'Gasto':'Ingreso');
@@ -921,8 +921,7 @@
                     document.getElementById('m-tx-date').value = t.date.length===10 ? t.date+"T12:00" : t.date.substring(0,16);
                     document.getElementById('m-tx-ignore').checked = !!t.ignoreDaily; document.getElementById('m-tx-btn-del').classList.remove('hidden');
                     
-                    const accSel = document.getElementById('m-tx-account');
-                    let accHtml = '<option value="main">Efectivo / Cuenta Principal</option>';
+                    const accSel = document.getElementById('m-tx-account'); let accHtml = '<option value="main">Efectivo / Cuenta Principal</option>';
                     if(t.type === 'expense') { App.state.cards.forEach(c => { accHtml += `<option value="${c.id}">💳 ${App.utils.esc(c.name)}</option>`; }); document.getElementById('m-tx-account-container').classList.remove('hidden'); } else { document.getElementById('m-tx-account-container').classList.add('hidden'); }
                     accSel.innerHTML = accHtml; accSel.value = t.accountId || 'main';
 
@@ -942,7 +941,6 @@
                     document.getElementById('m-pay-cc-amount').value = suggAmt > 0 ? suggAmt : '';
                     App.ui.modals.open('pay-cc');
                 },
-                // Reutilizamos el resto...
                 openFixed: (id=null) => { const f = id ? App.state.fixed.find(x=>x.id===id) : null; document.getElementById('m-fix-title').value = f ? f.title : ''; document.getElementById('m-fix-amount').value = f ? f.amount : ''; if(f) document.getElementById('m-fix-day').value = f.day; document.getElementById('m-fix-ignore').checked = f ? !!f.ignoreDaily : false; document.getElementById('m-fix-title').dataset.id = id||''; App.ui.modals.open('fixed'); },
                 openDebt: (id=null) => { const d = id ? App.state.debts.find(x=>x.id===id) : null; document.getElementById('m-debt-id').value = id||''; document.getElementById('m-debt-title').value = d?d.title:''; document.getElementById('m-debt-amount').value = d?d.totalAmount:''; document.getElementById('m-debt-installments').value = d?d.installments:''; if(id) document.getElementById('m-debt-btn-del').classList.remove('hidden'); else document.getElementById('m-debt-btn-del').classList.add('hidden'); App.ui.modals.open('debt'); },
                 openLoan: (id=null) => { const l = id ? App.state.loans.find(x=>x.id===id) : null; document.getElementById('m-loan-id').value = id||''; document.getElementById('m-loan-person').value = l?l.person:''; document.getElementById('m-loan-amount').value = l?l.amount:''; App.ui.modals.setLoanType(l ? l.type : 'lent'); if(id) document.getElementById('m-loan-btn-del').classList.remove('hidden'); else document.getElementById('m-loan-btn-del').classList.add('hidden'); App.ui.modals.open('loan'); },
@@ -959,26 +957,11 @@
             getPendingFixed: (targetDate) => { let p = 0; let cur = new Date(); cur.setHours(0,0,0,0); cur.setDate(cur.getDate()+1); const end = new Date(targetDate); end.setHours(0,0,0,0); const tm = new Date().getMonth(); const ty = new Date().getFullYear(); while(cur<=end) { const dn = cur.getDate(); const isM = (cur.getMonth()===tm && cur.getFullYear()===ty); App.state.fixed.forEach(f => { if(f.ignoreDaily) return; if(parseInt(f.day)===dn) { if(isM && App.logic.isFixedPaidThisMonth(f.id)) return; p+=parseFloat(f.amount); } }); cur.setDate(cur.getDate()+1); } return p; },
             getNextCycleFixed: (nextPd, days) => { let p=0; let cur=new Date(nextPd); cur.setHours(0,0,0,0); let end=new Date(cur); end.setDate(end.getDate()+days); while(cur<end){ const dn = cur.getDate(); App.state.fixed.forEach(f=>{ if(!f.ignoreDaily && parseInt(f.day)===dn) p+=parseFloat(f.amount); }); cur.setDate(cur.getDate()+1); } return p; },
             
-            // Lógica de Tarjetas
-            getLastCutOffDate: (cutOffDay) => {
-                const now = new Date();
-                let d = new Date(now.getFullYear(), now.getMonth(), cutOffDay, 23, 59, 59);
-                if (now.getTime() < d.getTime()) { d.setMonth(d.getMonth() - 1); }
-                return d;
-            },
+            getLastCutOffDate: (cutOffDay) => { const now = new Date(); let d = new Date(now.getFullYear(), now.getMonth(), cutOffDay, 23, 59, 59); if (now.getTime() < d.getTime()) { d.setMonth(d.getMonth() - 1); } return d; },
             calculateCardStats: (cardId) => {
                 const c = App.state.cards.find(x => x.id === cardId); if(!c) return { debt: 0, pagoNoInt: 0 };
-                let exp = 0, pay = 0, expBeforeCut = 0;
-                const lastCutOff = App.logic.getLastCutOffDate(c.cutOffDay).getTime();
-                
-                App.state.txs.forEach(t => {
-                    if (t.accountId !== cardId) return;
-                    if (t.type === 'expense') {
-                        exp += parseFloat(t.amount);
-                        if (new Date(t.date).getTime() <= lastCutOff) expBeforeCut += parseFloat(t.amount);
-                    } else if (t.type === 'cc-payment') { pay += parseFloat(t.amount); }
-                });
-
+                let exp = 0, pay = 0, expBeforeCut = 0; const lastCutOff = App.logic.getLastCutOffDate(c.cutOffDay).getTime();
+                App.state.txs.forEach(t => { if (t.accountId !== cardId) return; if (t.type === 'expense') { exp += parseFloat(t.amount); if (new Date(t.date).getTime() <= lastCutOff) expBeforeCut += parseFloat(t.amount); } else if (t.type === 'cc-payment') { pay += parseFloat(t.amount); } });
                 return { debt: Math.max(0, exp - pay), pagoNoInt: Math.max(0, expBeforeCut - pay) };
             },
 
@@ -995,9 +978,7 @@
                 const pFixed = App.logic.getPendingFixed(cLimit);
                 document.getElementById('dash-pending-fixed').textContent = "-"+App.utils.fmtCur(pFixed);
 
-                // Deducir automáticamente pagos de TDC para blindar el presupuesto
-                let pendingCC = 0;
-                App.state.cards.forEach(c => { pendingCC += App.logic.calculateCardStats(c.id).pagoNoInt; });
+                let pendingCC = 0; App.state.cards.forEach(c => { pendingCC += App.logic.calculateCardStats(c.id).pagoNoInt; });
                 document.getElementById('dash-pending-cc').textContent = "-"+App.utils.fmtCur(pendingCC);
 
                 const effBal = (bal + spentT) - pFixed - pendingCC; 
@@ -1010,13 +991,19 @@
                     const base = App.state.settings.baseIncome || 0;
                     if(base===0) { expl.innerHTML=`<span class="text-brand font-bold">Configura tu "Ingreso Base" en Ajustes</span>`; dLbl.textContent="---"; return;}
                     const cd = App.state.settings.frequency==='monthly'?30:15; const ncf = App.logic.getNextCycleFixed(nextPd, cd);
-                    const pool = effBal + base - ncf; const hBudg = pool / (diff + cd); const rem = hBudg - spentT;
-                    expl.innerHTML = `<span class="text-horizon font-bold">Modo Horizonte</span> • Fondo Proyectado: ${App.utils.fmtCur(pool)}`;
-                    dLbl.textContent = App.utils.fmtCur(rem); dLbl.className = `font-black text-3xl tracking-tight ${rem<0?'text-brand':'text-text'}`;
+                    const pool = effBal + base - ncf; const totalD = diff + cd; const hBudg = pool / totalD; const rem = hBudg - spentT;
+                    
+                    let explStr = `<span class="text-horizon font-bold">Modo Horizonte</span> • Fondo Proyectado: ${App.utils.fmtCur(pool)}`;
+                    if (rem < 0 && totalD > 1) { const tomorrow = (pool - spentT) / (totalD - 1); explStr += `<br><span class="text-brand font-bold text-[10.5px]">Te excediste. Presupuesto mañana: ${App.utils.fmtCur(Math.max(0, tomorrow))}</span>`; }
+                    
+                    expl.innerHTML = explStr; dLbl.textContent = App.utils.fmtCur(rem); dLbl.className = `font-black text-3xl tracking-tight ${rem<0?'text-brand':'text-text'}`;
                 } else {
                     const div = diff<=0?1:diff; const budg = effBal / div; const rem = budg - spentT;
-                    expl.innerHTML = `Base segura: <strong>${App.utils.fmtCur(budg)}/día</strong> • Gastado hoy: <strong>-${App.utils.fmtCur(spentT)}</strong>`;
-                    dLbl.textContent = App.utils.fmtCur(rem); dLbl.className = `font-black text-3xl tracking-tight ${rem<0?'text-brand':'text-text'}`;
+                    
+                    let explStr = `Base segura: <strong>${App.utils.fmtCur(budg)}/día</strong> • Gastado hoy: <strong>-${App.utils.fmtCur(spentT)}</strong>`;
+                    if (rem < 0 && diff > 1) { const tomorrow = (effBal - spentT) / (diff - 1); explStr += `<br><span class="text-brand font-bold text-[10.5px]">Te excediste. Presupuesto mañana: ${App.utils.fmtCur(Math.max(0, tomorrow))}</span>`; }
+                    
+                    expl.innerHTML = explStr; dLbl.textContent = App.utils.fmtCur(rem); dLbl.className = `font-black text-3xl tracking-tight ${rem<0?'text-brand':'text-text'}`;
                 }
             },
             saveSettings: async () => { if(!App.state.user) return; const data = { frequency: document.getElementById('set-freq').value, payday: document.getElementById('set-payday').value, payday1: document.getElementById('set-payday-1').value, payday2: document.getElementById('set-payday-2').value, savings: parseInt(document.getElementById('set-savings').value)||0, baseIncome: parseFloat(document.getElementById('set-base-income').value)||0 }; await setDoc(doc(App.db.ref, 'artifacts', App.constants.appId, 'users', App.state.user.uid, 'settings', 'config'), data, {merge:true}); App.utils.toast('Ajustes Guardados'); },
@@ -1068,7 +1055,15 @@
                 App.ui.modals.close('pay-cc'); App.utils.toast('Abono Registrado');
             },
 
-            saveAdjust: async (e) => { e.preventDefault(); if(!App.state.user) return; const real = parseFloat(document.getElementById('m-adj-real').value); const sysTxt = document.getElementById('dash-balance').textContent.replace(/[^0-9.-]+/g,""); const sys = parseFloat(sysTxt); const diff = (Math.round(real*100) - Math.round(sys*100))/100; if(Math.abs(diff)<0.01) { App.ui.modals.close('adjust'); return; } await addDoc(collection(App.db.ref, `artifacts/${App.constants.appId}/users/${App.state.user.uid}/transactions`), { type: diff>0?'income':'expense', amount: Math.abs(diff), title:'Ajuste Manual Físico', category:'Ajuste', date: new Date().toISOString().slice(0,16), ignoreDaily:false, accountId:'main', createdAt: new Date().toISOString() }); App.ui.modals.close('adjust'); App.utils.toast('Saldo Ajustado'); },
+            saveAdjust: async (e) => { 
+                e.preventDefault(); if(!App.state.user) return; 
+                const real = parseFloat(document.getElementById('m-adj-real').value); 
+                const sys = parseFloat(document.getElementById('m-adj-sys').dataset.raw); 
+                const diff = (Math.round(real*100) - Math.round(sys*100))/100; 
+                if(Math.abs(diff)<0.01) { App.ui.modals.close('adjust'); return; } 
+                await addDoc(collection(App.db.ref, `artifacts/${App.constants.appId}/users/${App.state.user.uid}/transactions`), { type: diff>0?'income':'expense', amount: Math.abs(diff), title:'Ajuste Manual Físico', category:'Ajuste', date: new Date().toISOString().slice(0,16), ignoreDaily:false, accountId:'main', createdAt: new Date().toISOString() }); 
+                App.ui.modals.close('adjust'); App.utils.toast('Saldo Ajustado'); 
+            },
             saveFixed: async (e) => { e.preventDefault(); if(!App.state.user) return; const id = document.getElementById('m-fix-title').dataset.id; const d = { title: document.getElementById('m-fix-title').value, amount: parseFloat(document.getElementById('m-fix-amount').value), day: document.getElementById('m-fix-day').value, ignoreDaily: document.getElementById('m-fix-ignore').checked }; const c = collection(App.db.ref, `artifacts/${App.constants.appId}/users/${App.state.user.uid}/fixed`); if(id) await updateDoc(doc(c, id), d); else await addDoc(c, d); App.ui.modals.close('fixed'); App.utils.toast('Pago Fijo Guardado'); },
             payFixed: (id) => { const f = App.state.fixed.find(x=>x.id===id); if(!f) return; App.ui.modals.openTx('expense', id); document.getElementById('m-tx-amount').value = f.amount; document.getElementById('m-tx-desc').value = f.title; App.ui.modals.selectChip('Servicios'); },
             saveDebt: async (e) => { e.preventDefault(); if(!App.state.user) return; const id = document.getElementById('m-debt-id').value; const inst = parseInt(document.getElementById('m-debt-installments').value); const d = { title: document.getElementById('m-debt-title').value, totalAmount: parseFloat(document.getElementById('m-debt-amount').value), installments: inst }; const c = collection(App.db.ref, `artifacts/${App.constants.appId}/users/${App.state.user.uid}/debts`); if(id) { const old = App.state.debts.find(x=>x.id===id); d.payments = (inst !== old.installments) ? new Array(inst).fill(false) : old.payments; await updateDoc(doc(c, id), d); } else { d.payments = new Array(inst).fill(false); d.createdAt=new Date().toISOString(); await addDoc(c, d); } App.ui.modals.close('debt'); App.utils.toast('Deuda Guardada'); },
