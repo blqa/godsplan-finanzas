@@ -532,7 +532,7 @@
         <div class="modal-content">
              <div class="flex justify-between items-center mb-6 border-b border-border pb-3">
                 <h3 class="font-black text-text text-lg uppercase tracking-wide" id="m-tx-title">Nuevo</h3>
-                <button onclick="App.ui.modals.close('modal-tx')" class="text-muted hover:text-text"><i class="ph-bold ph-x text-xl"></i></button>
+                <button onclick="App.ui.modals.close('tx')" class="text-muted hover:text-text"><i class="ph-bold ph-x text-xl"></i></button>
              </div>
              <form onsubmit="App.db.saveTx(event)" class="space-y-5">
                 <input type="hidden" id="m-tx-id">
@@ -576,7 +576,7 @@
         <div class="modal-content text-center">
             <div class="flex justify-between items-center mb-4 border-b border-border pb-3">
                 <h3 class="font-black text-text uppercase">Ajustar Saldo</h3>
-                <button onclick="App.ui.modals.close('modal-adjust')" class="text-muted"><i class="ph-bold ph-x text-xl"></i></button>
+                <button onclick="App.ui.modals.close('adjust')" class="text-muted"><i class="ph-bold ph-x text-xl"></i></button>
             </div>
             <p class="text-[10px] uppercase font-bold text-muted mb-1">Saldo en Sistema</p>
             <p class="text-3xl font-black text-text mb-6" id="m-adj-sys">$0.00</p>
@@ -596,7 +596,7 @@
         <div class="modal-content">
              <div class="flex justify-between items-center mb-6 border-b border-border pb-3">
                 <h3 class="font-black text-text uppercase">Pago Fijo</h3>
-                <button onclick="App.ui.modals.close('modal-fixed')" class="text-muted hover:text-text"><i class="ph-bold ph-x text-xl"></i></button>
+                <button onclick="App.ui.modals.close('fixed')" class="text-muted hover:text-text"><i class="ph-bold ph-x text-xl"></i></button>
              </div>
              <form onsubmit="App.db.saveFixed(event)" class="space-y-4">
                 <input type="text" id="m-fix-title" class="input-gp" placeholder="Servicio (Ej. Renta, Netflix)" required>
@@ -624,7 +624,7 @@
         <div class="modal-content">
              <div class="flex justify-between items-center mb-6 border-b border-border pb-3">
                 <h3 class="font-black text-text uppercase">Deuda a Plazos</h3>
-                <button onclick="App.ui.modals.close('modal-debt')" class="text-muted hover:text-text"><i class="ph-bold ph-x text-xl"></i></button>
+                <button onclick="App.ui.modals.close('debt')" class="text-muted hover:text-text"><i class="ph-bold ph-x text-xl"></i></button>
              </div>
              <form onsubmit="App.db.saveDebt(event)" class="space-y-4">
                 <input type="hidden" id="m-debt-id">
@@ -652,7 +652,7 @@
         <div class="modal-content">
              <div class="flex justify-between items-center mb-6 border-b border-border pb-3">
                 <h3 class="font-black text-text uppercase">Préstamo Personal</h3>
-                <button onclick="App.ui.modals.close('modal-loan')" class="text-muted hover:text-text"><i class="ph-bold ph-x text-xl"></i></button>
+                <button onclick="App.ui.modals.close('loan')" class="text-muted hover:text-text"><i class="ph-bold ph-x text-xl"></i></button>
              </div>
              <form onsubmit="App.db.saveLoan(event)" class="space-y-4">
                 <input type="hidden" id="m-loan-id">
@@ -1446,20 +1446,23 @@
         window.onload = async () => {
             App.ui.init();
             
-            // Firebase Config strict requirements
-            const fbConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-                apiKey: "AIzaSyC-cUzYmh5G9y_W2RXbO1Uma4DlKKmnnss", authDomain: "godsplan-adherencia.firebaseapp.com", projectId: "godsplan-adherencia"
+            // Usamos EXACAMENTE tu configuración fija
+            const firebaseConfig = {
+                apiKey: "AIzaSyC-cUzYmh5G9y_W2RXbO1Uma4DlKKmnnss",
+                authDomain: "godsplan-adherencia.firebaseapp.com",
+                projectId: "godsplan-adherencia",
+                storageBucket: "godsplan-adherencia.firebasestorage.app",
+                messagingSenderId: "660801277434",
+                appId: "1:660801277434:web:3a37ece56538dc2b22a843"
             };
             
-            const app = initializeApp(fbConfig);
+            const app = initializeApp(firebaseConfig);
             App.fbAuth = getAuth(app);
             App.db.ref = getFirestore(app);
 
-            // Auth flow strict requirement
+            // Auth flow strict requirement para mantener soporte en el Canvas si es que existe el token
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                 try { await signInWithCustomToken(App.fbAuth, __initial_auth_token); } catch(e){}
-            } else if (typeof __firebase_config !== 'undefined') { // solo si esta en canvas
-                try { await signInAnonymously(App.fbAuth); } catch(e){}
             }
 
             onAuthStateChanged(App.fbAuth, (user) => {
