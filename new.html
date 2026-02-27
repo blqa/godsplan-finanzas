@@ -148,6 +148,13 @@
             border-color: var(--text);
         }
 
+        .filter-pill {
+            padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border); background-color: var(--card); color: var(--muted);
+        }
+        .filter-pill.active {
+            background-color: var(--text); color: var(--bg); border-color: var(--text);
+        }
+
         .debt-bubble {
             width: 26px; height: 26px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
@@ -159,21 +166,6 @@
         .debt-bubble.paid {
             background-color: var(--money); border-color: var(--money); color: white;
         }
-
-        /* Timeline */
-        .timeline-line {
-            position: absolute; left: 24px; top: 0; bottom: 0; width: 2px;
-            background: linear-gradient(180deg, var(--border) 0%, transparent 100%);
-        }
-        .timeline-item { position: relative; padding-left: 50px; margin-bottom: 24px; }
-        .timeline-dot {
-            position: absolute; left: 18px; top: 4px;
-            width: 14px; height: 14px; border-radius: 50%;
-            background-color: var(--card); border: 2px solid var(--border);
-            z-index: 10;
-        }
-        .timeline-dot.income { border-color: var(--money); }
-        .timeline-dot.expense { border-color: var(--brand); }
 
         /* Utilidades SVG para mantener consistencia de colores rgb */
         .dark { --card-rgb: 9, 9, 11; }
@@ -333,14 +325,37 @@
             </div>
         </section>
 
-        <!-- VISTA: HISTORIAL -->
+        <!-- VISTA: HISTORIAL (REDESIGN COMPLETO) -->
         <section id="view-history" class="hidden animate-fade-in relative pb-6">
-            <div class="sticky top-[64px] bg-bg/90 backdrop-blur-md z-20 py-4 border-b border-border mb-6 -mx-4 px-4 flex items-center gap-3 overflow-x-auto hide-scrollbar">
-                <button onclick="App.ui.filterHistory('all')" class="filter-btn active chip shrink-0" data-filter="all">Todos</button>
-                <button onclick="App.ui.filterHistory('income')" class="filter-btn chip shrink-0" data-filter="income">Ingresos</button>
-                <button onclick="App.ui.filterHistory('expense')" class="filter-btn chip shrink-0" data-filter="expense">Gastos</button>
+            <h2 class="text-lg font-black text-text uppercase tracking-wide border-b border-border pb-3 mb-4">Explorador de Movimientos</h2>
+            
+            <!-- Resumen de Filtro Activo -->
+            <div class="bg-card border border-border rounded-3xl p-5 mb-5 shadow-soft">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xs font-bold text-muted uppercase tracking-widest">Resumen del Filtro</h3>
+                    <i class="ph-fill ph-chart-line-up text-brand text-xl"></i>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-[10px] text-muted font-bold uppercase">Entradas</p>
+                        <p class="text-xl font-black text-money" id="hist-sum-in">$0.00</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-muted font-bold uppercase">Salidas</p>
+                        <p class="text-xl font-black text-brand" id="hist-sum-out">$0.00</p>
+                    </div>
+                </div>
             </div>
-            <div id="full-history-list" class="relative min-h-[50vh]">
+
+            <!-- Filtros -->
+            <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar mb-6 pb-2">
+                <button onclick="App.ui.filterHistory('all')" class="filter-pill active shrink-0" data-filter="all">Todos</button>
+                <button onclick="App.ui.filterHistory('income')" class="filter-pill shrink-0" data-filter="income">Ingresos</button>
+                <button onclick="App.ui.filterHistory('expense')" class="filter-pill shrink-0" data-filter="expense">Gastos</button>
+            </div>
+
+            <!-- Lista de Movimientos -->
+            <div id="full-history-list" class="space-y-6">
                 <!-- Dinámico -->
             </div>
         </section>
@@ -412,13 +427,27 @@
                     <label class="text-[10px] text-muted font-black uppercase block mb-2">Frecuencia de Ingresos</label>
                     <select id="set-freq" class="input-gp" onchange="App.ui.settings.toggleFreq()">
                         <option value="biweekly">Quincenal (15 y 30/31)</option>
+                        <option value="biweekly-custom">Quincenal (Personalizada)</option>
                         <option value="monthly">Mensual</option>
                     </select>
                 </div>
                 
+                <!-- Opciones Mensuales -->
                 <div id="set-monthly-box" class="hidden">
-                    <label class="text-[10px] text-muted font-black uppercase block mb-2">Día de Pago</label>
+                    <label class="text-[10px] text-muted font-black uppercase block mb-2">Día de Pago (Mensual)</label>
                     <select id="set-payday" class="input-gp"></select>
+                </div>
+
+                <!-- Opciones Quincenal Personalizada -->
+                <div id="set-custom-box" class="hidden grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] text-muted font-black uppercase block mb-2">Primer Pago</label>
+                        <select id="set-payday-1" class="input-gp"></select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-muted font-black uppercase block mb-2">Segundo Pago</label>
+                        <select id="set-payday-2" class="input-gp"></select>
+                    </div>
                 </div>
 
                 <div>
@@ -428,6 +457,7 @@
                         <option value="10">10%</option>
                         <option value="15">15%</option>
                         <option value="20">20%</option>
+                        <option value="25">25%</option>
                         <option value="30">30%</option>
                     </select>
                     <p class="text-[10px] text-muted mt-1">Oculta visualmente este porcentaje de tu balance total.</p>
@@ -447,12 +477,17 @@
             <!-- Datos -->
             <div class="bg-card border border-border p-5 rounded-3xl shadow-soft">
                 <h3 class="font-bold text-text text-sm mb-4 uppercase tracking-wide">Gestión de Datos</h3>
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <button onclick="App.db.exportData()" class="bg-bg border border-border py-3 rounded-xl text-xs font-bold text-text hover:bg-border transition-colors flex flex-col items-center justify-center gap-1"><i class="ph-bold ph-download-simple text-lg"></i> Exportar (JSON)</button>
+                    <button onclick="document.getElementById('import-file').click()" class="bg-bg border border-border py-3 rounded-xl text-xs font-bold text-text hover:bg-border transition-colors flex flex-col items-center justify-center gap-1"><i class="ph-bold ph-upload-simple text-lg"></i> Importar (JSON)</button>
+                    <input type="file" id="import-file" accept=".json" class="hidden" onchange="App.db.importData(this)">
+                </div>
                 <button onclick="App.db.dangerReset()" class="w-full py-3 border border-red-500 bg-red-500/10 text-brand text-xs font-bold rounded-xl uppercase tracking-widest hover:bg-brand hover:text-white transition-colors">Borrar todos los datos</button>
             </div>
         </section>
     </main>
 
-    <!-- BARRA NAVEGACIÓN INFERIOR (MÓVIL / DESKTOP FLOTANTE) -->
+    <!-- BARRA NAVEGACIÓN INFERIOR -->
     <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] bg-card/90 backdrop-blur-xl border border-border rounded-2xl h-16 grid grid-cols-5 z-40 shadow-2xl items-center px-2">
         <button onclick="App.ui.switchTab('dashboard')" class="nav-btn flex flex-col items-center text-text transition-colors gap-1" data-tab="dashboard">
             <i class="ph-fill ph-squares-four text-2xl"></i>
@@ -654,7 +689,7 @@
         // APP NAMESPACE
         window.App = {
             db: null, auth: null, fbAuth: null,
-            state: { user: null, txs: [], fixed: [], debts: [], loans: [], settings: { frequency: 'biweekly', payday: null, savings: 0, baseIncome: 0 }, horizon: false, unsubs: [] },
+            state: { user: null, txs: [], fixed: [], debts: [], loans: [], settings: { frequency: 'biweekly', payday: null, payday1: null, payday2: null, savings: 0, baseIncome: 0 }, horizon: false, unsubs: [] },
             constants: {
                 catExp: [{id:'Comida',i:'ph-hamburger'},{id:'Transporte',i:'ph-car'},{id:'Hogar',i:'ph-house'},{id:'Ocio',i:'ph-film-strip'},{id:'Salud',i:'ph-heartbeat'},{id:'Servicios',i:'ph-lightning'},{id:'Ropa',i:'ph-t-shirt'},{id:'Ajuste',i:'ph-scales'},{id:'Otro',i:'ph-dots-three-circle'}],
                 catInc: [{id:'Nómina',i:'ph-money'},{id:'Negocio',i:'ph-storefront'},{id:'Regalo',i:'ph-gift'},{id:'Ajuste',i:'ph-scales'},{id:'Otro',i:'ph-dots-three-circle'}],
@@ -676,6 +711,10 @@
                 document.getElementById('toast-msg').textContent = msg;
                 t.classList.remove('-translate-y-20', 'opacity-0');
                 setTimeout(() => t.classList.add('-translate-y-20', 'opacity-0'), 3000);
+            },
+            getCat: (id, type) => {
+                const list = type === 'income' ? App.constants.catInc : App.constants.catExp;
+                return list.find(c => c.id === id) || { i: 'ph-circle' };
             }
         };
 
@@ -696,7 +735,7 @@
                 document.getElementById('header-date').textContent = str;
 
                 // Selects populate
-                ['m-fix-day', 'set-payday'].forEach(id => {
+                ['m-fix-day', 'set-payday', 'set-payday-1', 'set-payday-2'].forEach(id => {
                     const el = document.getElementById(id);
                     if(el) { el.innerHTML = ''; for(let i=1; i<=31; i++) el.innerHTML += `<option value="${i}">${i}</option>`; }
                 });
@@ -709,11 +748,7 @@
             },
             updateThemeIcon: () => {
                 const i = document.getElementById('theme-icon');
-                if(document.documentElement.classList.contains('dark')) {
-                    i.className = 'ph-bold ph-sun';
-                } else {
-                    i.className = 'ph-bold ph-moon';
-                }
+                if(document.documentElement.classList.contains('dark')) { i.className = 'ph-bold ph-sun'; } else { i.className = 'ph-bold ph-moon'; }
             },
             switchTab: (tabId) => {
                 App.ui.currentTab = tabId;
@@ -721,18 +756,15 @@
                 document.getElementById(`view-${tabId}`).classList.remove('hidden');
                 
                 document.querySelectorAll('.nav-btn').forEach(btn => {
-                    if(btn.dataset.tab === tabId) {
-                        btn.classList.add('text-text'); btn.classList.remove('text-muted');
-                    } else {
-                        btn.classList.add('text-muted'); btn.classList.remove('text-text');
-                    }
+                    if(btn.dataset.tab === tabId) { btn.classList.add('text-text'); btn.classList.remove('text-muted'); } 
+                    else { btn.classList.add('text-muted'); btn.classList.remove('text-text'); }
                 });
                 App.ui.renderAll();
             },
             filterHistory: (f) => {
                 App.ui.historyFilter = f;
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                document.querySelector(`.filter-btn[data-filter="${f}"]`).classList.add('active');
+                document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+                document.querySelector(`.filter-pill[data-filter="${f}"]`).classList.add('active');
                 App.ui.renderHistory();
             },
             renderAll: () => {
@@ -785,7 +817,7 @@
                 else {
                     list.innerHTML = recent.map(t => {
                         const isInc = t.type==='income';
-                        const cat = (isInc ? App.constants.catInc : App.constants.catExp).find(c=>c.id===t.category) || {i:'ph-circle'};
+                        const cat = App.utils.getCat(t.category, t.type);
                         return `
                         <div class="flex items-center justify-between bg-card border border-border p-3 rounded-2xl hover:bg-bg cursor-pointer transition-colors" onclick="App.ui.modals.editTx('${t.id}')">
                             <div class="flex items-center gap-3">
@@ -796,8 +828,7 @@
                                 </div>
                             </div>
                             <span class="text-xs font-black ${isInc?'text-money':'text-text'}">${isInc?'+':'-'}${App.utils.fmtCur(t.amount)}</span>
-                        </div>
-                        `;
+                        </div>`;
                     }).join('');
                 }
 
@@ -805,47 +836,78 @@
             },
             renderHistory: () => {
                 const list = document.getElementById('full-history-list');
-                let txs = [...App.state.txs].sort((a,b)=>new Date(b.date)-new Date(a.date));
-                if(App.ui.historyFilter !== 'all') txs = txs.filter(t=>t.type === App.ui.historyFilter);
+                const sumInEl = document.getElementById('hist-sum-in');
+                const sumOutEl = document.getElementById('hist-sum-out');
+                
+                let txs = [...App.state.txs].sort((a,b) => new Date(b.date) - new Date(a.date));
+                if(App.ui.historyFilter !== 'all') txs = txs.filter(t => t.type === App.ui.historyFilter);
 
-                if(txs.length===0) {
-                    list.innerHTML = '<p class="text-center text-muted text-xs mt-10">No hay movimientos</p>'; return;
+                let totalIn = 0, totalOut = 0;
+                
+                if(txs.length === 0) {
+                    list.innerHTML = '<div class="text-center bg-card border border-border rounded-3xl p-8"><i class="ph-fill ph-ghost text-4xl text-muted mb-2"></i><p class="text-muted text-xs font-bold uppercase tracking-widest">Nada por aquí</p></div>';
+                    sumInEl.textContent = "$0.00"; sumOutEl.textContent = "$0.00";
+                    return;
                 }
 
-                let html = '<div class="timeline-line"></div>';
+                // Agrupamiento estilo Banking App
                 let grouped = {};
                 txs.forEach(t => {
                     if(!t.date) return;
-                    const dk = t.date.substring(0,10);
-                    if(!grouped[dk]) grouped[dk]=[];
+                    if(t.type === 'income') totalIn += t.amount; else totalOut += t.amount;
+                    const d = new Date(t.date); d.setHours(0,0,0,0);
+                    const dk = d.toISOString().split('T')[0];
+                    if(!grouped[dk]) grouped[dk] = [];
                     grouped[dk].push(t);
                 });
 
-                Object.keys(grouped).sort((a,b)=>new Date(b)-new Date(a)).forEach(date => {
-                    let dObj = new Date(date + 'T12:00:00');
-                    let lbl = dObj.toLocaleDateString('es-ES',{day:'numeric',month:'short'}).toUpperCase();
-                    let inner = grouped[date].map(t => {
-                        const isInc = t.type==='income';
+                sumInEl.textContent = App.utils.fmtCur(totalIn);
+                sumOutEl.textContent = App.utils.fmtCur(totalOut);
+
+                let html = '';
+                const today = new Date(); today.setHours(0,0,0,0);
+                const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+
+                Object.keys(grouped).sort((a,b) => new Date(b) - new Date(a)).forEach(dateKey => {
+                    const dObj = new Date(dateKey + 'T12:00:00');
+                    let lbl = '';
+                    if(dObj.getTime() === today.getTime()) lbl = "Hoy";
+                    else if (dObj.getTime() === yesterday.getTime()) lbl = "Ayer";
+                    else lbl = dObj.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+
+                    const rows = grouped[dateKey].map(t => {
+                        const isInc = t.type === 'income';
+                        const cat = App.utils.getCat(t.category, t.type);
+                        const timeStr = new Date(t.date).toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'});
+                        
                         return `
-                        <div class="timeline-item group cursor-pointer" onclick="App.ui.modals.editTx('${t.id}')">
-                            <div class="timeline-dot ${t.type}"></div>
-                            <div class="flex justify-between items-start bg-card border border-border p-3 rounded-2xl group-hover:bg-bg transition-colors">
+                        <div class="flex justify-between items-center p-3 rounded-2xl bg-card border border-border hover:bg-bg cursor-pointer transition-all shadow-sm" onclick="App.ui.modals.editTx('${t.id}')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center ${isInc?'bg-money/10 text-money':'bg-bg border border-border text-muted'}"><i class="ph-fill ${cat.i} text-lg"></i></div>
                                 <div>
-                                    <h4 class="text-xs font-bold text-text">${App.utils.esc(t.title)}</h4>
-                                    <p class="text-[10px] text-muted font-bold uppercase">${t.category}</p>
+                                    <h4 class="text-xs font-bold text-text uppercase tracking-wide truncate w-[140px]">${App.utils.esc(t.title)}</h4>
+                                    <p class="text-[10px] text-muted font-bold">${t.category} • ${timeStr}</p>
                                 </div>
-                                <span class="font-black text-xs ${isInc?'text-money':'text-text'}">${isInc?'+':'-'}${App.utils.fmtCur(t.amount)}</span>
                             </div>
+                            <span class="font-black text-xs ${isInc?'text-money':'text-text'} bg-bg border border-border px-2 py-1 rounded-lg">
+                                ${isInc?'+':'-'}${App.utils.fmtCur(t.amount)}
+                            </span>
                         </div>`;
                     }).join('');
-                    html += `<div class="mb-6 relative"><span class="inline-block bg-bg border border-border px-3 py-1 text-[10px] font-black uppercase text-muted mb-4 ml-1 rounded-md shadow-sm">${lbl}</span><div>${inner}</div></div>`;
+
+                    html += `
+                    <div>
+                        <h3 class="text-[10px] font-black text-muted uppercase tracking-widest mb-3 pl-2 border-l-2 border-brand">${lbl}</h3>
+                        <div class="space-y-2">${rows}</div>
+                    </div>`;
                 });
+
                 list.innerHTML = html;
             },
             renderFixed: () => {
                 const list = document.getElementById('fixed-list');
                 const fixed = [...App.state.fixed].sort((a,b)=>parseInt(a.day)-parseInt(b.day));
-                if(fixed.length===0) { list.innerHTML = '<p class="text-muted text-xs text-center">No hay pagos fijos</p>'; return;}
+                if(fixed.length===0) { list.innerHTML = '<div class="text-center bg-card border border-border rounded-3xl p-8"><p class="text-muted text-xs font-bold uppercase tracking-widest">Sin pagos fijos configurados</p></div>'; return;}
                 
                 const html = fixed.map(f => {
                     const isPaid = App.logic.isFixedPaidThisMonth(f.id);
@@ -866,7 +928,7 @@
             },
             renderDebts: () => {
                 const list = document.getElementById('debts-list');
-                if(App.state.debts.length===0) { list.innerHTML = '<p class="text-muted text-xs text-center">Sin deudas</p>'; return; }
+                if(App.state.debts.length===0) { list.innerHTML = '<div class="text-center bg-card border border-border rounded-3xl p-8"><p class="text-muted text-xs font-bold uppercase tracking-widest">Libre de Deudas</p></div>'; return; }
                 
                 list.innerHTML = App.state.debts.map(d => {
                     const inst = d.installments;
@@ -901,7 +963,7 @@
             },
             renderLoans: () => {
                 const list = document.getElementById('loans-list');
-                if(App.state.loans.length===0) { list.innerHTML = '<p class="text-muted text-xs text-center">Sin préstamos</p>'; return; }
+                if(App.state.loans.length===0) { list.innerHTML = '<div class="text-center bg-card border border-border rounded-3xl p-8"><p class="text-muted text-xs font-bold uppercase tracking-widest">Sin préstamos activos</p></div>'; return; }
                 
                 let oMe=0, iOw=0;
                 list.innerHTML = App.state.loans.map(l => {
@@ -926,14 +988,22 @@
                     const s = App.state.settings;
                     document.getElementById('set-freq').value = s.frequency || 'biweekly';
                     if(s.payday) document.getElementById('set-payday').value = s.payday;
+                    if(s.payday1) document.getElementById('set-payday-1').value = s.payday1;
+                    if(s.payday2) document.getElementById('set-payday-2').value = s.payday2;
                     if(s.savings !== undefined) document.getElementById('set-savings').value = s.savings;
                     if(s.baseIncome !== undefined) document.getElementById('set-base-income').value = s.baseIncome;
                     App.ui.settings.toggleFreq();
                 },
                 toggleFreq: () => {
                     const v = document.getElementById('set-freq').value;
-                    const b = document.getElementById('set-monthly-box');
-                    if(v==='monthly') b.classList.remove('hidden'); else b.classList.add('hidden');
+                    const bMonth = document.getElementById('set-monthly-box');
+                    const bCustom = document.getElementById('set-custom-box');
+                    
+                    bMonth.classList.add('hidden');
+                    bCustom.classList.add('hidden');
+                    
+                    if(v === 'monthly') bMonth.classList.remove('hidden');
+                    if(v === 'biweekly-custom') bCustom.classList.remove('hidden');
                 }
             },
             modals: {
@@ -1001,7 +1071,6 @@
                     if(f) document.getElementById('m-fix-day').value = f.day;
                     document.getElementById('m-fix-ignore').checked = f ? !!f.ignoreDaily : false;
                     
-                    // Note: We use the title input as a pseudo ID carrier for edit simplicity here
                     document.getElementById('m-fix-title').dataset.id = id||'';
                     App.ui.modals.open('fixed');
                 },
@@ -1060,10 +1129,14 @@
                 for(let m=0;m<=1;m++){
                     let mI = today.getMonth() + m; let y = today.getFullYear();
                     if(mI>11) {mI-=12;y++;}
+                    
                     if(s.frequency==='biweekly'){
                         c.push(new Date(y,mI,Math.min(15,new Date(y,mI+1,0).getDate())));
-                        c.push(new Date(y,mI,new Date(y,mI+1,0).getDate())); // Ultimo dia mes
-                    } else if(s.payday){
+                        c.push(new Date(y,mI,new Date(y,mI+1,0).getDate())); 
+                    } else if(s.frequency==='biweekly-custom' && s.payday1 && s.payday2) {
+                        c.push(new Date(y,mI,Math.min(parseInt(s.payday1),new Date(y,mI+1,0).getDate())));
+                        c.push(new Date(y,mI,Math.min(parseInt(s.payday2),new Date(y,mI+1,0).getDate())));
+                    } else if(s.frequency==='monthly' && s.payday){
                         c.push(new Date(y,mI,Math.min(parseInt(s.payday),new Date(y,mI+1,0).getDate())));
                     }
                 }
@@ -1168,6 +1241,8 @@
                 const data = {
                     frequency: document.getElementById('set-freq').value,
                     payday: document.getElementById('set-payday').value,
+                    payday1: document.getElementById('set-payday-1').value,
+                    payday2: document.getElementById('set-payday-2').value,
                     savings: parseInt(document.getElementById('set-savings').value)||0,
                     baseIncome: parseFloat(document.getElementById('set-base-income').value)||0
                 };
@@ -1290,6 +1365,40 @@
             deleteLoan: async () => {
                 const id=document.getElementById('m-loan-id').value;
                 if(confirm('¿Borrar Préstamo?')) { await deleteDoc(doc(App.db.ref, `artifacts/${App.constants.appId}/users/${App.state.user.uid}/loans`, id)); App.ui.modals.close('loan'); App.utils.toast('Eliminado'); }
+            },
+            exportData: () => {
+                if(!App.state.user) return;
+                const data = {
+                    transactions: App.state.txs,
+                    fixed: App.state.fixed,
+                    debts: App.state.debts,
+                    loans: App.state.loans,
+                    settings: App.state.settings
+                };
+                const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `GodsPlan_Backup_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+            },
+            importData: (input) => {
+                const file = input.files[0];
+                if(!file || !App.state.user) return;
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const j = JSON.parse(e.target.result);
+                        const bPath = `artifacts/${App.constants.appId}/users/${App.state.user.uid}`;
+                        if(j.transactions) j.transactions.forEach(t => { delete t.id; addDoc(collection(App.db.ref, `${bPath}/transactions`), t); });
+                        if(j.fixed) j.fixed.forEach(t => { delete t.id; addDoc(collection(App.db.ref, `${bPath}/fixed`), t); });
+                        if(j.debts) j.debts.forEach(t => { delete t.id; addDoc(collection(App.db.ref, `${bPath}/debts`), t); });
+                        if(j.loans) j.loans.forEach(t => { delete t.id; addDoc(collection(App.db.ref, `${bPath}/loans`), t); });
+                        if(j.settings) await setDoc(doc(App.db.ref, `${bPath}/settings/config`), j.settings, {merge:true});
+                        App.utils.toast('Datos Importados');
+                    } catch (err) { alert('Archivo JSON inválido.'); }
+                };
+                reader.readAsText(file);
+                input.value = ''; // reset
             },
             dangerReset: async () => {
                 if(!App.state.user) return;
