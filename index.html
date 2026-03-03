@@ -471,7 +471,20 @@
                     </div>
                 </div>
 
-                <button onclick="App.logic.saveSettings()" class="btn-brand w-full py-3 rounded-xl text-xs">Guardar Cambios</button>
+                <!-- SECCIÓN NUEVA: LÍMITE MANUAL -->
+                <div class="mt-4 pt-4 border-t border-border">
+                    <label class="flex items-center justify-between cursor-pointer mb-2">
+                        <span class="text-[10px] text-muted font-black uppercase flex items-center gap-1"><i class="ph-fill ph-push-pin text-brand"></i> Fijar Límite Diario Manual</span>
+                        <input type="checkbox" id="set-manual-limit-active" class="w-4 h-4 accent-brand" onchange="App.ui.settings.toggleManualLimit()">
+                    </label>
+                    <div id="set-manual-limit-box" class="hidden relative mt-2">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted font-bold">$</span>
+                        <input type="number" id="set-manual-limit-amount" class="input-gp pl-8" placeholder="Ej. 500">
+                        <p class="text-[10px] text-muted mt-2 leading-tight">Al activar esto, la app dejará de calcular el límite diario basado en tu balance y días. <strong class="text-brand">Siempre se usará este monto fijo como base diaria.</strong></p>
+                    </div>
+                </div>
+
+                <button onclick="App.logic.saveSettings()" class="btn-brand w-full py-3 rounded-xl text-xs mt-4">Guardar Cambios</button>
             </div>
             
             <!-- Datos -->
@@ -689,7 +702,7 @@
         // APP NAMESPACE
         window.App = {
             db: null, auth: null, fbAuth: null,
-            state: { user: null, txs: [], fixed: [], debts: [], loans: [], settings: { frequency: 'biweekly', payday: null, payday1: null, payday2: null, savings: 0, baseIncome: 0 }, horizon: false, unsubs: [] },
+            state: { user: null, txs: [], fixed: [], debts: [], loans: [], settings: { frequency: 'biweekly', payday: null, payday1: null, payday2: null, savings: 0, baseIncome: 0, manualDailyLimitActive: false, manualDailyLimitAmount: 0 }, horizon: false, unsubs: [] },
             constants: {
                 catExp: [{id:'Comida',i:'ph-hamburger'},{id:'Transporte',i:'ph-car'},{id:'Hogar',i:'ph-house'},{id:'Ocio',i:'ph-film-strip'},{id:'Salud',i:'ph-heartbeat'},{id:'Servicios',i:'ph-lightning'},{id:'Ropa',i:'ph-t-shirt'},{id:'Ajuste',i:'ph-scales'},{id:'Otro',i:'ph-dots-three-circle'}],
                 catInc: [{id:'Nómina',i:'ph-money'},{id:'Negocio',i:'ph-storefront'},{id:'Regalo',i:'ph-gift'},{id:'Ajuste',i:'ph-scales'},{id:'Otro',i:'ph-dots-three-circle'}],
@@ -992,7 +1005,12 @@
                     if(s.payday2) document.getElementById('set-payday-2').value = s.payday2;
                     if(s.savings !== undefined) document.getElementById('set-savings').value = s.savings;
                     if(s.baseIncome !== undefined) document.getElementById('set-base-income').value = s.baseIncome;
+                    
+                    document.getElementById('set-manual-limit-active').checked = s.manualDailyLimitActive || false;
+                    document.getElementById('set-manual-limit-amount').value = s.manualDailyLimitAmount || '';
+                    
                     App.ui.settings.toggleFreq();
+                    App.ui.settings.toggleManualLimit();
                 },
                 toggleFreq: () => {
                     const v = document.getElementById('set-freq').value;
@@ -1004,6 +1022,12 @@
                     
                     if(v === 'monthly') bMonth.classList.remove('hidden');
                     if(v === 'biweekly-custom') bCustom.classList.remove('hidden');
+                },
+                toggleManualLimit: () => {
+                    const isActive = document.getElementById('set-manual-limit-active').checked;
+                    const box = document.getElementById('set-manual-limit-box');
+                    if(isActive) box.classList.remove('hidden');
+                    else box.classList.add('hidden');
                 }
             },
             modals: {
@@ -1212,6 +1236,23 @@
                 const expl = document.getElementById('dash-formula-expl');
 
                 const hCtrl = document.getElementById('horizon-controls');
+                
+                const isManual = App.state.settings.manualDailyLimitActive;
+                const manualAmount = parseFloat(App.state.settings.manualDailyLimitAmount) || 0;
+
+                // Si es modo manual, forzamos esa lógica e ignoramos lo demás
+                if (isManual) {
+                    hCtrl.classList.add('hidden'); // Ocultar controles horizonte
+                    bEl.textContent = "MANUAL";
+                    
+                    const rem = manualAmount - spentT;
+                    expl.innerHTML = `<span class="text-brand font-bold"><i class="ph-fill ph-push-pin"></i> Límite Manual</span> • Base: <strong>${App.utils.fmtCur(manualAmount)}</strong> • Gastado: <strong>-${App.utils.fmtCur(spentT)}</strong>`;
+                    dLbl.textContent = App.utils.fmtCur(rem);
+                    dLbl.className = `font-black text-3xl tracking-tight ${rem<0?'text-brand':'text-text'}`;
+                    return;
+                }
+
+                // Lógica Estándar / Horizonte
                 if(diff<=1) hCtrl.classList.remove('hidden'); else { hCtrl.classList.add('hidden'); if(App.state.horizon) App.logic.toggleHorizon(); }
 
                 if(App.state.horizon && diff<=1) {
@@ -1244,7 +1285,9 @@
                     payday1: document.getElementById('set-payday-1').value,
                     payday2: document.getElementById('set-payday-2').value,
                     savings: parseInt(document.getElementById('set-savings').value)||0,
-                    baseIncome: parseFloat(document.getElementById('set-base-income').value)||0
+                    baseIncome: parseFloat(document.getElementById('set-base-income').value)||0,
+                    manualDailyLimitActive: document.getElementById('set-manual-limit-active').checked,
+                    manualDailyLimitAmount: parseFloat(document.getElementById('set-manual-limit-amount').value)||0
                 };
                 await setDoc(doc(App.db.ref, 'artifacts', App.constants.appId, 'users', App.state.user.uid, 'settings', 'config'), data, {merge:true});
                 App.utils.toast('Ajustes Guardados');
